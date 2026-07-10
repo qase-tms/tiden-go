@@ -1,0 +1,8 @@
+github.com/qase-tms/tiden-cli/internal/cmd	TestNormalizeRemoteURL	=>	github.com/qase-tms/tiden-cli/internal/cmd::TestNormalizeRemoteURL
+github.com/qase-tms/tiden-cli/internal/cmd	TestResolveSkillForce/prompt declined	=>	github.com/qase-tms/tiden-cli/internal/cmd::TestResolveSkillForce/prompt declined
+github.com/qase-tms/tiden-cli/internal/api	TestUpdateComponent_OnlySetFieldsInBody	=>	github.com/qase-tms/tiden-cli/internal/api::TestUpdateComponent_OnlySetFieldsInBody
+example.com/mod	TestLogin/expired_token	=>	example.com/mod::TestLogin/expired_token
+example.com/mod	TestLogin/nested/deep leaf	=>	example.com/mod::TestLogin/nested/deep leaf
+example.com/mod/sub/pkg	TestParse/utf8-input	=>	example.com/mod/sub/pkg::TestParse/utf8-input
+example.com/mod	TestWeird/Ünïcode_and spaces/tabs	inside	=>	example.com/mod::TestWeird/Ünïcode_and spaces/tabs	inside
+example.com/mod	TestParens/case_(1)	=>	example.com/mod::TestParens/case_(1)

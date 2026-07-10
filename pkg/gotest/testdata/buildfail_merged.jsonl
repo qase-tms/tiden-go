@@ -1,0 +1,6 @@
+{"ImportPath":"example.com/buildfail.test","Action":"build-output","Output":"# example.com/buildfail\n"}
+{"ImportPath":"example.com/buildfail.test","Action":"build-output","Output":"broken_test.go:6:7: expected ';', found is\n"}
+{"ImportPath":"example.com/buildfail.test","Action":"build-fail"}
+{"Time":"2026-07-10T11:26:37.682854+02:00","Action":"start","Package":"example.com/buildfail"}
+{"Time":"2026-07-10T11:26:37.68298+02:00","Action":"output","Package":"example.com/buildfail","Output":"FAIL\texample.com/buildfail [setup failed]\n"}
+{"Time":"2026-07-10T11:26:37.682987+02:00","Action":"fail","Package":"example.com/buildfail","Elapsed":0,"FailedBuild":"example.com/buildfail.test"}

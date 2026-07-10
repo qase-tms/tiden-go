@@ -1,0 +1,35 @@
+{"Time":"2026-07-10T11:26:37.20079+02:00","Action":"start","Package":"example.com/parallel"}
+{"Time":"2026-07-10T11:26:37.511908+02:00","Action":"run","Package":"example.com/parallel","Test":"TestParallelGroup"}
+{"Time":"2026-07-10T11:26:37.51197+02:00","Action":"output","Package":"example.com/parallel","Test":"TestParallelGroup","Output":"=== RUN   TestParallelGroup\n"}
+{"Time":"2026-07-10T11:26:37.511988+02:00","Action":"run","Package":"example.com/parallel","Test":"TestParallelGroup/alpha"}
+{"Time":"2026-07-10T11:26:37.511993+02:00","Action":"output","Package":"example.com/parallel","Test":"TestParallelGroup/alpha","Output":"=== RUN   TestParallelGroup/alpha\n"}
+{"Time":"2026-07-10T11:26:37.511996+02:00","Action":"output","Package":"example.com/parallel","Test":"TestParallelGroup/alpha","Output":"=== PAUSE TestParallelGroup/alpha\n"}
+{"Time":"2026-07-10T11:26:37.511999+02:00","Action":"pause","Package":"example.com/parallel","Test":"TestParallelGroup/alpha"}
+{"Time":"2026-07-10T11:26:37.512002+02:00","Action":"run","Package":"example.com/parallel","Test":"TestParallelGroup/beta"}
+{"Time":"2026-07-10T11:26:37.512004+02:00","Action":"output","Package":"example.com/parallel","Test":"TestParallelGroup/beta","Output":"=== RUN   TestParallelGroup/beta\n"}
+{"Time":"2026-07-10T11:26:37.512007+02:00","Action":"output","Package":"example.com/parallel","Test":"TestParallelGroup/beta","Output":"=== PAUSE TestParallelGroup/beta\n"}
+{"Time":"2026-07-10T11:26:37.512009+02:00","Action":"pause","Package":"example.com/parallel","Test":"TestParallelGroup/beta"}
+{"Time":"2026-07-10T11:26:37.512011+02:00","Action":"run","Package":"example.com/parallel","Test":"TestParallelGroup/gamma"}
+{"Time":"2026-07-10T11:26:37.512014+02:00","Action":"output","Package":"example.com/parallel","Test":"TestParallelGroup/gamma","Output":"=== RUN   TestParallelGroup/gamma\n"}
+{"Time":"2026-07-10T11:26:37.512016+02:00","Action":"output","Package":"example.com/parallel","Test":"TestParallelGroup/gamma","Output":"=== PAUSE TestParallelGroup/gamma\n"}
+{"Time":"2026-07-10T11:26:37.512018+02:00","Action":"pause","Package":"example.com/parallel","Test":"TestParallelGroup/gamma"}
+{"Time":"2026-07-10T11:26:37.51202+02:00","Action":"cont","Package":"example.com/parallel","Test":"TestParallelGroup/alpha"}
+{"Time":"2026-07-10T11:26:37.512022+02:00","Action":"output","Package":"example.com/parallel","Test":"TestParallelGroup/alpha","Output":"=== CONT  TestParallelGroup/alpha\n"}
+{"Time":"2026-07-10T11:26:37.512024+02:00","Action":"cont","Package":"example.com/parallel","Test":"TestParallelGroup/beta"}
+{"Time":"2026-07-10T11:26:37.512026+02:00","Action":"output","Package":"example.com/parallel","Test":"TestParallelGroup/beta","Output":"=== CONT  TestParallelGroup/beta\n"}
+{"Time":"2026-07-10T11:26:37.512028+02:00","Action":"cont","Package":"example.com/parallel","Test":"TestParallelGroup/gamma"}
+{"Time":"2026-07-10T11:26:37.512033+02:00","Action":"output","Package":"example.com/parallel","Test":"TestParallelGroup/gamma","Output":"=== CONT  TestParallelGroup/gamma\n"}
+{"Time":"2026-07-10T11:26:37.533063+02:00","Action":"output","Package":"example.com/parallel","Test":"TestParallelGroup/beta","Output":"    parallel_test.go:13: done beta\n"}
+{"Time":"2026-07-10T11:26:37.533164+02:00","Action":"output","Package":"example.com/parallel","Test":"TestParallelGroup/beta","Output":"--- PASS: TestParallelGroup/beta (0.02s)\n"}
+{"Time":"2026-07-10T11:26:37.53331+02:00","Action":"pass","Package":"example.com/parallel","Test":"TestParallelGroup/beta","Elapsed":0.02}
+{"Time":"2026-07-10T11:26:37.533339+02:00","Action":"output","Package":"example.com/parallel","Test":"TestParallelGroup/gamma","Output":"    parallel_test.go:13: done gamma\n"}
+{"Time":"2026-07-10T11:26:37.533361+02:00","Action":"output","Package":"example.com/parallel","Test":"TestParallelGroup/gamma","Output":"--- PASS: TestParallelGroup/gamma (0.02s)\n"}
+{"Time":"2026-07-10T11:26:37.533372+02:00","Action":"pass","Package":"example.com/parallel","Test":"TestParallelGroup/gamma","Elapsed":0.02}
+{"Time":"2026-07-10T11:26:37.533381+02:00","Action":"output","Package":"example.com/parallel","Test":"TestParallelGroup/alpha","Output":"    parallel_test.go:13: done alpha\n"}
+{"Time":"2026-07-10T11:26:37.533418+02:00","Action":"output","Package":"example.com/parallel","Test":"TestParallelGroup/alpha","Output":"--- PASS: TestParallelGroup/alpha (0.02s)\n"}
+{"Time":"2026-07-10T11:26:37.533427+02:00","Action":"pass","Package":"example.com/parallel","Test":"TestParallelGroup/alpha","Elapsed":0.02}
+{"Time":"2026-07-10T11:26:37.533435+02:00","Action":"output","Package":"example.com/parallel","Test":"TestParallelGroup","Output":"--- PASS: TestParallelGroup (0.00s)\n"}
+{"Time":"2026-07-10T11:26:37.533465+02:00","Action":"pass","Package":"example.com/parallel","Test":"TestParallelGroup","Elapsed":0}
+{"Time":"2026-07-10T11:26:37.533475+02:00","Action":"output","Package":"example.com/parallel","Output":"PASS\n"}
+{"Time":"2026-07-10T11:26:37.534274+02:00","Action":"output","Package":"example.com/parallel","Output":"ok  \texample.com/parallel\t0.333s\n"}
+{"Time":"2026-07-10T11:26:37.537706+02:00","Action":"pass","Package":"example.com/parallel","Elapsed":0.337}

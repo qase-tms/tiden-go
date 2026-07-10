@@ -1,0 +1,29 @@
+{"Time":"2026-07-10T11:26:34.757761+02:00","Action":"start","Package":"example.com/allpass"}
+{"Time":"2026-07-10T11:26:35.064126+02:00","Action":"run","Package":"example.com/allpass","Test":"TestSimple"}
+{"Time":"2026-07-10T11:26:35.064172+02:00","Action":"output","Package":"example.com/allpass","Test":"TestSimple","Output":"=== RUN   TestSimple\n"}
+{"Time":"2026-07-10T11:26:35.064192+02:00","Action":"output","Package":"example.com/allpass","Test":"TestSimple","Output":"--- PASS: TestSimple (0.00s)\n"}
+{"Time":"2026-07-10T11:26:35.064197+02:00","Action":"pass","Package":"example.com/allpass","Test":"TestSimple","Elapsed":0}
+{"Time":"2026-07-10T11:26:35.064205+02:00","Action":"run","Package":"example.com/allpass","Test":"TestWithSubtests"}
+{"Time":"2026-07-10T11:26:35.064209+02:00","Action":"output","Package":"example.com/allpass","Test":"TestWithSubtests","Output":"=== RUN   TestWithSubtests\n"}
+{"Time":"2026-07-10T11:26:35.06422+02:00","Action":"run","Package":"example.com/allpass","Test":"TestWithSubtests/first_case"}
+{"Time":"2026-07-10T11:26:35.064224+02:00","Action":"output","Package":"example.com/allpass","Test":"TestWithSubtests/first_case","Output":"=== RUN   TestWithSubtests/first_case\n"}
+{"Time":"2026-07-10T11:26:35.064232+02:00","Action":"output","Package":"example.com/allpass","Test":"TestWithSubtests/first_case","Output":"--- PASS: TestWithSubtests/first_case (0.00s)\n"}
+{"Time":"2026-07-10T11:26:35.064235+02:00","Action":"pass","Package":"example.com/allpass","Test":"TestWithSubtests/first_case","Elapsed":0}
+{"Time":"2026-07-10T11:26:35.064239+02:00","Action":"run","Package":"example.com/allpass","Test":"TestWithSubtests/nested"}
+{"Time":"2026-07-10T11:26:35.064242+02:00","Action":"output","Package":"example.com/allpass","Test":"TestWithSubtests/nested","Output":"=== RUN   TestWithSubtests/nested\n"}
+{"Time":"2026-07-10T11:26:35.064247+02:00","Action":"run","Package":"example.com/allpass","Test":"TestWithSubtests/nested/deep_leaf"}
+{"Time":"2026-07-10T11:26:35.064251+02:00","Action":"output","Package":"example.com/allpass","Test":"TestWithSubtests/nested/deep_leaf","Output":"=== RUN   TestWithSubtests/nested/deep_leaf\n"}
+{"Time":"2026-07-10T11:26:35.064256+02:00","Action":"output","Package":"example.com/allpass","Test":"TestWithSubtests/nested/deep_leaf","Output":"--- PASS: TestWithSubtests/nested/deep_leaf (0.00s)\n"}
+{"Time":"2026-07-10T11:26:35.064258+02:00","Action":"pass","Package":"example.com/allpass","Test":"TestWithSubtests/nested/deep_leaf","Elapsed":0}
+{"Time":"2026-07-10T11:26:35.064262+02:00","Action":"output","Package":"example.com/allpass","Test":"TestWithSubtests/nested","Output":"--- PASS: TestWithSubtests/nested (0.00s)\n"}
+{"Time":"2026-07-10T11:26:35.064267+02:00","Action":"pass","Package":"example.com/allpass","Test":"TestWithSubtests/nested","Elapsed":0}
+{"Time":"2026-07-10T11:26:35.06427+02:00","Action":"output","Package":"example.com/allpass","Test":"TestWithSubtests","Output":"--- PASS: TestWithSubtests (0.00s)\n"}
+{"Time":"2026-07-10T11:26:35.064274+02:00","Action":"pass","Package":"example.com/allpass","Test":"TestWithSubtests","Elapsed":0}
+{"Time":"2026-07-10T11:26:35.064276+02:00","Action":"run","Package":"example.com/allpass","Test":"TestSkipped"}
+{"Time":"2026-07-10T11:26:35.064279+02:00","Action":"output","Package":"example.com/allpass","Test":"TestSkipped","Output":"=== RUN   TestSkipped\n"}
+{"Time":"2026-07-10T11:26:35.064282+02:00","Action":"output","Package":"example.com/allpass","Test":"TestSkipped","Output":"    all_test.go:15: not today\n"}
+{"Time":"2026-07-10T11:26:35.064285+02:00","Action":"output","Package":"example.com/allpass","Test":"TestSkipped","Output":"--- SKIP: TestSkipped (0.00s)\n"}
+{"Time":"2026-07-10T11:26:35.064288+02:00","Action":"skip","Package":"example.com/allpass","Test":"TestSkipped","Elapsed":0}
+{"Time":"2026-07-10T11:26:35.064291+02:00","Action":"output","Package":"example.com/allpass","Output":"PASS\n"}
+{"Time":"2026-07-10T11:26:35.064638+02:00","Action":"output","Package":"example.com/allpass","Output":"ok  \texample.com/allpass\t0.307s\n"}
+{"Time":"2026-07-10T11:26:35.066167+02:00","Action":"pass","Package":"example.com/allpass","Elapsed":0.308}

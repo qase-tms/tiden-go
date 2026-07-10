@@ -1,0 +1,16 @@
+{"Time":"2026-07-10T11:26:36.180703+02:00","Action":"start","Package":"example.com/panic_goroutine"}
+{"Time":"2026-07-10T11:26:36.475146+02:00","Action":"run","Package":"example.com/panic_goroutine","Test":"TestInnocent"}
+{"Time":"2026-07-10T11:26:36.475193+02:00","Action":"output","Package":"example.com/panic_goroutine","Test":"TestInnocent","Output":"=== RUN   TestInnocent\n"}
+{"Time":"2026-07-10T11:26:36.475214+02:00","Action":"output","Package":"example.com/panic_goroutine","Test":"TestInnocent","Output":"--- PASS: TestInnocent (0.00s)\n"}
+{"Time":"2026-07-10T11:26:36.475224+02:00","Action":"pass","Package":"example.com/panic_goroutine","Test":"TestInnocent","Elapsed":0}
+{"Time":"2026-07-10T11:26:36.475229+02:00","Action":"run","Package":"example.com/panic_goroutine","Test":"TestGoroutinePanic"}
+{"Time":"2026-07-10T11:26:36.475232+02:00","Action":"output","Package":"example.com/panic_goroutine","Test":"TestGoroutinePanic","Output":"=== RUN   TestGoroutinePanic\n"}
+{"Time":"2026-07-10T11:26:36.487798+02:00","Action":"output","Package":"example.com/panic_goroutine","Test":"TestGoroutinePanic","Output":"panic: boom: goroutine panic escapes the test\n"}
+{"Time":"2026-07-10T11:26:36.487937+02:00","Action":"output","Package":"example.com/panic_goroutine","Test":"TestGoroutinePanic","Output":"\n"}
+{"Time":"2026-07-10T11:26:36.487977+02:00","Action":"output","Package":"example.com/panic_goroutine","Test":"TestGoroutinePanic","Output":"goroutine 36 [running]:\n"}
+{"Time":"2026-07-10T11:26:36.488002+02:00","Action":"output","Package":"example.com/panic_goroutine","Test":"TestGoroutinePanic","Output":"example.com/panic_goroutine.TestGoroutinePanic.func1()\n"}
+{"Time":"2026-07-10T11:26:36.48804+02:00","Action":"output","Package":"example.com/panic_goroutine","Test":"TestGoroutinePanic","Output":"\t/Users/nikopi/.supacode/repos/tiden-workspace/reporter-go/repos/tiden-go/pkg/gotest/testdata/src/panic_goroutine/panic_test.go:17 +0x60\n"}
+{"Time":"2026-07-10T11:26:36.488093+02:00","Action":"output","Package":"example.com/panic_goroutine","Test":"TestGoroutinePanic","Output":"created by example.com/panic_goroutine.TestGoroutinePanic in goroutine 35\n"}
+{"Time":"2026-07-10T11:26:36.488122+02:00","Action":"output","Package":"example.com/panic_goroutine","Test":"TestGoroutinePanic","Output":"\t/Users/nikopi/.supacode/repos/tiden-workspace/reporter-go/repos/tiden-go/pkg/gotest/testdata/src/panic_goroutine/panic_test.go:14 +0x70\n"}
+{"Time":"2026-07-10T11:26:36.489014+02:00","Action":"output","Package":"example.com/panic_goroutine","Output":"FAIL\texample.com/panic_goroutine\t0.308s\n"}
+{"Time":"2026-07-10T11:26:36.489077+02:00","Action":"fail","Package":"example.com/panic_goroutine","Elapsed":0.308}

@@ -1,0 +1,28 @@
+{"Time":"2026-07-10T11:26:35.237321+02:00","Action":"start","Package":"example.com/failing"}
+{"Time":"2026-07-10T11:26:35.529874+02:00","Action":"run","Package":"example.com/failing","Test":"TestPasses"}
+{"Time":"2026-07-10T11:26:35.529933+02:00","Action":"output","Package":"example.com/failing","Test":"TestPasses","Output":"=== RUN   TestPasses\n"}
+{"Time":"2026-07-10T11:26:35.529953+02:00","Action":"output","Package":"example.com/failing","Test":"TestPasses","Output":"    fail_test.go:6: some passing output\n"}
+{"Time":"2026-07-10T11:26:35.529963+02:00","Action":"output","Package":"example.com/failing","Test":"TestPasses","Output":"--- PASS: TestPasses (0.00s)\n"}
+{"Time":"2026-07-10T11:26:35.529967+02:00","Action":"pass","Package":"example.com/failing","Test":"TestPasses","Elapsed":0}
+{"Time":"2026-07-10T11:26:35.529972+02:00","Action":"run","Package":"example.com/failing","Test":"TestFails"}
+{"Time":"2026-07-10T11:26:35.529976+02:00","Action":"output","Package":"example.com/failing","Test":"TestFails","Output":"=== RUN   TestFails\n"}
+{"Time":"2026-07-10T11:26:35.529979+02:00","Action":"output","Package":"example.com/failing","Test":"TestFails","Output":"    fail_test.go:10: about to fail\n"}
+{"Time":"2026-07-10T11:26:35.529984+02:00","Action":"output","Package":"example.com/failing","Test":"TestFails","Output":"    fail_test.go:11: expected 200, got 402\n"}
+{"Time":"2026-07-10T11:26:35.529988+02:00","Action":"output","Package":"example.com/failing","Test":"TestFails","Output":"--- FAIL: TestFails (0.00s)\n"}
+{"Time":"2026-07-10T11:26:35.52999+02:00","Action":"fail","Package":"example.com/failing","Test":"TestFails","Elapsed":0}
+{"Time":"2026-07-10T11:26:35.529993+02:00","Action":"run","Package":"example.com/failing","Test":"TestFailingSubtest"}
+{"Time":"2026-07-10T11:26:35.529996+02:00","Action":"output","Package":"example.com/failing","Test":"TestFailingSubtest","Output":"=== RUN   TestFailingSubtest\n"}
+{"Time":"2026-07-10T11:26:35.529999+02:00","Action":"run","Package":"example.com/failing","Test":"TestFailingSubtest/good"}
+{"Time":"2026-07-10T11:26:35.530001+02:00","Action":"output","Package":"example.com/failing","Test":"TestFailingSubtest/good","Output":"=== RUN   TestFailingSubtest/good\n"}
+{"Time":"2026-07-10T11:26:35.530005+02:00","Action":"output","Package":"example.com/failing","Test":"TestFailingSubtest/good","Output":"--- PASS: TestFailingSubtest/good (0.00s)\n"}
+{"Time":"2026-07-10T11:26:35.530013+02:00","Action":"pass","Package":"example.com/failing","Test":"TestFailingSubtest/good","Elapsed":0}
+{"Time":"2026-07-10T11:26:35.530015+02:00","Action":"run","Package":"example.com/failing","Test":"TestFailingSubtest/bad"}
+{"Time":"2026-07-10T11:26:35.530018+02:00","Action":"output","Package":"example.com/failing","Test":"TestFailingSubtest/bad","Output":"=== RUN   TestFailingSubtest/bad\n"}
+{"Time":"2026-07-10T11:26:35.53002+02:00","Action":"output","Package":"example.com/failing","Test":"TestFailingSubtest/bad","Output":"    fail_test.go:17: subtest exploded\n"}
+{"Time":"2026-07-10T11:26:35.530026+02:00","Action":"output","Package":"example.com/failing","Test":"TestFailingSubtest/bad","Output":"--- FAIL: TestFailingSubtest/bad (0.00s)\n"}
+{"Time":"2026-07-10T11:26:35.530033+02:00","Action":"fail","Package":"example.com/failing","Test":"TestFailingSubtest/bad","Elapsed":0}
+{"Time":"2026-07-10T11:26:35.530036+02:00","Action":"output","Package":"example.com/failing","Test":"TestFailingSubtest","Output":"--- FAIL: TestFailingSubtest (0.00s)\n"}
+{"Time":"2026-07-10T11:26:35.530038+02:00","Action":"fail","Package":"example.com/failing","Test":"TestFailingSubtest","Elapsed":0}
+{"Time":"2026-07-10T11:26:35.530041+02:00","Action":"output","Package":"example.com/failing","Output":"FAIL\n"}
+{"Time":"2026-07-10T11:26:35.530425+02:00","Action":"output","Package":"example.com/failing","Output":"FAIL\texample.com/failing\t0.293s\n"}
+{"Time":"2026-07-10T11:26:35.530438+02:00","Action":"fail","Package":"example.com/failing","Elapsed":0.293}

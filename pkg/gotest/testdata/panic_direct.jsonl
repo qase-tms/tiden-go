@@ -1,0 +1,27 @@
+{"Time":"2026-07-10T11:26:35.703791+02:00","Action":"start","Package":"example.com/panic_direct"}
+{"Time":"2026-07-10T11:26:36.003911+02:00","Action":"run","Package":"example.com/panic_direct","Test":"TestBefore"}
+{"Time":"2026-07-10T11:26:36.003979+02:00","Action":"output","Package":"example.com/panic_direct","Test":"TestBefore","Output":"=== RUN   TestBefore\n"}
+{"Time":"2026-07-10T11:26:36.004034+02:00","Action":"output","Package":"example.com/panic_direct","Test":"TestBefore","Output":"--- PASS: TestBefore (0.00s)\n"}
+{"Time":"2026-07-10T11:26:36.00405+02:00","Action":"pass","Package":"example.com/panic_direct","Test":"TestBefore","Elapsed":0}
+{"Time":"2026-07-10T11:26:36.004061+02:00","Action":"run","Package":"example.com/panic_direct","Test":"TestPanics"}
+{"Time":"2026-07-10T11:26:36.004068+02:00","Action":"output","Package":"example.com/panic_direct","Test":"TestPanics","Output":"=== RUN   TestPanics\n"}
+{"Time":"2026-07-10T11:26:36.004077+02:00","Action":"output","Package":"example.com/panic_direct","Test":"TestPanics","Output":"    panic_test.go:8: reaching the cliff\n"}
+{"Time":"2026-07-10T11:26:36.00416+02:00","Action":"output","Package":"example.com/panic_direct","Test":"TestPanics","Output":"--- FAIL: TestPanics (0.00s)\n"}
+{"Time":"2026-07-10T11:26:36.00668+02:00","Action":"output","Package":"example.com/panic_direct","Test":"TestPanics","Output":"panic: boom: direct panic in test [recovered, repanicked]\n"}
+{"Time":"2026-07-10T11:26:36.006705+02:00","Action":"output","Package":"example.com/panic_direct","Test":"TestPanics","Output":"\n"}
+{"Time":"2026-07-10T11:26:36.006712+02:00","Action":"output","Package":"example.com/panic_direct","Test":"TestPanics","Output":"goroutine 35 [running]:\n"}
+{"Time":"2026-07-10T11:26:36.00672+02:00","Action":"output","Package":"example.com/panic_direct","Test":"TestPanics","Output":"testing.tRunner.func1.2({0x100f4cd20, 0x100f7d740})\n"}
+{"Time":"2026-07-10T11:26:36.006726+02:00","Action":"output","Package":"example.com/panic_direct","Test":"TestPanics","Output":"\t/opt/homebrew/Cellar/go/1.25.6/libexec/src/testing/testing.go:1872 +0x190\n"}
+{"Time":"2026-07-10T11:26:36.006734+02:00","Action":"output","Package":"example.com/panic_direct","Test":"TestPanics","Output":"testing.tRunner.func1()\n"}
+{"Time":"2026-07-10T11:26:36.006737+02:00","Action":"output","Package":"example.com/panic_direct","Test":"TestPanics","Output":"\t/opt/homebrew/Cellar/go/1.25.6/libexec/src/testing/testing.go:1875 +0x31c\n"}
+{"Time":"2026-07-10T11:26:36.00674+02:00","Action":"output","Package":"example.com/panic_direct","Test":"TestPanics","Output":"panic({0x100f4cd20?, 0x100f7d740?})\n"}
+{"Time":"2026-07-10T11:26:36.006743+02:00","Action":"output","Package":"example.com/panic_direct","Test":"TestPanics","Output":"\t/opt/homebrew/Cellar/go/1.25.6/libexec/src/runtime/panic.go:783 +0x120\n"}
+{"Time":"2026-07-10T11:26:36.006746+02:00","Action":"output","Package":"example.com/panic_direct","Test":"TestPanics","Output":"example.com/panic_direct.TestPanics(0x14000126700?)\n"}
+{"Time":"2026-07-10T11:26:36.006748+02:00","Action":"output","Package":"example.com/panic_direct","Test":"TestPanics","Output":"\t/Users/nikopi/.supacode/repos/tiden-workspace/reporter-go/repos/tiden-go/pkg/gotest/testdata/src/panic_direct/panic_test.go:9 +0x54\n"}
+{"Time":"2026-07-10T11:26:36.006755+02:00","Action":"output","Package":"example.com/panic_direct","Test":"TestPanics","Output":"testing.tRunner(0x14000126700, 0x100f7cc08)\n"}
+{"Time":"2026-07-10T11:26:36.006758+02:00","Action":"output","Package":"example.com/panic_direct","Test":"TestPanics","Output":"\t/opt/homebrew/Cellar/go/1.25.6/libexec/src/testing/testing.go:1934 +0xc8\n"}
+{"Time":"2026-07-10T11:26:36.00676+02:00","Action":"output","Package":"example.com/panic_direct","Test":"TestPanics","Output":"created by testing.(*T).Run in goroutine 1\n"}
+{"Time":"2026-07-10T11:26:36.006763+02:00","Action":"output","Package":"example.com/panic_direct","Test":"TestPanics","Output":"\t/opt/homebrew/Cellar/go/1.25.6/libexec/src/testing/testing.go:1997 +0x364\n"}
+{"Time":"2026-07-10T11:26:36.007174+02:00","Action":"fail","Package":"example.com/panic_direct","Test":"TestPanics","Elapsed":0}
+{"Time":"2026-07-10T11:26:36.007201+02:00","Action":"output","Package":"example.com/panic_direct","Output":"FAIL\texample.com/panic_direct\t0.303s\n"}
+{"Time":"2026-07-10T11:26:36.007208+02:00","Action":"fail","Package":"example.com/panic_direct","Elapsed":0.303}
