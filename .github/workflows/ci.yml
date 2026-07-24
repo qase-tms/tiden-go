@@ -8,17 +8,28 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        module: [., tidenapi]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
       - name: gofmt
-        # testdata holds intentionally-broken fixture sources (build-failure goldens)
+        if: matrix.module == '.'
+        # testdata holds intentionally-broken fixture sources (build-failure goldens);
+        # tidenapi/ is generated code (from qase-tms/tiden-specs) - exempt, never hand-formatted
         run: |
-          UNFORMATTED=$(gofmt -l . | grep -v '/testdata/' || true)
+          UNFORMATTED=$(gofmt -l . | grep -v '/testdata/' | grep -v '^tidenapi/' || true)
           test -z "$UNFORMATTED" || (echo "$UNFORMATTED" && exit 1)
+      - name: go build
+        working-directory: ${{ matrix.module }}
+        run: go build ./...
       - name: go vet
+        working-directory: ${{ matrix.module }}
         run: go vet ./...
       - name: tests
+        working-directory: ${{ matrix.module }}
         run: go test ./...

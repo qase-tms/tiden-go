@@ -1,0 +1,290 @@
+# Branch
+
+## Properties
+
+Name | Type | Description | Notes
+------------ | ------------- | ------------- | -------------
+**Id** | Pointer to **string** |  | [optional] 
+**ProductId** | Pointer to **string** |  | [optional] 
+**Name** | Pointer to **string** |  | [optional] 
+**Description** | Pointer to **string** |  | [optional] 
+**CreatedBy** | Pointer to **string** |  | [optional] 
+**Status** | Pointer to **string** |  | [optional] 
+**CreatedAt** | Pointer to **time.Time** |  | [optional] 
+**UpdatedAt** | Pointer to **time.Time** |  | [optional] 
+**CreatedByAgentRunId** | Pointer to **string** | Set when this branch was produced by an agent run; NULL for branches created by humans through the UI / CLI. | [optional] 
+**Stats** | Pointer to [**BranchChangeStats**](BranchChangeStats.md) |  | [optional] 
+
+## Methods
+
+### NewBranch
+
+`func NewBranch() *Branch`
+
+NewBranch instantiates a new Branch object
+This constructor will assign default values to properties that have it defined,
+and makes sure properties required by API are set, but the set of arguments
+will change when the set of required properties is changed
+
+### NewBranchWithDefaults
+
+`func NewBranchWithDefaults() *Branch`
+
+NewBranchWithDefaults instantiates a new Branch object
+This constructor will only assign default values to properties that have it defined,
+but it doesn't guarantee that properties required by API are set
+
+### GetId
+
+`func (o *Branch) GetId() string`
+
+GetId returns the Id field if non-nil, zero value otherwise.
+
+### GetIdOk
+
+`func (o *Branch) GetIdOk() (*string, bool)`
+
+GetIdOk returns a tuple with the Id field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetId
+
+`func (o *Branch) SetId(v string)`
+
+SetId sets Id field to given value.
+
+### HasId
+
+`func (o *Branch) HasId() bool`
+
+HasId returns a boolean if a field has been set.
+
+### GetProductId
+
+`func (o *Branch) GetProductId() string`
+
+GetProductId returns the ProductId field if non-nil, zero value otherwise.
+
+### GetProductIdOk
+
+`func (o *Branch) GetProductIdOk() (*string, bool)`
+
+GetProductIdOk returns a tuple with the ProductId field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetProductId
+
+`func (o *Branch) SetProductId(v string)`
+
+SetProductId sets ProductId field to given value.
+
+### HasProductId
+
+`func (o *Branch) HasProductId() bool`
+
+HasProductId returns a boolean if a field has been set.
+
+### GetName
+
+`func (o *Branch) GetName() string`
+
+GetName returns the Name field if non-nil, zero value otherwise.
+
+### GetNameOk
+
+`func (o *Branch) GetNameOk() (*string, bool)`
+
+GetNameOk returns a tuple with the Name field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetName
+
+`func (o *Branch) SetName(v string)`
+
+SetName sets Name field to given value.
+
+### HasName
+
+`func (o *Branch) HasName() bool`
+
+HasName returns a boolean if a field has been set.
+
+### GetDescription
+
+`func (o *Branch) GetDescription() string`
+
+GetDescription returns the Description field if non-nil, zero value otherwise.
+
+### GetDescriptionOk
+
+`func (o *Branch) GetDescriptionOk() (*string, bool)`
+
+GetDescriptionOk returns a tuple with the Description field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetDescription
+
+`func (o *Branch) SetDescription(v string)`
+
+SetDescription sets Description field to given value.
+
+### HasDescription
+
+`func (o *Branch) HasDescription() bool`
+
+HasDescription returns a boolean if a field has been set.
+
+### GetCreatedBy
+
+`func (o *Branch) GetCreatedBy() string`
+
+GetCreatedBy returns the CreatedBy field if non-nil, zero value otherwise.
+
+### GetCreatedByOk
+
+`func (o *Branch) GetCreatedByOk() (*string, bool)`
+
+GetCreatedByOk returns a tuple with the CreatedBy field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetCreatedBy
+
+`func (o *Branch) SetCreatedBy(v string)`
+
+SetCreatedBy sets CreatedBy field to given value.
+
+### HasCreatedBy
+
+`func (o *Branch) HasCreatedBy() bool`
+
+HasCreatedBy returns a boolean if a field has been set.
+
+### GetStatus
+
+`func (o *Branch) GetStatus() string`
+
+GetStatus returns the Status field if non-nil, zero value otherwise.
+
+### GetStatusOk
+
+`func (o *Branch) GetStatusOk() (*string, bool)`
+
+GetStatusOk returns a tuple with the Status field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetStatus
+
+`func (o *Branch) SetStatus(v string)`
+
+SetStatus sets Status field to given value.
+
+### HasStatus
+
+`func (o *Branch) HasStatus() bool`
+
+HasStatus returns a boolean if a field has been set.
+
+### GetCreatedAt
+
+`func (o *Branch) GetCreatedAt() time.Time`
+
+GetCreatedAt returns the CreatedAt field if non-nil, zero value otherwise.
+
+### GetCreatedAtOk
+
+`func (o *Branch) GetCreatedAtOk() (*time.Time, bool)`
+
+GetCreatedAtOk returns a tuple with the CreatedAt field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetCreatedAt
+
+`func (o *Branch) SetCreatedAt(v time.Time)`
+
+SetCreatedAt sets CreatedAt field to given value.
+
+### HasCreatedAt
+
+`func (o *Branch) HasCreatedAt() bool`
+
+HasCreatedAt returns a boolean if a field has been set.
+
+### GetUpdatedAt
+
+`func (o *Branch) GetUpdatedAt() time.Time`
+
+GetUpdatedAt returns the UpdatedAt field if non-nil, zero value otherwise.
+
+### GetUpdatedAtOk
+
+`func (o *Branch) GetUpdatedAtOk() (*time.Time, bool)`
+
+GetUpdatedAtOk returns a tuple with the UpdatedAt field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetUpdatedAt
+
+`func (o *Branch) SetUpdatedAt(v time.Time)`
+
+SetUpdatedAt sets UpdatedAt field to given value.
+
+### HasUpdatedAt
+
+`func (o *Branch) HasUpdatedAt() bool`
+
+HasUpdatedAt returns a boolean if a field has been set.
+
+### GetCreatedByAgentRunId
+
+`func (o *Branch) GetCreatedByAgentRunId() string`
+
+GetCreatedByAgentRunId returns the CreatedByAgentRunId field if non-nil, zero value otherwise.
+
+### GetCreatedByAgentRunIdOk
+
+`func (o *Branch) GetCreatedByAgentRunIdOk() (*string, bool)`
+
+GetCreatedByAgentRunIdOk returns a tuple with the CreatedByAgentRunId field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetCreatedByAgentRunId
+
+`func (o *Branch) SetCreatedByAgentRunId(v string)`
+
+SetCreatedByAgentRunId sets CreatedByAgentRunId field to given value.
+
+### HasCreatedByAgentRunId
+
+`func (o *Branch) HasCreatedByAgentRunId() bool`
+
+HasCreatedByAgentRunId returns a boolean if a field has been set.
+
+### GetStats
+
+`func (o *Branch) GetStats() BranchChangeStats`
+
+GetStats returns the Stats field if non-nil, zero value otherwise.
+
+### GetStatsOk
+
+`func (o *Branch) GetStatsOk() (*BranchChangeStats, bool)`
+
+GetStatsOk returns a tuple with the Stats field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetStats
+
+`func (o *Branch) SetStats(v BranchChangeStats)`
+
+SetStats sets Stats field to given value.
+
+### HasStats
+
+`func (o *Branch) HasStats() bool`
+
+HasStats returns a boolean if a field has been set.
+
+
+[[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
+
+
