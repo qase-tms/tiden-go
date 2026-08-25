@@ -23,7 +23,7 @@ type GetMergePreviewResponse struct {
 	Modifications []MergeModification `json:"modifications,omitempty"`
 	Deletions []Requirement `json:"deletions,omitempty"`
 	Stats *MergeStats `json:"stats,omitempty"`
-	// Test-side merge effects (Phase 4 extension). Empty when the branch holds no test changes.
+	// Test-side merge effects. Empty when the branch holds no test changes.
 	TestAdditions []Test `json:"testAdditions,omitempty"`
 	TestModifications []TestMergeModification `json:"testModifications,omitempty"`
 	TestDeletions []Test `json:"testDeletions,omitempty"`
@@ -31,6 +31,7 @@ type GetMergePreviewResponse struct {
 	ComponentAdditions []Component `json:"componentAdditions,omitempty"`
 	ComponentModifications []ComponentMergeModification `json:"componentModifications,omitempty"`
 	ComponentDeletions []Component `json:"componentDeletions,omitempty"`
+	IntentSession *MergeIntentSessionState `json:"intentSession,omitempty"`
 }
 
 // NewGetMergePreviewResponse instantiates a new GetMergePreviewResponse object
@@ -370,6 +371,38 @@ func (o *GetMergePreviewResponse) SetComponentDeletions(v []Component) {
 	o.ComponentDeletions = v
 }
 
+// GetIntentSession returns the IntentSession field value if set, zero value otherwise.
+func (o *GetMergePreviewResponse) GetIntentSession() MergeIntentSessionState {
+	if o == nil || IsNil(o.IntentSession) {
+		var ret MergeIntentSessionState
+		return ret
+	}
+	return *o.IntentSession
+}
+
+// GetIntentSessionOk returns a tuple with the IntentSession field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *GetMergePreviewResponse) GetIntentSessionOk() (*MergeIntentSessionState, bool) {
+	if o == nil || IsNil(o.IntentSession) {
+		return nil, false
+	}
+	return o.IntentSession, true
+}
+
+// HasIntentSession returns a boolean if a field has been set.
+func (o *GetMergePreviewResponse) HasIntentSession() bool {
+	if o != nil && !IsNil(o.IntentSession) {
+		return true
+	}
+
+	return false
+}
+
+// SetIntentSession gets a reference to the given MergeIntentSessionState and assigns it to the IntentSession field.
+func (o *GetMergePreviewResponse) SetIntentSession(v MergeIntentSessionState) {
+	o.IntentSession = &v
+}
+
 func (o GetMergePreviewResponse) MarshalJSON() ([]byte, error) {
 	toSerialize,err := o.ToMap()
 	if err != nil {
@@ -409,6 +442,9 @@ func (o GetMergePreviewResponse) ToMap() (map[string]interface{}, error) {
 	}
 	if !IsNil(o.ComponentDeletions) {
 		toSerialize["componentDeletions"] = o.ComponentDeletions
+	}
+	if !IsNil(o.IntentSession) {
+		toSerialize["intentSession"] = o.IntentSession
 	}
 	return toSerialize, nil
 }

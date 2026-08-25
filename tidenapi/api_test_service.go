@@ -24,7 +24,12 @@ import (
 type TestServiceAPI interface {
 
 	/*
-	TestServiceCreateTest Method for TestServiceCreateTest
+	TestServiceCreateTest Creates a test suite or case.
+
+	kind selects "suite" | "case"; case-only fields (status, steps, execution,
+...) are ignored for suites. parent_id nests the test under a suite;
+branch (empty = main) applies the write copy-on-write. Cases get a
+product-wide seq_num.
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@param productId
@@ -37,7 +42,11 @@ type TestServiceAPI interface {
 	TestServiceCreateTestExecute(r ApiTestServiceCreateTestRequest) (*CreateTestResponse, *http.Response, error)
 
 	/*
-	TestServiceDeleteTest Method for TestServiceDeleteTest
+	TestServiceDeleteTest Deletes a test.
+
+	On a branch (branch set, non-main) a main-row delete records a
+copy-on-write deletion marker that applies at merge; on main the row is
+deleted directly.
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@param id
@@ -50,7 +59,14 @@ type TestServiceAPI interface {
 	TestServiceDeleteTestExecute(r ApiTestServiceDeleteTestRequest) (map[string]interface{}, *http.Response, error)
 
 	/*
-	TestServiceDeriveTestLinks DeriveTestLinks matches requirement repo_file anchors against tests' file_path: exact-file matches are auto-linked (durable, moves the gate), directory-proximity matches are returned for an agent to confirm via LinkRequirement. Idempotent.
+	TestServiceDeriveTestLinks Derives test-requirement links from shared file anchors.
+
+	Matches requirement repo_file anchors against tests' file_path.
+Exact-file matches are auto-linked durably (the Quality Gate recomputes);
+directory-proximity matches are returned as candidates for an agent to
+confirm via LinkRequirement. Idempotent. When the product spans more than
+one repository, matching is skipped entirely (multi_repo_skipped=true) —
+tests carry no repo attribution, so a bare path match could cross-link.
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@param productId
@@ -63,7 +79,10 @@ type TestServiceAPI interface {
 	TestServiceDeriveTestLinksExecute(r ApiTestServiceDeriveTestLinksRequest) (*DeriveTestLinksResponse, *http.Response, error)
 
 	/*
-	TestServiceGetTest Method for TestServiceGetTest
+	TestServiceGetTest Fetches one test by id.
+
+	Returns the suite or case with steps, parameters, latest execution, and
+server-populated counts.
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@param id
@@ -76,7 +95,15 @@ type TestServiceAPI interface {
 	TestServiceGetTestExecute(r ApiTestServiceGetTestRequest) (*GetTestResponse, *http.Response, error)
 
 	/*
-	TestServiceIngestTests IngestTests is the reporter-friendly batch upsert endpoint. Idempotent on (product, branch, external_id). Server-validates the entire batch upfront, then either applies all changes or returns 422 with the per-entry errors. Max 1000 tests per call (enforced server-side).
+	TestServiceIngestTests Batch-upserts tests from a reporter (live-documentation ingest).
+
+	Idempotent upsert keyed on (product, branch, external_id); branch is
+auto-created when absent (empty = main). The whole batch (1..1000 entries)
+is validated up front and applied in one transaction: on validation
+failure nothing is written and the per-entry errors are returned (HTTP
+400, also attached as google.rpc.Status details for gRPC clients). Suites
+are found-or-created from suite_path; requirement_seq_nums auto-link cases
+to requirements (main only).
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@param productId
@@ -89,7 +116,13 @@ type TestServiceAPI interface {
 	TestServiceIngestTestsExecute(r ApiTestServiceIngestTestsRequest) (*IngestTestsResponse, *http.Response, error)
 
 	/*
-	TestServiceLinkRequirement Method for TestServiceLinkRequirement
+	TestServiceLinkRequirement Links a test case to a requirement.
+
+	Only cases can be linked, and only within one product. With branch empty
+(main) the durable link is written immediately and idempotently (duplicate
+links are a no-op) and requirement coverage recomputes. With a branch set,
+the call records a branch link PROPOSAL instead — reviewed via
+ReviewBranchLinkProposals and materialized when the branch merges.
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@param testId
@@ -102,7 +135,11 @@ type TestServiceAPI interface {
 	TestServiceLinkRequirementExecute(r ApiTestServiceLinkRequirementRequest) (map[string]interface{}, *http.Response, error)
 
 	/*
-	TestServiceListBranchLinkProposals Method for TestServiceListBranchLinkProposals
+	TestServiceListBranchLinkProposals Lists a branch's test-requirement link proposals.
+
+	Returns the link/unlink proposals recorded on the branch, optionally
+filtered by statuses (proposed | accepted | rejected). Accepted proposals
+become durable links when the branch merges.
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@param branchId
@@ -115,7 +152,11 @@ type TestServiceAPI interface {
 	TestServiceListBranchLinkProposalsExecute(r ApiTestServiceListBranchLinkProposalsRequest) (*ListBranchLinkProposalsResponse, *http.Response, error)
 
 	/*
-	TestServiceListLinks Method for TestServiceListLinks
+	TestServiceListLinks Lists a test's requirement links.
+
+	On a branch view links resolve through copy-on-write (a COW copy surfaces
+its main source's links; branch-only tests have none) and read_only=true
+is returned so clients hide link editing.
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@param testId
@@ -128,7 +169,10 @@ type TestServiceAPI interface {
 	TestServiceListLinksExecute(r ApiTestServiceListLinksRequest) (*ListLinksResponse, *http.Response, error)
 
 	/*
-	TestServiceListTests Method for TestServiceListTests
+	TestServiceListTests Lists a product's tests.
+
+	Returns suites and cases as a flat list (parent_id encodes the tree) in
+the branch view (empty = main), with page_size/page_token pagination.
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@param productId
@@ -141,7 +185,11 @@ type TestServiceAPI interface {
 	TestServiceListTestsExecute(r ApiTestServiceListTestsRequest) (*ListTestsResponse, *http.Response, error)
 
 	/*
-	TestServiceReviewBranchLinkProposals Method for TestServiceReviewBranchLinkProposals
+	TestServiceReviewBranchLinkProposals Accepts or rejects branch link proposals.
+
+	Applies decision ("accepted" | "rejected"), with an optional review_note,
+to the given proposal_ids (at least one required). Accepted proposals
+materialize into durable links at branch merge; rejected ones are dropped.
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@param branchId
@@ -154,7 +202,13 @@ type TestServiceAPI interface {
 	TestServiceReviewBranchLinkProposalsExecute(r ApiTestServiceReviewBranchLinkProposalsRequest) (*ReviewBranchLinkProposalsResponse, *http.Response, error)
 
 	/*
-	TestServiceUnlinkRequirement Method for TestServiceUnlinkRequirement
+	TestServiceUnlinkRequirement Removes a test-requirement link.
+
+	With branch empty (main) the durable link is removed idempotently
+(removing a non-existent link is a no-op) and requirement coverage
+recomputes. With a branch set, the call withdraws that branch's pending
+link proposal for the (test, requirement) pair instead of touching main
+links.
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@param testId
@@ -168,7 +222,13 @@ type TestServiceAPI interface {
 	TestServiceUnlinkRequirementExecute(r ApiTestServiceUnlinkRequirementRequest) (map[string]interface{}, *http.Response, error)
 
 	/*
-	TestServiceUpdateTest Method for TestServiceUpdateTest
+	TestServiceUpdateTest Updates a test suite or case.
+
+	Scalar optional fields change only when present. Repeated/struct fields
+use replacement semantics behind set_* flags (set_tags, set_steps,
+set_custom_fields, ...): when the flag is true the paired value replaces
+the stored one entirely (empty clears); when false it is untouched.
+branch (empty = main) applies the edit copy-on-write.
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@param id
@@ -201,7 +261,12 @@ func (r ApiTestServiceCreateTestRequest) Execute() (*CreateTestResponse, *http.R
 }
 
 /*
-TestServiceCreateTest Method for TestServiceCreateTest
+TestServiceCreateTest Creates a test suite or case.
+
+kind selects "suite" | "case"; case-only fields (status, steps, execution,
+...) are ignored for suites. parent_id nests the test under a suite;
+branch (empty = main) applies the write copy-on-write. Cases get a
+product-wide seq_num.
 
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @param productId
@@ -335,7 +400,11 @@ func (r ApiTestServiceDeleteTestRequest) Execute() (map[string]interface{}, *htt
 }
 
 /*
-TestServiceDeleteTest Method for TestServiceDeleteTest
+TestServiceDeleteTest Deletes a test.
+
+On a branch (branch set, non-main) a main-row delete records a
+copy-on-write deletion marker that applies at merge; on main the row is
+deleted directly.
 
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @param id
@@ -467,7 +536,14 @@ func (r ApiTestServiceDeriveTestLinksRequest) Execute() (*DeriveTestLinksRespons
 }
 
 /*
-TestServiceDeriveTestLinks DeriveTestLinks matches requirement repo_file anchors against tests' file_path: exact-file matches are auto-linked (durable, moves the gate), directory-proximity matches are returned for an agent to confirm via LinkRequirement. Idempotent.
+TestServiceDeriveTestLinks Derives test-requirement links from shared file anchors.
+
+Matches requirement repo_file anchors against tests' file_path.
+Exact-file matches are auto-linked durably (the Quality Gate recomputes);
+directory-proximity matches are returned as candidates for an agent to
+confirm via LinkRequirement. Idempotent. When the product spans more than
+one repository, matching is skipped entirely (multi_repo_skipped=true) —
+tests carry no repo attribution, so a bare path match could cross-link.
 
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @param productId
@@ -595,7 +671,10 @@ func (r ApiTestServiceGetTestRequest) Execute() (*GetTestResponse, *http.Respons
 }
 
 /*
-TestServiceGetTest Method for TestServiceGetTest
+TestServiceGetTest Fetches one test by id.
+
+Returns the suite or case with steps, parameters, latest execution, and
+server-populated counts.
 
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @param id
@@ -724,7 +803,15 @@ func (r ApiTestServiceIngestTestsRequest) Execute() (*IngestTestsResponse, *http
 }
 
 /*
-TestServiceIngestTests IngestTests is the reporter-friendly batch upsert endpoint. Idempotent on (product, branch, external_id). Server-validates the entire batch upfront, then either applies all changes or returns 422 with the per-entry errors. Max 1000 tests per call (enforced server-side).
+TestServiceIngestTests Batch-upserts tests from a reporter (live-documentation ingest).
+
+Idempotent upsert keyed on (product, branch, external_id); branch is
+auto-created when absent (empty = main). The whole batch (1..1000 entries)
+is validated up front and applied in one transaction: on validation
+failure nothing is written and the per-entry errors are returned (HTTP
+400, also attached as google.rpc.Status details for gRPC clients). Suites
+are found-or-created from suite_path; requirement_seq_nums auto-link cases
+to requirements (main only).
 
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @param productId
@@ -858,7 +945,13 @@ func (r ApiTestServiceLinkRequirementRequest) Execute() (map[string]interface{},
 }
 
 /*
-TestServiceLinkRequirement Method for TestServiceLinkRequirement
+TestServiceLinkRequirement Links a test case to a requirement.
+
+Only cases can be linked, and only within one product. With branch empty
+(main) the durable link is written immediately and idempotently (duplicate
+links are a no-op) and requirement coverage recomputes. With a branch set,
+the call records a branch link PROPOSAL instead — reviewed via
+ReviewBranchLinkProposals and materialized when the branch merges.
 
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @param testId
@@ -992,7 +1085,11 @@ func (r ApiTestServiceListBranchLinkProposalsRequest) Execute() (*ListBranchLink
 }
 
 /*
-TestServiceListBranchLinkProposals Method for TestServiceListBranchLinkProposals
+TestServiceListBranchLinkProposals Lists a branch's test-requirement link proposals.
+
+Returns the link/unlink proposals recorded on the branch, optionally
+filtered by statuses (proposed | accepted | rejected). Accepted proposals
+become durable links when the branch merges.
 
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @param branchId
@@ -1133,7 +1230,11 @@ func (r ApiTestServiceListLinksRequest) Execute() (*ListLinksResponse, *http.Res
 }
 
 /*
-TestServiceListLinks Method for TestServiceListLinks
+TestServiceListLinks Lists a test's requirement links.
+
+On a branch view links resolve through copy-on-write (a COW copy surfaces
+its main source's links; branch-only tests have none) and read_only=true
+is returned so clients hide link editing.
 
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @param testId
@@ -1277,7 +1378,10 @@ func (r ApiTestServiceListTestsRequest) Execute() (*ListTestsResponse, *http.Res
 }
 
 /*
-TestServiceListTests Method for TestServiceListTests
+TestServiceListTests Lists a product's tests.
+
+Returns suites and cases as a flat list (parent_id encodes the tree) in
+the branch view (empty = main), with page_size/page_token pagination.
 
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @param productId
@@ -1415,7 +1519,11 @@ func (r ApiTestServiceReviewBranchLinkProposalsRequest) Execute() (*ReviewBranch
 }
 
 /*
-TestServiceReviewBranchLinkProposals Method for TestServiceReviewBranchLinkProposals
+TestServiceReviewBranchLinkProposals Accepts or rejects branch link proposals.
+
+Applies decision ("accepted" | "rejected"), with an optional review_note,
+to the given proposal_ids (at least one required). Accepted proposals
+materialize into durable links at branch merge; rejected ones are dropped.
 
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @param branchId
@@ -1550,7 +1658,13 @@ func (r ApiTestServiceUnlinkRequirementRequest) Execute() (map[string]interface{
 }
 
 /*
-TestServiceUnlinkRequirement Method for TestServiceUnlinkRequirement
+TestServiceUnlinkRequirement Removes a test-requirement link.
+
+With branch empty (main) the durable link is removed idempotently
+(removing a non-existent link is a no-op) and requirement coverage
+recomputes. With a branch set, the call withdraws that branch's pending
+link proposal for the (test, requirement) pair instead of touching main
+links.
 
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @param testId
@@ -1685,7 +1799,13 @@ func (r ApiTestServiceUpdateTestRequest) Execute() (*UpdateTestResponse, *http.R
 }
 
 /*
-TestServiceUpdateTest Method for TestServiceUpdateTest
+TestServiceUpdateTest Updates a test suite or case.
+
+Scalar optional fields change only when present. Repeated/struct fields
+use replacement semantics behind set_* flags (set_tags, set_steps,
+set_custom_fields, ...): when the flag is true the paired value replaces
+the stored one entirely (empty clears); when false it is untouched.
+branch (empty = main) applies the edit copy-on-write.
 
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @param id

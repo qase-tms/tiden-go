@@ -10,7 +10,7 @@ Name | Type | Description | Notes
 **FileName** | Pointer to **string** |  | [optional] 
 **ReleaseName** | Pointer to **string** |  | [optional] 
 **ByteSize** | Pointer to **string** |  | [optional] 
-**CreatedAt** | Pointer to **time.Time** | NOTE: metadata only — never an S3 download URL (maps are private source). | [optional] 
+**CreatedAt** | Pointer to **time.Time** | NOTE: metadata only — never a download URL (source maps stay private). | [optional] 
 
 ## Methods
 

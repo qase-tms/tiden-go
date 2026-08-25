@@ -23,7 +23,15 @@ import (
 type IntentServiceAPI interface {
 
 	/*
-	IntentServiceDistillIntent Method for IntentServiceDistillIntent
+	IntentServiceDistillIntent Distills a coding-session transcript into requirement changes.
+
+	Runs an LLM reconciliation of the transcript against the product's
+requirement tree and writes the created/updated requirements to an
+intent/YYYY-MM-DD-<slug> branch for review (slug defaults to "session";
+same-day non-open branch names get a -2..-9 suffix). Requires a usable
+llm.* workspace credential (credential_id overrides the default). An empty
+transcript is a readiness probe: configuration is validated and the call
+reports skipped=true without invoking the LLM.
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@param productId Product whose requirement tree the intent is reconciled against.
@@ -56,7 +64,15 @@ func (r ApiIntentServiceDistillIntentRequest) Execute() (*DistillIntentResponse,
 }
 
 /*
-IntentServiceDistillIntent Method for IntentServiceDistillIntent
+IntentServiceDistillIntent Distills a coding-session transcript into requirement changes.
+
+Runs an LLM reconciliation of the transcript against the product's
+requirement tree and writes the created/updated requirements to an
+intent/YYYY-MM-DD-<slug> branch for review (slug defaults to "session";
+same-day non-open branch names get a -2..-9 suffix). Requires a usable
+llm.* workspace credential (credential_id overrides the default). An empty
+transcript is a readiness probe: configuration is validated and the call
+reports skipped=true without invoking the LLM.
 
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @param productId Product whose requirement tree the intent is reconciled against.

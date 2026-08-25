@@ -25,6 +25,9 @@ type RequirementImpactResponse struct {
 	CoveringTestIds []string `json:"coveringTestIds,omitempty"`
 	// uncovered_requirement_ids is the subset of affected that have zero live test links.
 	UncoveredRequirementIds []string `json:"uncoveredRequirementIds,omitempty"`
+	// impacted carries one entry per affected requirement with the provenance of how it was reached. Ordered: direct anchor hits (hops = 0) first, then by ascending hops. Same set as affected_requirement_ids — a typed view of it.
+	Impacted []ImpactedRequirement `json:"impacted,omitempty"`
+	Coverage *ImpactCoverage `json:"coverage,omitempty"`
 }
 
 // NewRequirementImpactResponse instantiates a new RequirementImpactResponse object
@@ -140,6 +143,70 @@ func (o *RequirementImpactResponse) SetUncoveredRequirementIds(v []string) {
 	o.UncoveredRequirementIds = v
 }
 
+// GetImpacted returns the Impacted field value if set, zero value otherwise.
+func (o *RequirementImpactResponse) GetImpacted() []ImpactedRequirement {
+	if o == nil || IsNil(o.Impacted) {
+		var ret []ImpactedRequirement
+		return ret
+	}
+	return o.Impacted
+}
+
+// GetImpactedOk returns a tuple with the Impacted field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *RequirementImpactResponse) GetImpactedOk() ([]ImpactedRequirement, bool) {
+	if o == nil || IsNil(o.Impacted) {
+		return nil, false
+	}
+	return o.Impacted, true
+}
+
+// HasImpacted returns a boolean if a field has been set.
+func (o *RequirementImpactResponse) HasImpacted() bool {
+	if o != nil && !IsNil(o.Impacted) {
+		return true
+	}
+
+	return false
+}
+
+// SetImpacted gets a reference to the given []ImpactedRequirement and assigns it to the Impacted field.
+func (o *RequirementImpactResponse) SetImpacted(v []ImpactedRequirement) {
+	o.Impacted = v
+}
+
+// GetCoverage returns the Coverage field value if set, zero value otherwise.
+func (o *RequirementImpactResponse) GetCoverage() ImpactCoverage {
+	if o == nil || IsNil(o.Coverage) {
+		var ret ImpactCoverage
+		return ret
+	}
+	return *o.Coverage
+}
+
+// GetCoverageOk returns a tuple with the Coverage field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *RequirementImpactResponse) GetCoverageOk() (*ImpactCoverage, bool) {
+	if o == nil || IsNil(o.Coverage) {
+		return nil, false
+	}
+	return o.Coverage, true
+}
+
+// HasCoverage returns a boolean if a field has been set.
+func (o *RequirementImpactResponse) HasCoverage() bool {
+	if o != nil && !IsNil(o.Coverage) {
+		return true
+	}
+
+	return false
+}
+
+// SetCoverage gets a reference to the given ImpactCoverage and assigns it to the Coverage field.
+func (o *RequirementImpactResponse) SetCoverage(v ImpactCoverage) {
+	o.Coverage = &v
+}
+
 func (o RequirementImpactResponse) MarshalJSON() ([]byte, error) {
 	toSerialize,err := o.ToMap()
 	if err != nil {
@@ -158,6 +225,12 @@ func (o RequirementImpactResponse) ToMap() (map[string]interface{}, error) {
 	}
 	if !IsNil(o.UncoveredRequirementIds) {
 		toSerialize["uncoveredRequirementIds"] = o.UncoveredRequirementIds
+	}
+	if !IsNil(o.Impacted) {
+		toSerialize["impacted"] = o.Impacted
+	}
+	if !IsNil(o.Coverage) {
+		toSerialize["coverage"] = o.Coverage
 	}
 	return toSerialize, nil
 }

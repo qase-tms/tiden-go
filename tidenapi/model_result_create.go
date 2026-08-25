@@ -17,7 +17,7 @@ import (
 // checks if the ResultCreate type satisfies the MappedNullable interface at compile time
 var _ MappedNullable = &ResultCreate{}
 
-// ResultCreate struct for ResultCreate
+// ResultCreate ResultCreate is one reported test result (Qase v2 ResultCreate-compatible; see the section note above for transformer deltas). id is the idempotency key — resending the same id is counted as a duplicate and skipped.
 type ResultCreate struct {
 	Id *string `json:"id,omitempty"`
 	Title *string `json:"title,omitempty"`

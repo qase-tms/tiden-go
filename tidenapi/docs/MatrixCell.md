@@ -7,6 +7,7 @@ Name | Type | Description | Notes
 **TestCase** | Pointer to **string** |  | [optional] 
 **Status** | Pointer to **string** |  | [optional] 
 **Display** | Pointer to **string** |  | [optional] 
+**TestId** | Pointer to **string** | test reference; pinned by TIDEN-135 so the grid stays diffable across runs — do not repurpose it.  join key: lets a client attach gate-accurate status to | [optional] 
 
 ## Methods
 
@@ -101,6 +102,31 @@ SetDisplay sets Display field to given value.
 `func (o *MatrixCell) HasDisplay() bool`
 
 HasDisplay returns a boolean if a field has been set.
+
+### GetTestId
+
+`func (o *MatrixCell) GetTestId() string`
+
+GetTestId returns the TestId field if non-nil, zero value otherwise.
+
+### GetTestIdOk
+
+`func (o *MatrixCell) GetTestIdOk() (*string, bool)`
+
+GetTestIdOk returns a tuple with the TestId field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetTestId
+
+`func (o *MatrixCell) SetTestId(v string)`
+
+SetTestId sets TestId field to given value.
+
+### HasTestId
+
+`func (o *MatrixCell) HasTestId() bool`
+
+HasTestId returns a boolean if a field has been set.
 
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)

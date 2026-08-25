@@ -15,7 +15,7 @@ import (
 	"fmt"
 )
 
-// CriterionStatus the model 'CriterionStatus'
+// CriterionStatus - CRITERION_STATUS_NOT_APPLICABLE: e.g. prod issues (Stream B) on branch scope
 type CriterionStatus string
 
 // List of CriterionStatus

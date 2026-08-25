@@ -26,6 +26,8 @@ type MatrixRequirement struct {
 	Title *string `json:"title,omitempty"`
 	ParentId *string `json:"parentId,omitempty"`
 	BranchStatus *string `json:"branchStatus,omitempty"`
+	// Canonical (main) id of this row: source_id for a branch COW copy, empty otherwise. Branch scope keys rows by their branch-local id while parent_id and Verdict.subjects carry main ids, so a client needs this to rebuild the feature tree the way the server resolver does.
+	CanonicalId *string `json:"canonicalId,omitempty"`
 }
 
 // NewMatrixRequirement instantiates a new MatrixRequirement object
@@ -269,6 +271,38 @@ func (o *MatrixRequirement) SetBranchStatus(v string) {
 	o.BranchStatus = &v
 }
 
+// GetCanonicalId returns the CanonicalId field value if set, zero value otherwise.
+func (o *MatrixRequirement) GetCanonicalId() string {
+	if o == nil || IsNil(o.CanonicalId) {
+		var ret string
+		return ret
+	}
+	return *o.CanonicalId
+}
+
+// GetCanonicalIdOk returns a tuple with the CanonicalId field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *MatrixRequirement) GetCanonicalIdOk() (*string, bool) {
+	if o == nil || IsNil(o.CanonicalId) {
+		return nil, false
+	}
+	return o.CanonicalId, true
+}
+
+// HasCanonicalId returns a boolean if a field has been set.
+func (o *MatrixRequirement) HasCanonicalId() bool {
+	if o != nil && !IsNil(o.CanonicalId) {
+		return true
+	}
+
+	return false
+}
+
+// SetCanonicalId gets a reference to the given string and assigns it to the CanonicalId field.
+func (o *MatrixRequirement) SetCanonicalId(v string) {
+	o.CanonicalId = &v
+}
+
 func (o MatrixRequirement) MarshalJSON() ([]byte, error) {
 	toSerialize,err := o.ToMap()
 	if err != nil {
@@ -299,6 +333,9 @@ func (o MatrixRequirement) ToMap() (map[string]interface{}, error) {
 	}
 	if !IsNil(o.BranchStatus) {
 		toSerialize["branchStatus"] = o.BranchStatus
+	}
+	if !IsNil(o.CanonicalId) {
+		toSerialize["canonicalId"] = o.CanonicalId
 	}
 	return toSerialize, nil
 }

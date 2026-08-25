@@ -9,6 +9,7 @@ Name | Type | Description | Notes
 **StartTime** | Pointer to **string** |  | [optional] 
 **EndTime** | Pointer to **string** |  | [optional] 
 **Thread** | Pointer to **string** |  | [optional] 
+**RunSeq** | Pointer to **int32** | Test-run seq this execution came from (live-doc sync stamps it; 0 &#x3D; unknown — run seqs start at 1). Read-only: server-populated, never accepted from clients. | [optional] 
 
 ## Methods
 
@@ -153,6 +154,31 @@ SetThread sets Thread field to given value.
 `func (o *TestExecution) HasThread() bool`
 
 HasThread returns a boolean if a field has been set.
+
+### GetRunSeq
+
+`func (o *TestExecution) GetRunSeq() int32`
+
+GetRunSeq returns the RunSeq field if non-nil, zero value otherwise.
+
+### GetRunSeqOk
+
+`func (o *TestExecution) GetRunSeqOk() (*int32, bool)`
+
+GetRunSeqOk returns a tuple with the RunSeq field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetRunSeq
+
+`func (o *TestExecution) SetRunSeq(v int32)`
+
+SetRunSeq sets RunSeq field to given value.
+
+### HasRunSeq
+
+`func (o *TestExecution) HasRunSeq() bool`
+
+HasRunSeq returns a boolean if a field has been set.
 
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)

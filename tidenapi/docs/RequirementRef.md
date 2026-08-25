@@ -8,6 +8,8 @@ Name | Type | Description | Notes
 **SeqNum** | Pointer to **int32** |  | [optional] 
 **Title** | Pointer to **string** |  | [optional] 
 **Description** | Pointer to **string** |  | [optional] 
+**Tier** | Pointer to [**RequirementTier**](RequirementTier.md) |  | [optional] [default to REQUIREMENT_TIER_UNSPECIFIED]
+**Resources** | Pointer to **[]string** | resources are the root&#39;s branch-effective repo_file anchor paths, same meaning as TouchedNode.resources (a root can carry the session&#39;s evidence). | [optional] 
 
 ## Methods
 
@@ -127,6 +129,56 @@ SetDescription sets Description field to given value.
 `func (o *RequirementRef) HasDescription() bool`
 
 HasDescription returns a boolean if a field has been set.
+
+### GetTier
+
+`func (o *RequirementRef) GetTier() RequirementTier`
+
+GetTier returns the Tier field if non-nil, zero value otherwise.
+
+### GetTierOk
+
+`func (o *RequirementRef) GetTierOk() (*RequirementTier, bool)`
+
+GetTierOk returns a tuple with the Tier field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetTier
+
+`func (o *RequirementRef) SetTier(v RequirementTier)`
+
+SetTier sets Tier field to given value.
+
+### HasTier
+
+`func (o *RequirementRef) HasTier() bool`
+
+HasTier returns a boolean if a field has been set.
+
+### GetResources
+
+`func (o *RequirementRef) GetResources() []string`
+
+GetResources returns the Resources field if non-nil, zero value otherwise.
+
+### GetResourcesOk
+
+`func (o *RequirementRef) GetResourcesOk() (*[]string, bool)`
+
+GetResourcesOk returns a tuple with the Resources field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetResources
+
+`func (o *RequirementRef) SetResources(v []string)`
+
+SetResources sets Resources field to given value.
+
+### HasResources
+
+`func (o *RequirementRef) HasResources() bool`
+
+HasResources returns a boolean if a field has been set.
 
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)

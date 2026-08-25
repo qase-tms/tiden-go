@@ -44,6 +44,8 @@ type TestRun struct {
 	CreatedBy *string `json:"createdBy,omitempty"`
 	CreatedAt *time.Time `json:"createdAt,omitempty"`
 	UpdatedAt *time.Time `json:"updatedAt,omitempty"`
+	IntentSessionId *string `json:"intentSessionId,omitempty"`
+	IntentBranch *string `json:"intentBranch,omitempty"`
 }
 
 // NewTestRun instantiates a new TestRun object
@@ -831,6 +833,70 @@ func (o *TestRun) SetUpdatedAt(v time.Time) {
 	o.UpdatedAt = &v
 }
 
+// GetIntentSessionId returns the IntentSessionId field value if set, zero value otherwise.
+func (o *TestRun) GetIntentSessionId() string {
+	if o == nil || IsNil(o.IntentSessionId) {
+		var ret string
+		return ret
+	}
+	return *o.IntentSessionId
+}
+
+// GetIntentSessionIdOk returns a tuple with the IntentSessionId field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *TestRun) GetIntentSessionIdOk() (*string, bool) {
+	if o == nil || IsNil(o.IntentSessionId) {
+		return nil, false
+	}
+	return o.IntentSessionId, true
+}
+
+// HasIntentSessionId returns a boolean if a field has been set.
+func (o *TestRun) HasIntentSessionId() bool {
+	if o != nil && !IsNil(o.IntentSessionId) {
+		return true
+	}
+
+	return false
+}
+
+// SetIntentSessionId gets a reference to the given string and assigns it to the IntentSessionId field.
+func (o *TestRun) SetIntentSessionId(v string) {
+	o.IntentSessionId = &v
+}
+
+// GetIntentBranch returns the IntentBranch field value if set, zero value otherwise.
+func (o *TestRun) GetIntentBranch() string {
+	if o == nil || IsNil(o.IntentBranch) {
+		var ret string
+		return ret
+	}
+	return *o.IntentBranch
+}
+
+// GetIntentBranchOk returns a tuple with the IntentBranch field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *TestRun) GetIntentBranchOk() (*string, bool) {
+	if o == nil || IsNil(o.IntentBranch) {
+		return nil, false
+	}
+	return o.IntentBranch, true
+}
+
+// HasIntentBranch returns a boolean if a field has been set.
+func (o *TestRun) HasIntentBranch() bool {
+	if o != nil && !IsNil(o.IntentBranch) {
+		return true
+	}
+
+	return false
+}
+
+// SetIntentBranch gets a reference to the given string and assigns it to the IntentBranch field.
+func (o *TestRun) SetIntentBranch(v string) {
+	o.IntentBranch = &v
+}
+
 func (o TestRun) MarshalJSON() ([]byte, error) {
 	toSerialize,err := o.ToMap()
 	if err != nil {
@@ -912,6 +978,12 @@ func (o TestRun) ToMap() (map[string]interface{}, error) {
 	}
 	if !IsNil(o.UpdatedAt) {
 		toSerialize["updatedAt"] = o.UpdatedAt
+	}
+	if !IsNil(o.IntentSessionId) {
+		toSerialize["intentSessionId"] = o.IntentSessionId
+	}
+	if !IsNil(o.IntentBranch) {
+		toSerialize["intentBranch"] = o.IntentBranch
 	}
 	return toSerialize, nil
 }

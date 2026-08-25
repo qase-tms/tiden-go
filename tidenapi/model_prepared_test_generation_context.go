@@ -17,7 +17,7 @@ import (
 // checks if the PreparedTestGenerationContext type satisfies the MappedNullable interface at compile time
 var _ MappedNullable = &PreparedTestGenerationContext{}
 
-// PreparedTestGenerationContext struct for PreparedTestGenerationContext
+// PreparedTestGenerationContext PreparedTestGenerationContext is the batched output of PrepareTestGenerationContext: one RequirementTestContext per requested requirement plus shared codebase context, under one token budget.
 type PreparedTestGenerationContext struct {
 	ProductId *string `json:"productId,omitempty"`
 	Branch *string `json:"branch,omitempty"`

@@ -17,7 +17,7 @@ import (
 // checks if the PaginationResponse type satisfies the MappedNullable interface at compile time
 var _ MappedNullable = &PaginationResponse{}
 
-// PaginationResponse struct for PaginationResponse
+// PaginationResponse PaginationResponse carries the cursor for the next page (empty = no further results) and the total row count for the query.
 type PaginationResponse struct {
 	NextPageToken *string `json:"nextPageToken,omitempty"`
 	TotalCount *int32 `json:"totalCount,omitempty"`

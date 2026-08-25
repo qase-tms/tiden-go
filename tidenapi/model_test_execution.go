@@ -17,13 +17,15 @@ import (
 // checks if the TestExecution type satisfies the MappedNullable interface at compile time
 var _ MappedNullable = &TestExecution{}
 
-// TestExecution struct for TestExecution
+// TestExecution TestExecution is the embedded latest-execution snapshot carried on tests and steps: reporter-provided status, duration, timing, and thread.
 type TestExecution struct {
 	DurationMs *string `json:"durationMs,omitempty"`
 	Status *string `json:"status,omitempty"`
 	StartTime *string `json:"startTime,omitempty"`
 	EndTime *string `json:"endTime,omitempty"`
 	Thread *string `json:"thread,omitempty"`
+	// Test-run seq this execution came from (live-doc sync stamps it; 0 = unknown — run seqs start at 1). Read-only: server-populated, never accepted from clients.
+	RunSeq *int32 `json:"runSeq,omitempty"`
 }
 
 // NewTestExecution instantiates a new TestExecution object
@@ -203,6 +205,38 @@ func (o *TestExecution) SetThread(v string) {
 	o.Thread = &v
 }
 
+// GetRunSeq returns the RunSeq field value if set, zero value otherwise.
+func (o *TestExecution) GetRunSeq() int32 {
+	if o == nil || IsNil(o.RunSeq) {
+		var ret int32
+		return ret
+	}
+	return *o.RunSeq
+}
+
+// GetRunSeqOk returns a tuple with the RunSeq field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *TestExecution) GetRunSeqOk() (*int32, bool) {
+	if o == nil || IsNil(o.RunSeq) {
+		return nil, false
+	}
+	return o.RunSeq, true
+}
+
+// HasRunSeq returns a boolean if a field has been set.
+func (o *TestExecution) HasRunSeq() bool {
+	if o != nil && !IsNil(o.RunSeq) {
+		return true
+	}
+
+	return false
+}
+
+// SetRunSeq gets a reference to the given int32 and assigns it to the RunSeq field.
+func (o *TestExecution) SetRunSeq(v int32) {
+	o.RunSeq = &v
+}
+
 func (o TestExecution) MarshalJSON() ([]byte, error) {
 	toSerialize,err := o.ToMap()
 	if err != nil {
@@ -227,6 +261,9 @@ func (o TestExecution) ToMap() (map[string]interface{}, error) {
 	}
 	if !IsNil(o.Thread) {
 		toSerialize["thread"] = o.Thread
+	}
+	if !IsNil(o.RunSeq) {
+		toSerialize["runSeq"] = o.RunSeq
 	}
 	return toSerialize, nil
 }

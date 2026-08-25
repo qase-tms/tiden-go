@@ -23,7 +23,12 @@ import (
 type BranchServiceAPI interface {
 
 	/*
-	BranchServiceCreateBranch Method for BranchServiceCreateBranch
+	BranchServiceCreateBranch Creates a copy-on-write branch of a product's main line.
+
+	The branch starts as a view of main; edits made on it copy entities on
+write and flow back via MergeBranch. name must be lowercase alphanumeric
+with hyphens/underscores/slashes, at most 100 characters, and not "main".
+created_by_agent_run_id attributes branches created by an agent run.
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@param productId
@@ -36,7 +41,11 @@ type BranchServiceAPI interface {
 	BranchServiceCreateBranchExecute(r ApiBranchServiceCreateBranchRequest) (*CreateBranchResponse, *http.Response, error)
 
 	/*
-	BranchServiceDeleteBranch Method for BranchServiceDeleteBranch
+	BranchServiceDeleteBranch Deletes a branch and discards its copy-on-write changes.
+
+	Permanently drops the branch's local requirement/test/component copies and
+deletion markers; main is unaffected. Deletion history is recorded per
+discarded requirement. The main branch cannot be deleted.
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@param id
@@ -49,7 +58,10 @@ type BranchServiceAPI interface {
 	BranchServiceDeleteBranchExecute(r ApiBranchServiceDeleteBranchRequest) (map[string]interface{}, *http.Response, error)
 
 	/*
-	BranchServiceGetBranch Method for BranchServiceGetBranch
+	BranchServiceGetBranch Fetches one branch by id.
+
+	Returns the branch with its status and metadata. Change stats are only
+populated by ListBranches with include_stats=true.
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@param id
@@ -62,7 +74,12 @@ type BranchServiceAPI interface {
 	BranchServiceGetBranchExecute(r ApiBranchServiceGetBranchRequest) (*GetBranchResponse, *http.Response, error)
 
 	/*
-	BranchServiceGetMergePreview Method for BranchServiceGetMergePreview
+	BranchServiceGetMergePreview Previews the effect of merging a branch into main.
+
+	Returns the additions, modifications (with per-field conflict flags), and
+deletions the merge would apply, for requirements, tests, and components,
+plus aggregate stats. A conflict means main changed the entity after the
+branch took its copy. Read-only — nothing is written.
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@param id
@@ -75,7 +92,30 @@ type BranchServiceAPI interface {
 	BranchServiceGetMergePreviewExecute(r ApiBranchServiceGetMergePreviewRequest) (*GetMergePreviewResponse, *http.Response, error)
 
 	/*
-	BranchServiceListBranches Method for BranchServiceListBranches
+	BranchServiceListBranchCodeLinks Lists a branch's durable code links (git branches, pull requests).
+
+	Returns every link recorded for the branch, pull requests before git
+branches, then most recently updated first.
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param branchId
+	@return ApiBranchServiceListBranchCodeLinksRequest
+	*/
+	BranchServiceListBranchCodeLinks(ctx context.Context, branchId string) ApiBranchServiceListBranchCodeLinksRequest
+
+	// BranchServiceListBranchCodeLinksExecute executes the request
+	//  @return ListBranchCodeLinksResponse
+	BranchServiceListBranchCodeLinksExecute(r ApiBranchServiceListBranchCodeLinksRequest) (*ListBranchCodeLinksResponse, *http.Response, error)
+
+	/*
+	BranchServiceListBranches Lists a product's branches.
+
+	Returns every branch including main. Set include_stats to add per-branch
+change counts vs main (additions/modifications/deletions per entity kind,
+plus conflicts). Set include_status to add loop/latest-run/code-link/
+intent-capture signals (Branch.loop/.latest_run/.code_links/.intent) —
+independent of include_stats, each is its own fixed-query-count batch
+read, so a caller that needs only the branch list is not charged for it.
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@param productId
@@ -88,7 +128,13 @@ type BranchServiceAPI interface {
 	BranchServiceListBranchesExecute(r ApiBranchServiceListBranchesRequest) (*ListBranchesResponse, *http.Response, error)
 
 	/*
-	BranchServiceMergeBranch Method for BranchServiceMergeBranch
+	BranchServiceMergeBranch Merges a branch's changes into main and closes the branch.
+
+	Applies the branch's additions/modifications/deletions to main in one
+transaction. Every conflicting entity requires a resolutions entry keyed
+"req:<uuid>", "test:<uuid>", or "comp:<uuid>" with value KEEP_BRANCH or
+KEEP_MAIN — otherwise the call fails with UNRESOLVED_CONFLICT and nothing
+is applied. Only open branches can merge; main cannot merge into itself.
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@param id
@@ -99,6 +145,43 @@ type BranchServiceAPI interface {
 	// BranchServiceMergeBranchExecute executes the request
 	//  @return MergeBranchResponse
 	BranchServiceMergeBranchExecute(r ApiBranchServiceMergeBranchRequest) (*MergeBranchResponse, *http.Response, error)
+
+	/*
+	BranchServiceUpdateBranch Updates a branch's description and/or created_by_agent.
+
+	Both request fields are optional: an absent field leaves the branch's
+current value unchanged, a present field (including an empty string)
+sets it. created_by_agent is validated server-side against a fixed
+allowlist — an unrecognized value is stored as empty string.
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param id
+	@return ApiBranchServiceUpdateBranchRequest
+	*/
+	BranchServiceUpdateBranch(ctx context.Context, id string) ApiBranchServiceUpdateBranchRequest
+
+	// BranchServiceUpdateBranchExecute executes the request
+	//  @return UpdateBranchResponse
+	BranchServiceUpdateBranchExecute(r ApiBranchServiceUpdateBranchRequest) (*UpdateBranchResponse, *http.Response, error)
+
+	/*
+	BranchServiceUpsertBranchCodeLinks Upserts a batch of code links onto a branch.
+
+	Each entry is keyed by (kind, repository, ref): a repeat of an existing
+key updates url/title/state/base_sha/head_sha instead of duplicating.
+kind must be "git_branch" or "pull_request"; state must be "", "open",
+"merged", or "closed". Fails closed on the first invalid entry — nothing
+is written if any entry is invalid.
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param branchId
+	@return ApiBranchServiceUpsertBranchCodeLinksRequest
+	*/
+	BranchServiceUpsertBranchCodeLinks(ctx context.Context, branchId string) ApiBranchServiceUpsertBranchCodeLinksRequest
+
+	// BranchServiceUpsertBranchCodeLinksExecute executes the request
+	//  @return UpsertBranchCodeLinksResponse
+	BranchServiceUpsertBranchCodeLinksExecute(r ApiBranchServiceUpsertBranchCodeLinksRequest) (*UpsertBranchCodeLinksResponse, *http.Response, error)
 }
 
 // BranchServiceAPIService BranchServiceAPI service
@@ -121,7 +204,12 @@ func (r ApiBranchServiceCreateBranchRequest) Execute() (*CreateBranchResponse, *
 }
 
 /*
-BranchServiceCreateBranch Method for BranchServiceCreateBranch
+BranchServiceCreateBranch Creates a copy-on-write branch of a product's main line.
+
+The branch starts as a view of main; edits made on it copy entities on
+write and flow back via MergeBranch. name must be lowercase alphanumeric
+with hyphens/underscores/slashes, at most 100 characters, and not "main".
+created_by_agent_run_id attributes branches created by an agent run.
 
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @param productId
@@ -249,7 +337,11 @@ func (r ApiBranchServiceDeleteBranchRequest) Execute() (map[string]interface{}, 
 }
 
 /*
-BranchServiceDeleteBranch Method for BranchServiceDeleteBranch
+BranchServiceDeleteBranch Deletes a branch and discards its copy-on-write changes.
+
+Permanently drops the branch's local requirement/test/component copies and
+deletion markers; main is unaffected. Deletion history is recorded per
+discarded requirement. The main branch cannot be deleted.
 
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @param id
@@ -372,7 +464,10 @@ func (r ApiBranchServiceGetBranchRequest) Execute() (*GetBranchResponse, *http.R
 }
 
 /*
-BranchServiceGetBranch Method for BranchServiceGetBranch
+BranchServiceGetBranch Fetches one branch by id.
+
+Returns the branch with its status and metadata. Change stats are only
+populated by ListBranches with include_stats=true.
 
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @param id
@@ -495,7 +590,12 @@ func (r ApiBranchServiceGetMergePreviewRequest) Execute() (*GetMergePreviewRespo
 }
 
 /*
-BranchServiceGetMergePreview Method for BranchServiceGetMergePreview
+BranchServiceGetMergePreview Previews the effect of merging a branch into main.
+
+Returns the additions, modifications (with per-field conflict flags), and
+deletions the merge would apply, for requirements, tests, and components,
+plus aggregate stats. A conflict means main changed the entity after the
+branch took its copy. Read-only — nothing is written.
 
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @param id
@@ -607,11 +707,138 @@ func (a *BranchServiceAPIService) BranchServiceGetMergePreviewExecute(r ApiBranc
 	return localVarReturnValue, localVarHTTPResponse, nil
 }
 
+type ApiBranchServiceListBranchCodeLinksRequest struct {
+	ctx context.Context
+	ApiService BranchServiceAPI
+	branchId string
+}
+
+func (r ApiBranchServiceListBranchCodeLinksRequest) Execute() (*ListBranchCodeLinksResponse, *http.Response, error) {
+	return r.ApiService.BranchServiceListBranchCodeLinksExecute(r)
+}
+
+/*
+BranchServiceListBranchCodeLinks Lists a branch's durable code links (git branches, pull requests).
+
+Returns every link recorded for the branch, pull requests before git
+branches, then most recently updated first.
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param branchId
+ @return ApiBranchServiceListBranchCodeLinksRequest
+*/
+func (a *BranchServiceAPIService) BranchServiceListBranchCodeLinks(ctx context.Context, branchId string) ApiBranchServiceListBranchCodeLinksRequest {
+	return ApiBranchServiceListBranchCodeLinksRequest{
+		ApiService: a,
+		ctx: ctx,
+		branchId: branchId,
+	}
+}
+
+// Execute executes the request
+//  @return ListBranchCodeLinksResponse
+func (a *BranchServiceAPIService) BranchServiceListBranchCodeLinksExecute(r ApiBranchServiceListBranchCodeLinksRequest) (*ListBranchCodeLinksResponse, *http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *ListBranchCodeLinksResponse
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "BranchServiceAPIService.BranchServiceListBranchCodeLinks")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/v1/branches/{branchId}/code-links"
+	localVarPath = strings.Replace(localVarPath, "{"+"branchId"+"}", url.PathEscape(parameterValueToString(r.branchId, "branchId")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	if r.ctx != nil {
+		// API Key Authentication
+		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
+			if apiKey, ok := auth["BearerAuth"]; ok {
+				var key string
+				if apiKey.Prefix != "" {
+					key = apiKey.Prefix + " " + apiKey.Key
+				} else {
+					key = apiKey.Key
+				}
+				localVarHeaderParams["Authorization"] = key
+			}
+		}
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+			var v Status
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
 type ApiBranchServiceListBranchesRequest struct {
 	ctx context.Context
 	ApiService BranchServiceAPI
 	productId string
 	includeStats *bool
+	includeStatus *bool
 }
 
 // When true, each returned Branch carries BranchChangeStats (per-branch change counts vs main).
@@ -620,12 +847,25 @@ func (r ApiBranchServiceListBranchesRequest) IncludeStats(includeStats bool) Api
 	return r
 }
 
+// When true, each returned Branch carries loop/latest-run/code-link/intent status signals (Branch.loop, .latest_run, .code_links, .intent). Kept separate from include_stats: the sidebar branch dropdown calls List without stats and must not pay for this extra work either.
+func (r ApiBranchServiceListBranchesRequest) IncludeStatus(includeStatus bool) ApiBranchServiceListBranchesRequest {
+	r.includeStatus = &includeStatus
+	return r
+}
+
 func (r ApiBranchServiceListBranchesRequest) Execute() (*ListBranchesResponse, *http.Response, error) {
 	return r.ApiService.BranchServiceListBranchesExecute(r)
 }
 
 /*
-BranchServiceListBranches Method for BranchServiceListBranches
+BranchServiceListBranches Lists a product's branches.
+
+Returns every branch including main. Set include_stats to add per-branch
+change counts vs main (additions/modifications/deletions per entity kind,
+plus conflicts). Set include_status to add loop/latest-run/code-link/
+intent-capture signals (Branch.loop/.latest_run/.code_links/.intent) —
+independent of include_stats, each is its own fixed-query-count batch
+read, so a caller that needs only the branch list is not charged for it.
 
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @param productId
@@ -663,6 +903,9 @@ func (a *BranchServiceAPIService) BranchServiceListBranchesExecute(r ApiBranchSe
 
 	if r.includeStats != nil {
 		parameterAddToHeaderOrQuery(localVarQueryParams, "includeStats", r.includeStats, "form", "")
+	}
+	if r.includeStatus != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "includeStatus", r.includeStatus, "form", "")
 	}
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
@@ -757,7 +1000,13 @@ func (r ApiBranchServiceMergeBranchRequest) Execute() (*MergeBranchResponse, *ht
 }
 
 /*
-BranchServiceMergeBranch Method for BranchServiceMergeBranch
+BranchServiceMergeBranch Merges a branch's changes into main and closes the branch.
+
+Applies the branch's additions/modifications/deletions to main in one
+transaction. Every conflicting entity requires a resolutions entry keyed
+"req:<uuid>", "test:<uuid>", or "comp:<uuid>" with value KEEP_BRANCH or
+KEEP_MAIN — otherwise the call fails with UNRESOLVED_CONFLICT and nothing
+is applied. Only open branches can merge; main cannot merge into itself.
 
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @param id
@@ -815,6 +1064,285 @@ func (a *BranchServiceAPIService) BranchServiceMergeBranchExecute(r ApiBranchSer
 	}
 	// body params
 	localVarPostBody = r.mergeBranchBody
+	if r.ctx != nil {
+		// API Key Authentication
+		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
+			if apiKey, ok := auth["BearerAuth"]; ok {
+				var key string
+				if apiKey.Prefix != "" {
+					key = apiKey.Prefix + " " + apiKey.Key
+				} else {
+					key = apiKey.Key
+				}
+				localVarHeaderParams["Authorization"] = key
+			}
+		}
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+			var v Status
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type ApiBranchServiceUpdateBranchRequest struct {
+	ctx context.Context
+	ApiService BranchServiceAPI
+	id string
+	updateBranchBody *UpdateBranchBody
+}
+
+func (r ApiBranchServiceUpdateBranchRequest) UpdateBranchBody(updateBranchBody UpdateBranchBody) ApiBranchServiceUpdateBranchRequest {
+	r.updateBranchBody = &updateBranchBody
+	return r
+}
+
+func (r ApiBranchServiceUpdateBranchRequest) Execute() (*UpdateBranchResponse, *http.Response, error) {
+	return r.ApiService.BranchServiceUpdateBranchExecute(r)
+}
+
+/*
+BranchServiceUpdateBranch Updates a branch's description and/or created_by_agent.
+
+Both request fields are optional: an absent field leaves the branch's
+current value unchanged, a present field (including an empty string)
+sets it. created_by_agent is validated server-side against a fixed
+allowlist — an unrecognized value is stored as empty string.
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param id
+ @return ApiBranchServiceUpdateBranchRequest
+*/
+func (a *BranchServiceAPIService) BranchServiceUpdateBranch(ctx context.Context, id string) ApiBranchServiceUpdateBranchRequest {
+	return ApiBranchServiceUpdateBranchRequest{
+		ApiService: a,
+		ctx: ctx,
+		id: id,
+	}
+}
+
+// Execute executes the request
+//  @return UpdateBranchResponse
+func (a *BranchServiceAPIService) BranchServiceUpdateBranchExecute(r ApiBranchServiceUpdateBranchRequest) (*UpdateBranchResponse, *http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodPatch
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *UpdateBranchResponse
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "BranchServiceAPIService.BranchServiceUpdateBranch")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/v1/branches/{id}"
+	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", url.PathEscape(parameterValueToString(r.id, "id")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+	if r.updateBranchBody == nil {
+		return localVarReturnValue, nil, reportError("updateBranchBody is required and must be specified")
+	}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{"application/json"}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	// body params
+	localVarPostBody = r.updateBranchBody
+	if r.ctx != nil {
+		// API Key Authentication
+		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
+			if apiKey, ok := auth["BearerAuth"]; ok {
+				var key string
+				if apiKey.Prefix != "" {
+					key = apiKey.Prefix + " " + apiKey.Key
+				} else {
+					key = apiKey.Key
+				}
+				localVarHeaderParams["Authorization"] = key
+			}
+		}
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+			var v Status
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type ApiBranchServiceUpsertBranchCodeLinksRequest struct {
+	ctx context.Context
+	ApiService BranchServiceAPI
+	branchId string
+	upsertBranchCodeLinksBody *UpsertBranchCodeLinksBody
+}
+
+func (r ApiBranchServiceUpsertBranchCodeLinksRequest) UpsertBranchCodeLinksBody(upsertBranchCodeLinksBody UpsertBranchCodeLinksBody) ApiBranchServiceUpsertBranchCodeLinksRequest {
+	r.upsertBranchCodeLinksBody = &upsertBranchCodeLinksBody
+	return r
+}
+
+func (r ApiBranchServiceUpsertBranchCodeLinksRequest) Execute() (*UpsertBranchCodeLinksResponse, *http.Response, error) {
+	return r.ApiService.BranchServiceUpsertBranchCodeLinksExecute(r)
+}
+
+/*
+BranchServiceUpsertBranchCodeLinks Upserts a batch of code links onto a branch.
+
+Each entry is keyed by (kind, repository, ref): a repeat of an existing
+key updates url/title/state/base_sha/head_sha instead of duplicating.
+kind must be "git_branch" or "pull_request"; state must be "", "open",
+"merged", or "closed". Fails closed on the first invalid entry — nothing
+is written if any entry is invalid.
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param branchId
+ @return ApiBranchServiceUpsertBranchCodeLinksRequest
+*/
+func (a *BranchServiceAPIService) BranchServiceUpsertBranchCodeLinks(ctx context.Context, branchId string) ApiBranchServiceUpsertBranchCodeLinksRequest {
+	return ApiBranchServiceUpsertBranchCodeLinksRequest{
+		ApiService: a,
+		ctx: ctx,
+		branchId: branchId,
+	}
+}
+
+// Execute executes the request
+//  @return UpsertBranchCodeLinksResponse
+func (a *BranchServiceAPIService) BranchServiceUpsertBranchCodeLinksExecute(r ApiBranchServiceUpsertBranchCodeLinksRequest) (*UpsertBranchCodeLinksResponse, *http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodPost
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *UpsertBranchCodeLinksResponse
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "BranchServiceAPIService.BranchServiceUpsertBranchCodeLinks")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/v1/branches/{branchId}/code-links"
+	localVarPath = strings.Replace(localVarPath, "{"+"branchId"+"}", url.PathEscape(parameterValueToString(r.branchId, "branchId")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+	if r.upsertBranchCodeLinksBody == nil {
+		return localVarReturnValue, nil, reportError("upsertBranchCodeLinksBody is required and must be specified")
+	}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{"application/json"}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	// body params
+	localVarPostBody = r.upsertBranchCodeLinksBody
 	if r.ctx != nil {
 		// API Key Authentication
 		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {

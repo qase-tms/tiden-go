@@ -18,7 +18,7 @@ import (
 // checks if the Branch type satisfies the MappedNullable interface at compile time
 var _ MappedNullable = &Branch{}
 
-// Branch struct for Branch
+// Branch Branch is a copy-on-write working line over a product's main data: requirement/test/component edits made on it shadow main until merged. status is \"open\" until the branch is merged (\"merged\").
 type Branch struct {
 	Id *string `json:"id,omitempty"`
 	ProductId *string `json:"productId,omitempty"`
@@ -31,6 +31,17 @@ type Branch struct {
 	// Set when this branch was produced by an agent run; NULL for branches created by humans through the UI / CLI.
 	CreatedByAgentRunId *string `json:"createdByAgentRunId,omitempty"`
 	Stats *BranchChangeStats `json:"stats,omitempty"`
+	// Coding agent that created this branch (validated server-side against a fixed allowlist at write time); empty for human-created branches or an unrecognized value.
+	CreatedByAgent *string `json:"createdByAgent,omitempty"`
+	// Display name/email of the user in created_by, resolved server-side by ListBranches/GetBranch in one batched lookup. Empty when created_by is unset or the user has since been deleted.
+	CreatedByName *string `json:"createdByName,omitempty"`
+	CreatedByEmail *string `json:"createdByEmail,omitempty"`
+	// Immutable merge-completion timestamp (column exists since migration 000076); unset for open branches and for branches merged before that column existed. Distinct from updated_at, which mutates on any later edit — this is the one trustworthy \"when did this land\" fact.
+	MergedAt *time.Time `json:"mergedAt,omitempty"`
+	Loop *BranchLoopStats `json:"loop,omitempty"`
+	LatestRun *BranchLatestRun `json:"latestRun,omitempty"`
+	CodeLinks []CodeLink `json:"codeLinks,omitempty"`
+	Intent *BranchIntentState `json:"intent,omitempty"`
 }
 
 // NewBranch instantiates a new Branch object
@@ -370,6 +381,262 @@ func (o *Branch) SetStats(v BranchChangeStats) {
 	o.Stats = &v
 }
 
+// GetCreatedByAgent returns the CreatedByAgent field value if set, zero value otherwise.
+func (o *Branch) GetCreatedByAgent() string {
+	if o == nil || IsNil(o.CreatedByAgent) {
+		var ret string
+		return ret
+	}
+	return *o.CreatedByAgent
+}
+
+// GetCreatedByAgentOk returns a tuple with the CreatedByAgent field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *Branch) GetCreatedByAgentOk() (*string, bool) {
+	if o == nil || IsNil(o.CreatedByAgent) {
+		return nil, false
+	}
+	return o.CreatedByAgent, true
+}
+
+// HasCreatedByAgent returns a boolean if a field has been set.
+func (o *Branch) HasCreatedByAgent() bool {
+	if o != nil && !IsNil(o.CreatedByAgent) {
+		return true
+	}
+
+	return false
+}
+
+// SetCreatedByAgent gets a reference to the given string and assigns it to the CreatedByAgent field.
+func (o *Branch) SetCreatedByAgent(v string) {
+	o.CreatedByAgent = &v
+}
+
+// GetCreatedByName returns the CreatedByName field value if set, zero value otherwise.
+func (o *Branch) GetCreatedByName() string {
+	if o == nil || IsNil(o.CreatedByName) {
+		var ret string
+		return ret
+	}
+	return *o.CreatedByName
+}
+
+// GetCreatedByNameOk returns a tuple with the CreatedByName field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *Branch) GetCreatedByNameOk() (*string, bool) {
+	if o == nil || IsNil(o.CreatedByName) {
+		return nil, false
+	}
+	return o.CreatedByName, true
+}
+
+// HasCreatedByName returns a boolean if a field has been set.
+func (o *Branch) HasCreatedByName() bool {
+	if o != nil && !IsNil(o.CreatedByName) {
+		return true
+	}
+
+	return false
+}
+
+// SetCreatedByName gets a reference to the given string and assigns it to the CreatedByName field.
+func (o *Branch) SetCreatedByName(v string) {
+	o.CreatedByName = &v
+}
+
+// GetCreatedByEmail returns the CreatedByEmail field value if set, zero value otherwise.
+func (o *Branch) GetCreatedByEmail() string {
+	if o == nil || IsNil(o.CreatedByEmail) {
+		var ret string
+		return ret
+	}
+	return *o.CreatedByEmail
+}
+
+// GetCreatedByEmailOk returns a tuple with the CreatedByEmail field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *Branch) GetCreatedByEmailOk() (*string, bool) {
+	if o == nil || IsNil(o.CreatedByEmail) {
+		return nil, false
+	}
+	return o.CreatedByEmail, true
+}
+
+// HasCreatedByEmail returns a boolean if a field has been set.
+func (o *Branch) HasCreatedByEmail() bool {
+	if o != nil && !IsNil(o.CreatedByEmail) {
+		return true
+	}
+
+	return false
+}
+
+// SetCreatedByEmail gets a reference to the given string and assigns it to the CreatedByEmail field.
+func (o *Branch) SetCreatedByEmail(v string) {
+	o.CreatedByEmail = &v
+}
+
+// GetMergedAt returns the MergedAt field value if set, zero value otherwise.
+func (o *Branch) GetMergedAt() time.Time {
+	if o == nil || IsNil(o.MergedAt) {
+		var ret time.Time
+		return ret
+	}
+	return *o.MergedAt
+}
+
+// GetMergedAtOk returns a tuple with the MergedAt field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *Branch) GetMergedAtOk() (*time.Time, bool) {
+	if o == nil || IsNil(o.MergedAt) {
+		return nil, false
+	}
+	return o.MergedAt, true
+}
+
+// HasMergedAt returns a boolean if a field has been set.
+func (o *Branch) HasMergedAt() bool {
+	if o != nil && !IsNil(o.MergedAt) {
+		return true
+	}
+
+	return false
+}
+
+// SetMergedAt gets a reference to the given time.Time and assigns it to the MergedAt field.
+func (o *Branch) SetMergedAt(v time.Time) {
+	o.MergedAt = &v
+}
+
+// GetLoop returns the Loop field value if set, zero value otherwise.
+func (o *Branch) GetLoop() BranchLoopStats {
+	if o == nil || IsNil(o.Loop) {
+		var ret BranchLoopStats
+		return ret
+	}
+	return *o.Loop
+}
+
+// GetLoopOk returns a tuple with the Loop field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *Branch) GetLoopOk() (*BranchLoopStats, bool) {
+	if o == nil || IsNil(o.Loop) {
+		return nil, false
+	}
+	return o.Loop, true
+}
+
+// HasLoop returns a boolean if a field has been set.
+func (o *Branch) HasLoop() bool {
+	if o != nil && !IsNil(o.Loop) {
+		return true
+	}
+
+	return false
+}
+
+// SetLoop gets a reference to the given BranchLoopStats and assigns it to the Loop field.
+func (o *Branch) SetLoop(v BranchLoopStats) {
+	o.Loop = &v
+}
+
+// GetLatestRun returns the LatestRun field value if set, zero value otherwise.
+func (o *Branch) GetLatestRun() BranchLatestRun {
+	if o == nil || IsNil(o.LatestRun) {
+		var ret BranchLatestRun
+		return ret
+	}
+	return *o.LatestRun
+}
+
+// GetLatestRunOk returns a tuple with the LatestRun field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *Branch) GetLatestRunOk() (*BranchLatestRun, bool) {
+	if o == nil || IsNil(o.LatestRun) {
+		return nil, false
+	}
+	return o.LatestRun, true
+}
+
+// HasLatestRun returns a boolean if a field has been set.
+func (o *Branch) HasLatestRun() bool {
+	if o != nil && !IsNil(o.LatestRun) {
+		return true
+	}
+
+	return false
+}
+
+// SetLatestRun gets a reference to the given BranchLatestRun and assigns it to the LatestRun field.
+func (o *Branch) SetLatestRun(v BranchLatestRun) {
+	o.LatestRun = &v
+}
+
+// GetCodeLinks returns the CodeLinks field value if set, zero value otherwise.
+func (o *Branch) GetCodeLinks() []CodeLink {
+	if o == nil || IsNil(o.CodeLinks) {
+		var ret []CodeLink
+		return ret
+	}
+	return o.CodeLinks
+}
+
+// GetCodeLinksOk returns a tuple with the CodeLinks field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *Branch) GetCodeLinksOk() ([]CodeLink, bool) {
+	if o == nil || IsNil(o.CodeLinks) {
+		return nil, false
+	}
+	return o.CodeLinks, true
+}
+
+// HasCodeLinks returns a boolean if a field has been set.
+func (o *Branch) HasCodeLinks() bool {
+	if o != nil && !IsNil(o.CodeLinks) {
+		return true
+	}
+
+	return false
+}
+
+// SetCodeLinks gets a reference to the given []CodeLink and assigns it to the CodeLinks field.
+func (o *Branch) SetCodeLinks(v []CodeLink) {
+	o.CodeLinks = v
+}
+
+// GetIntent returns the Intent field value if set, zero value otherwise.
+func (o *Branch) GetIntent() BranchIntentState {
+	if o == nil || IsNil(o.Intent) {
+		var ret BranchIntentState
+		return ret
+	}
+	return *o.Intent
+}
+
+// GetIntentOk returns a tuple with the Intent field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *Branch) GetIntentOk() (*BranchIntentState, bool) {
+	if o == nil || IsNil(o.Intent) {
+		return nil, false
+	}
+	return o.Intent, true
+}
+
+// HasIntent returns a boolean if a field has been set.
+func (o *Branch) HasIntent() bool {
+	if o != nil && !IsNil(o.Intent) {
+		return true
+	}
+
+	return false
+}
+
+// SetIntent gets a reference to the given BranchIntentState and assigns it to the Intent field.
+func (o *Branch) SetIntent(v BranchIntentState) {
+	o.Intent = &v
+}
+
 func (o Branch) MarshalJSON() ([]byte, error) {
 	toSerialize,err := o.ToMap()
 	if err != nil {
@@ -409,6 +676,30 @@ func (o Branch) ToMap() (map[string]interface{}, error) {
 	}
 	if !IsNil(o.Stats) {
 		toSerialize["stats"] = o.Stats
+	}
+	if !IsNil(o.CreatedByAgent) {
+		toSerialize["createdByAgent"] = o.CreatedByAgent
+	}
+	if !IsNil(o.CreatedByName) {
+		toSerialize["createdByName"] = o.CreatedByName
+	}
+	if !IsNil(o.CreatedByEmail) {
+		toSerialize["createdByEmail"] = o.CreatedByEmail
+	}
+	if !IsNil(o.MergedAt) {
+		toSerialize["mergedAt"] = o.MergedAt
+	}
+	if !IsNil(o.Loop) {
+		toSerialize["loop"] = o.Loop
+	}
+	if !IsNil(o.LatestRun) {
+		toSerialize["latestRun"] = o.LatestRun
+	}
+	if !IsNil(o.CodeLinks) {
+		toSerialize["codeLinks"] = o.CodeLinks
+	}
+	if !IsNil(o.Intent) {
+		toSerialize["intent"] = o.Intent
 	}
 	return toSerialize, nil
 }

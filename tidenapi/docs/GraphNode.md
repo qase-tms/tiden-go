@@ -10,7 +10,7 @@ Name | Type | Description | Notes
 **Status** | Pointer to **string** |  | [optional] 
 **CoverageStatus** | Pointer to **string** |  | [optional] 
 **ParentId** | Pointer to **string** |  | [optional] 
-**Kind** | Pointer to **string** | kind distinguishes node types in the graph (shift-left v3). \&quot;requirement\&quot; (default) or \&quot;component\&quot; — a component node reached via an impacts_component edge. Component nodes carry their name in &#x60;title&#x60;; seq_num/status/parent_id are empty. | [optional] 
+**Kind** | Pointer to **string** | kind distinguishes node types in the graph. \&quot;requirement\&quot; (default) or \&quot;component\&quot; — a component node reached via an impacts_component edge. Component nodes carry their name in &#x60;title&#x60;; seq_num/status/parent_id are empty. | [optional] 
 
 ## Methods
 

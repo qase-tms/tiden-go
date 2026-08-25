@@ -18,7 +18,7 @@ import (
 // checks if the Product type satisfies the MappedNullable interface at compile time
 var _ MappedNullable = &Product{}
 
-// Product struct for Product
+// Product Product is the top-level container for requirements, tests, runs, and releases. code is the reference prefix for entity sequence numbers ({CODE}-{seq}).
 type Product struct {
 	Id *string `json:"id,omitempty"`
 	WorkspaceId *string `json:"workspaceId,omitempty"`

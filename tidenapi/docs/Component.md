@@ -13,7 +13,7 @@ Name | Type | Description | Notes
 **BranchId** | Pointer to **string** |  | [optional] 
 **SourceId** | Pointer to **string** |  | [optional] 
 **BranchStatus** | Pointer to **string** |  | [optional] 
-**Repository** | Pointer to **string** | Shift-left v3: repository-aware components.  canonical repo id (e.g. \&quot;github.com/qase-tms/tiden-cli\&quot;); unset &#x3D; unscoped/main repo | [optional] 
+**Repository** | Pointer to **string** | Repository-aware component scope.  canonical repo id (e.g. \&quot;github.com/acme/backend\&quot;); unset &#x3D; unscoped/main repo | [optional] 
 **ComponentPaths** | Pointer to **[]string** |  | [optional] 
 **RepositoryAliases** | Pointer to **[]string** |  | [optional] 
 

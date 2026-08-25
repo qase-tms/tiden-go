@@ -18,7 +18,7 @@ import (
 // checks if the Component type satisfies the MappedNullable interface at compile time
 var _ MappedNullable = &Component{}
 
-// Component struct for Component
+// Component Component is a deployment/architectural unit of a product. The repository/component_paths/repository_aliases scope maps changed files to the component.
 type Component struct {
 	Id *string `json:"id,omitempty"`
 	ProductId *string `json:"productId,omitempty"`
@@ -29,7 +29,7 @@ type Component struct {
 	BranchId *string `json:"branchId,omitempty"`
 	SourceId *string `json:"sourceId,omitempty"`
 	BranchStatus *string `json:"branchStatus,omitempty"`
-	// Shift-left v3: repository-aware components.  canonical repo id (e.g. \"github.com/qase-tms/tiden-cli\"); unset = unscoped/main repo
+	// Repository-aware component scope.  canonical repo id (e.g. \"github.com/acme/backend\"); unset = unscoped/main repo
 	Repository *string `json:"repository,omitempty"`
 	ComponentPaths []string `json:"componentPaths,omitempty"`
 	RepositoryAliases []string `json:"repositoryAliases,omitempty"`

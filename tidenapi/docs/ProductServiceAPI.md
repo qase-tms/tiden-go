@@ -4,16 +4,18 @@ All URIs are relative to *https://api.tiden.ai*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
-[**ProductServiceCreateProduct**](ProductServiceAPI.md#ProductServiceCreateProduct) | **Post** /v1/workspaces/{workspaceId}/products | 
-[**ProductServiceGetProduct**](ProductServiceAPI.md#ProductServiceGetProduct) | **Get** /v1/products/{id} | GetProduct fetches one product by id so the CLI / agents can resolve a bound product&#39;s details (e.g. its name for &#x60;tiden doctor&#x60;) without paging the whole workspace list. Tenancy is enforced via the id&#39;s TENANT_ANCHOR_PRODUCT anchor.
-[**ProductServiceListProducts**](ProductServiceAPI.md#ProductServiceListProducts) | **Get** /v1/workspaces/{workspaceId}/products | 
-[**ProductServiceVerifyProductSetup**](ProductServiceAPI.md#ProductServiceVerifyProductSetup) | **Post** /v1/products/{productId}/setup:verify | 
+[**ProductServiceCreateProduct**](ProductServiceAPI.md#ProductServiceCreateProduct) | **Post** /v1/workspaces/{workspaceId}/products | Creates a product in a workspace.
+[**ProductServiceGetProduct**](ProductServiceAPI.md#ProductServiceGetProduct) | **Get** /v1/products/{id} | Fetches one product by id.
+[**ProductServiceListProducts**](ProductServiceAPI.md#ProductServiceListProducts) | **Get** /v1/workspaces/{workspaceId}/products | Lists a workspace&#39;s products.
+[**ProductServiceVerifyProductSetup**](ProductServiceAPI.md#ProductServiceVerifyProductSetup) | **Post** /v1/products/{productId}/setup:verify | Records a CLI setup verification snapshot for the product.
 
 
 
 ## ProductServiceCreateProduct
 
 > CreateProductResponse ProductServiceCreateProduct(ctx, workspaceId).CreateProductBody(createProductBody).Execute()
+
+Creates a product in a workspace.
 
 
 
@@ -85,7 +87,9 @@ Name | Type | Description  | Notes
 
 > GetProductResponse ProductServiceGetProduct(ctx, id).Execute()
 
-GetProduct fetches one product by id so the CLI / agents can resolve a bound product's details (e.g. its name for `tiden doctor`) without paging the whole workspace list. Tenancy is enforced via the id's TENANT_ANCHOR_PRODUCT anchor.
+Fetches one product by id.
+
+
 
 ### Example
 
@@ -152,6 +156,8 @@ Name | Type | Description  | Notes
 ## ProductServiceListProducts
 
 > ListProductsResponse ProductServiceListProducts(ctx, workspaceId).PaginationPageSize(paginationPageSize).PaginationPageToken(paginationPageToken).Execute()
+
+Lists a workspace's products.
 
 
 
@@ -224,6 +230,8 @@ Name | Type | Description  | Notes
 ## ProductServiceVerifyProductSetup
 
 > VerifyProductSetupResponse ProductServiceVerifyProductSetup(ctx, productId).VerifyProductSetupBody(verifyProductSetupBody).Execute()
+
+Records a CLI setup verification snapshot for the product.
 
 
 

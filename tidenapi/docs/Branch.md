@@ -14,6 +14,14 @@ Name | Type | Description | Notes
 **UpdatedAt** | Pointer to **time.Time** |  | [optional] 
 **CreatedByAgentRunId** | Pointer to **string** | Set when this branch was produced by an agent run; NULL for branches created by humans through the UI / CLI. | [optional] 
 **Stats** | Pointer to [**BranchChangeStats**](BranchChangeStats.md) |  | [optional] 
+**CreatedByAgent** | Pointer to **string** | Coding agent that created this branch (validated server-side against a fixed allowlist at write time); empty for human-created branches or an unrecognized value. | [optional] 
+**CreatedByName** | Pointer to **string** | Display name/email of the user in created_by, resolved server-side by ListBranches/GetBranch in one batched lookup. Empty when created_by is unset or the user has since been deleted. | [optional] 
+**CreatedByEmail** | Pointer to **string** |  | [optional] 
+**MergedAt** | Pointer to **time.Time** | Immutable merge-completion timestamp (column exists since migration 000076); unset for open branches and for branches merged before that column existed. Distinct from updated_at, which mutates on any later edit — this is the one trustworthy \&quot;when did this land\&quot; fact. | [optional] 
+**Loop** | Pointer to [**BranchLoopStats**](BranchLoopStats.md) |  | [optional] 
+**LatestRun** | Pointer to [**BranchLatestRun**](BranchLatestRun.md) |  | [optional] 
+**CodeLinks** | Pointer to [**[]CodeLink**](CodeLink.md) |  | [optional] 
+**Intent** | Pointer to [**BranchIntentState**](BranchIntentState.md) |  | [optional] 
 
 ## Methods
 
@@ -283,6 +291,206 @@ SetStats sets Stats field to given value.
 `func (o *Branch) HasStats() bool`
 
 HasStats returns a boolean if a field has been set.
+
+### GetCreatedByAgent
+
+`func (o *Branch) GetCreatedByAgent() string`
+
+GetCreatedByAgent returns the CreatedByAgent field if non-nil, zero value otherwise.
+
+### GetCreatedByAgentOk
+
+`func (o *Branch) GetCreatedByAgentOk() (*string, bool)`
+
+GetCreatedByAgentOk returns a tuple with the CreatedByAgent field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetCreatedByAgent
+
+`func (o *Branch) SetCreatedByAgent(v string)`
+
+SetCreatedByAgent sets CreatedByAgent field to given value.
+
+### HasCreatedByAgent
+
+`func (o *Branch) HasCreatedByAgent() bool`
+
+HasCreatedByAgent returns a boolean if a field has been set.
+
+### GetCreatedByName
+
+`func (o *Branch) GetCreatedByName() string`
+
+GetCreatedByName returns the CreatedByName field if non-nil, zero value otherwise.
+
+### GetCreatedByNameOk
+
+`func (o *Branch) GetCreatedByNameOk() (*string, bool)`
+
+GetCreatedByNameOk returns a tuple with the CreatedByName field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetCreatedByName
+
+`func (o *Branch) SetCreatedByName(v string)`
+
+SetCreatedByName sets CreatedByName field to given value.
+
+### HasCreatedByName
+
+`func (o *Branch) HasCreatedByName() bool`
+
+HasCreatedByName returns a boolean if a field has been set.
+
+### GetCreatedByEmail
+
+`func (o *Branch) GetCreatedByEmail() string`
+
+GetCreatedByEmail returns the CreatedByEmail field if non-nil, zero value otherwise.
+
+### GetCreatedByEmailOk
+
+`func (o *Branch) GetCreatedByEmailOk() (*string, bool)`
+
+GetCreatedByEmailOk returns a tuple with the CreatedByEmail field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetCreatedByEmail
+
+`func (o *Branch) SetCreatedByEmail(v string)`
+
+SetCreatedByEmail sets CreatedByEmail field to given value.
+
+### HasCreatedByEmail
+
+`func (o *Branch) HasCreatedByEmail() bool`
+
+HasCreatedByEmail returns a boolean if a field has been set.
+
+### GetMergedAt
+
+`func (o *Branch) GetMergedAt() time.Time`
+
+GetMergedAt returns the MergedAt field if non-nil, zero value otherwise.
+
+### GetMergedAtOk
+
+`func (o *Branch) GetMergedAtOk() (*time.Time, bool)`
+
+GetMergedAtOk returns a tuple with the MergedAt field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetMergedAt
+
+`func (o *Branch) SetMergedAt(v time.Time)`
+
+SetMergedAt sets MergedAt field to given value.
+
+### HasMergedAt
+
+`func (o *Branch) HasMergedAt() bool`
+
+HasMergedAt returns a boolean if a field has been set.
+
+### GetLoop
+
+`func (o *Branch) GetLoop() BranchLoopStats`
+
+GetLoop returns the Loop field if non-nil, zero value otherwise.
+
+### GetLoopOk
+
+`func (o *Branch) GetLoopOk() (*BranchLoopStats, bool)`
+
+GetLoopOk returns a tuple with the Loop field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetLoop
+
+`func (o *Branch) SetLoop(v BranchLoopStats)`
+
+SetLoop sets Loop field to given value.
+
+### HasLoop
+
+`func (o *Branch) HasLoop() bool`
+
+HasLoop returns a boolean if a field has been set.
+
+### GetLatestRun
+
+`func (o *Branch) GetLatestRun() BranchLatestRun`
+
+GetLatestRun returns the LatestRun field if non-nil, zero value otherwise.
+
+### GetLatestRunOk
+
+`func (o *Branch) GetLatestRunOk() (*BranchLatestRun, bool)`
+
+GetLatestRunOk returns a tuple with the LatestRun field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetLatestRun
+
+`func (o *Branch) SetLatestRun(v BranchLatestRun)`
+
+SetLatestRun sets LatestRun field to given value.
+
+### HasLatestRun
+
+`func (o *Branch) HasLatestRun() bool`
+
+HasLatestRun returns a boolean if a field has been set.
+
+### GetCodeLinks
+
+`func (o *Branch) GetCodeLinks() []CodeLink`
+
+GetCodeLinks returns the CodeLinks field if non-nil, zero value otherwise.
+
+### GetCodeLinksOk
+
+`func (o *Branch) GetCodeLinksOk() (*[]CodeLink, bool)`
+
+GetCodeLinksOk returns a tuple with the CodeLinks field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetCodeLinks
+
+`func (o *Branch) SetCodeLinks(v []CodeLink)`
+
+SetCodeLinks sets CodeLinks field to given value.
+
+### HasCodeLinks
+
+`func (o *Branch) HasCodeLinks() bool`
+
+HasCodeLinks returns a boolean if a field has been set.
+
+### GetIntent
+
+`func (o *Branch) GetIntent() BranchIntentState`
+
+GetIntent returns the Intent field if non-nil, zero value otherwise.
+
+### GetIntentOk
+
+`func (o *Branch) GetIntentOk() (*BranchIntentState, bool)`
+
+GetIntentOk returns a tuple with the Intent field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetIntent
+
+`func (o *Branch) SetIntent(v BranchIntentState)`
+
+SetIntent sets Intent field to given value.
+
+### HasIntent
+
+`func (o *Branch) HasIntent() bool`
+
+HasIntent returns a boolean if a field has been set.
 
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)

@@ -23,7 +23,12 @@ import (
 type EnvironmentServiceAPI interface {
 
 	/*
-	EnvironmentServiceCreateEnvironment Method for EnvironmentServiceCreateEnvironment
+	EnvironmentServiceCreateEnvironment Creates an environment in a product.
+
+	Environments (e.g. production, staging) label where test runs and releases
+happened. slug is the stable identifier reporters and CI reference in
+CreateTestRun/CreateRelease; those endpoints also auto-create unknown
+slugs, so explicit creation is only needed to control name/host/type.
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@param productId
@@ -36,7 +41,10 @@ type EnvironmentServiceAPI interface {
 	EnvironmentServiceCreateEnvironmentExecute(r ApiEnvironmentServiceCreateEnvironmentRequest) (*CreateEnvironmentResponse, *http.Response, error)
 
 	/*
-	EnvironmentServiceDeleteEnvironment Method for EnvironmentServiceDeleteEnvironment
+	EnvironmentServiceDeleteEnvironment Deletes an environment.
+
+	Permanently removes the environment from the product. Test runs and
+releases that referenced it keep their recorded slug.
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@param id
@@ -49,7 +57,9 @@ type EnvironmentServiceAPI interface {
 	EnvironmentServiceDeleteEnvironmentExecute(r ApiEnvironmentServiceDeleteEnvironmentRequest) (map[string]interface{}, *http.Response, error)
 
 	/*
-	EnvironmentServiceGetEnvironment Method for EnvironmentServiceGetEnvironment
+	EnvironmentServiceGetEnvironment Fetches one environment by id.
+
+	Returns the environment including its slug, host, type, and origin.
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@param id
@@ -62,7 +72,10 @@ type EnvironmentServiceAPI interface {
 	EnvironmentServiceGetEnvironmentExecute(r ApiEnvironmentServiceGetEnvironmentRequest) (*GetEnvironmentResponse, *http.Response, error)
 
 	/*
-	EnvironmentServiceListEnvironments Method for EnvironmentServiceListEnvironments
+	EnvironmentServiceListEnvironments Lists a product's environments.
+
+	Returns all environments of the product with page_size/page_token
+pagination.
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@param productId
@@ -95,7 +108,12 @@ func (r ApiEnvironmentServiceCreateEnvironmentRequest) Execute() (*CreateEnviron
 }
 
 /*
-EnvironmentServiceCreateEnvironment Method for EnvironmentServiceCreateEnvironment
+EnvironmentServiceCreateEnvironment Creates an environment in a product.
+
+Environments (e.g. production, staging) label where test runs and releases
+happened. slug is the stable identifier reporters and CI reference in
+CreateTestRun/CreateRelease; those endpoints also auto-create unknown
+slugs, so explicit creation is only needed to control name/host/type.
 
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @param productId
@@ -223,7 +241,10 @@ func (r ApiEnvironmentServiceDeleteEnvironmentRequest) Execute() (map[string]int
 }
 
 /*
-EnvironmentServiceDeleteEnvironment Method for EnvironmentServiceDeleteEnvironment
+EnvironmentServiceDeleteEnvironment Deletes an environment.
+
+Permanently removes the environment from the product. Test runs and
+releases that referenced it keep their recorded slug.
 
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @param id
@@ -346,7 +367,9 @@ func (r ApiEnvironmentServiceGetEnvironmentRequest) Execute() (*GetEnvironmentRe
 }
 
 /*
-EnvironmentServiceGetEnvironment Method for EnvironmentServiceGetEnvironment
+EnvironmentServiceGetEnvironment Fetches one environment by id.
+
+Returns the environment including its slug, host, type, and origin.
 
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @param id
@@ -481,7 +504,10 @@ func (r ApiEnvironmentServiceListEnvironmentsRequest) Execute() (*ListEnvironmen
 }
 
 /*
-EnvironmentServiceListEnvironments Method for EnvironmentServiceListEnvironments
+EnvironmentServiceListEnvironments Lists a product's environments.
+
+Returns all environments of the product with page_size/page_token
+pagination.
 
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @param productId

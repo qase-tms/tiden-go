@@ -18,7 +18,7 @@ import (
 // checks if the Requirement type satisfies the MappedNullable interface at compile time
 var _ MappedNullable = &Requirement{}
 
-// Requirement struct for Requirement
+// Requirement Requirement is one node of a product's requirement tree: parent_id encodes the hierarchy, position orders siblings, and seq_num is the product-wide sequence used in {CODE}-{seq} references. content is markdown. sources are embedded only when requested (ListRequirements.include_sources); otherwise clients rely on source_count.
 type Requirement struct {
 	Id *string `json:"id,omitempty"`
 	ProductId *string `json:"productId,omitempty"`

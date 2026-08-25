@@ -17,7 +17,7 @@ import (
 // checks if the ContextTest type satisfies the MappedNullable interface at compile time
 var _ MappedNullable = &ContextTest{}
 
-// ContextTest struct for ContextTest
+// ContextTest ContextTest is one test in a context pack, labeled by how it relates to the requirement (link_kind) and whether its coverage is stale.
 type ContextTest struct {
 	Test *Test `json:"test,omitempty"`
 	LinkKind *string `json:"linkKind,omitempty"`
