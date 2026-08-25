@@ -18,7 +18,7 @@ import (
 // checks if the AgentRunEvent type satisfies the MappedNullable interface at compile time
 var _ MappedNullable = &AgentRunEvent{}
 
-// AgentRunEvent struct for AgentRunEvent
+// AgentRunEvent AgentRunEvent is one timestamped log entry of an agent run: level + kind + human-readable message, with optional structured data_json.
 type AgentRunEvent struct {
 	Id *string `json:"id,omitempty"`
 	RunId *string `json:"runId,omitempty"`

@@ -18,7 +18,7 @@ import (
 // checks if the UserOnboardingState type satisfies the MappedNullable interface at compile time
 var _ MappedNullable = &UserOnboardingState{}
 
-// UserOnboardingState struct for UserOnboardingState
+// UserOnboardingState UserOnboardingState tracks a user's onboarding milestones as one-way timestamps (unset = not reached), plus the resumable creator-wizard position.
 type UserOnboardingState struct {
 	UserId *string `json:"userId,omitempty"`
 	CliVerifiedAt *time.Time `json:"cliVerifiedAt,omitempty"`
@@ -26,6 +26,9 @@ type UserOnboardingState struct {
 	CompletedAt *time.Time `json:"completedAt,omitempty"`
 	CreatedAt *time.Time `json:"createdAt,omitempty"`
 	UpdatedAt *time.Time `json:"updatedAt,omitempty"`
+	// Current wizard screen; \"\" means the wizard was never started.
+	WizardStep *string `json:"wizardStep,omitempty"`
+	Answers *OnboardingAnswers `json:"answers,omitempty"`
 }
 
 // NewUserOnboardingState instantiates a new UserOnboardingState object
@@ -237,6 +240,70 @@ func (o *UserOnboardingState) SetUpdatedAt(v time.Time) {
 	o.UpdatedAt = &v
 }
 
+// GetWizardStep returns the WizardStep field value if set, zero value otherwise.
+func (o *UserOnboardingState) GetWizardStep() string {
+	if o == nil || IsNil(o.WizardStep) {
+		var ret string
+		return ret
+	}
+	return *o.WizardStep
+}
+
+// GetWizardStepOk returns a tuple with the WizardStep field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *UserOnboardingState) GetWizardStepOk() (*string, bool) {
+	if o == nil || IsNil(o.WizardStep) {
+		return nil, false
+	}
+	return o.WizardStep, true
+}
+
+// HasWizardStep returns a boolean if a field has been set.
+func (o *UserOnboardingState) HasWizardStep() bool {
+	if o != nil && !IsNil(o.WizardStep) {
+		return true
+	}
+
+	return false
+}
+
+// SetWizardStep gets a reference to the given string and assigns it to the WizardStep field.
+func (o *UserOnboardingState) SetWizardStep(v string) {
+	o.WizardStep = &v
+}
+
+// GetAnswers returns the Answers field value if set, zero value otherwise.
+func (o *UserOnboardingState) GetAnswers() OnboardingAnswers {
+	if o == nil || IsNil(o.Answers) {
+		var ret OnboardingAnswers
+		return ret
+	}
+	return *o.Answers
+}
+
+// GetAnswersOk returns a tuple with the Answers field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *UserOnboardingState) GetAnswersOk() (*OnboardingAnswers, bool) {
+	if o == nil || IsNil(o.Answers) {
+		return nil, false
+	}
+	return o.Answers, true
+}
+
+// HasAnswers returns a boolean if a field has been set.
+func (o *UserOnboardingState) HasAnswers() bool {
+	if o != nil && !IsNil(o.Answers) {
+		return true
+	}
+
+	return false
+}
+
+// SetAnswers gets a reference to the given OnboardingAnswers and assigns it to the Answers field.
+func (o *UserOnboardingState) SetAnswers(v OnboardingAnswers) {
+	o.Answers = &v
+}
+
 func (o UserOnboardingState) MarshalJSON() ([]byte, error) {
 	toSerialize,err := o.ToMap()
 	if err != nil {
@@ -264,6 +331,12 @@ func (o UserOnboardingState) ToMap() (map[string]interface{}, error) {
 	}
 	if !IsNil(o.UpdatedAt) {
 		toSerialize["updatedAt"] = o.UpdatedAt
+	}
+	if !IsNil(o.WizardStep) {
+		toSerialize["wizardStep"] = o.WizardStep
+	}
+	if !IsNil(o.Answers) {
+		toSerialize["answers"] = o.Answers
 	}
 	return toSerialize, nil
 }

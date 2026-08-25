@@ -17,7 +17,7 @@ import (
 // checks if the IngestTestsBody type satisfies the MappedNullable interface at compile time
 var _ MappedNullable = &IngestTestsBody{}
 
-// IngestTestsBody struct for IngestTestsBody
+// IngestTestsBody IngestTestsRequest is one reporter batch: 1..1000 tests upserted into (product, branch) with a shared framework label.
 type IngestTestsBody struct {
 	Branch *string `json:"branch,omitempty"`
 	// pytest | jest | junit | ...

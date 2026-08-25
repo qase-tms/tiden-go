@@ -4,7 +4,8 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**Resolutions** | Pointer to **map[string]string** | Resolution map keys are prefixed: \&quot;req:&lt;uuid&gt;\&quot;, \&quot;test:&lt;uuid&gt;\&quot;, or \&quot;comp:&lt;uuid&gt;\&quot;. Server accepts un-prefixed keys as &#x60;req:&#x60; for v1 backwards compat (deprecated; logged with warning, removal scheduled for v2). | [optional] 
+**Resolutions** | Pointer to **map[string]string** | Resolution map keys are prefixed: \&quot;req:&lt;uuid&gt;\&quot;, \&quot;test:&lt;uuid&gt;\&quot;, or \&quot;comp:&lt;uuid&gt;\&quot;. Server accepts un-prefixed keys as &#x60;req:&#x60; for v1 backwards compat (deprecated; use prefixed keys). | [optional] 
+**AllowUndistilled** | Pointer to **bool** | allow_undistilled overrides the INTENT_UNDISTILLED merge guard: a branch carrying an intent session that is not closed, has no recorded settlement, and has requirement changes normally refuses to merge. This is a recorded human decision — true merges anyway and stamps the override (session id, actor) onto the merge&#39;s activity event. Branches with no intent session record are never blocked, so this is a no-op for them. | [optional] 
 
 ## Methods
 
@@ -49,6 +50,31 @@ SetResolutions sets Resolutions field to given value.
 `func (o *MergeBranchBody) HasResolutions() bool`
 
 HasResolutions returns a boolean if a field has been set.
+
+### GetAllowUndistilled
+
+`func (o *MergeBranchBody) GetAllowUndistilled() bool`
+
+GetAllowUndistilled returns the AllowUndistilled field if non-nil, zero value otherwise.
+
+### GetAllowUndistilledOk
+
+`func (o *MergeBranchBody) GetAllowUndistilledOk() (*bool, bool)`
+
+GetAllowUndistilledOk returns a tuple with the AllowUndistilled field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetAllowUndistilled
+
+`func (o *MergeBranchBody) SetAllowUndistilled(v bool)`
+
+SetAllowUndistilled sets AllowUndistilled field to given value.
+
+### HasAllowUndistilled
+
+`func (o *MergeBranchBody) HasAllowUndistilled() bool`
+
+HasAllowUndistilled returns a boolean if a field has been set.
 
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)

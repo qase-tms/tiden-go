@@ -23,6 +23,9 @@ type RequirementRef struct {
 	SeqNum *int32 `json:"seqNum,omitempty"`
 	Title *string `json:"title,omitempty"`
 	Description *string `json:"description,omitempty"`
+	Tier *RequirementTier `json:"tier,omitempty"`
+	// resources are the root's branch-effective repo_file anchor paths, same meaning as TouchedNode.resources (a root can carry the session's evidence).
+	Resources []string `json:"resources,omitempty"`
 }
 
 // NewRequirementRef instantiates a new RequirementRef object
@@ -31,6 +34,8 @@ type RequirementRef struct {
 // will change when the set of required properties is changed
 func NewRequirementRef() *RequirementRef {
 	this := RequirementRef{}
+	var tier RequirementTier = REQUIREMENT_TIER_UNSPECIFIED
+	this.Tier = &tier
 	return &this
 }
 
@@ -39,6 +44,8 @@ func NewRequirementRef() *RequirementRef {
 // but it doesn't guarantee that properties required by API are set
 func NewRequirementRefWithDefaults() *RequirementRef {
 	this := RequirementRef{}
+	var tier RequirementTier = REQUIREMENT_TIER_UNSPECIFIED
+	this.Tier = &tier
 	return &this
 }
 
@@ -170,6 +177,70 @@ func (o *RequirementRef) SetDescription(v string) {
 	o.Description = &v
 }
 
+// GetTier returns the Tier field value if set, zero value otherwise.
+func (o *RequirementRef) GetTier() RequirementTier {
+	if o == nil || IsNil(o.Tier) {
+		var ret RequirementTier
+		return ret
+	}
+	return *o.Tier
+}
+
+// GetTierOk returns a tuple with the Tier field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *RequirementRef) GetTierOk() (*RequirementTier, bool) {
+	if o == nil || IsNil(o.Tier) {
+		return nil, false
+	}
+	return o.Tier, true
+}
+
+// HasTier returns a boolean if a field has been set.
+func (o *RequirementRef) HasTier() bool {
+	if o != nil && !IsNil(o.Tier) {
+		return true
+	}
+
+	return false
+}
+
+// SetTier gets a reference to the given RequirementTier and assigns it to the Tier field.
+func (o *RequirementRef) SetTier(v RequirementTier) {
+	o.Tier = &v
+}
+
+// GetResources returns the Resources field value if set, zero value otherwise.
+func (o *RequirementRef) GetResources() []string {
+	if o == nil || IsNil(o.Resources) {
+		var ret []string
+		return ret
+	}
+	return o.Resources
+}
+
+// GetResourcesOk returns a tuple with the Resources field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *RequirementRef) GetResourcesOk() ([]string, bool) {
+	if o == nil || IsNil(o.Resources) {
+		return nil, false
+	}
+	return o.Resources, true
+}
+
+// HasResources returns a boolean if a field has been set.
+func (o *RequirementRef) HasResources() bool {
+	if o != nil && !IsNil(o.Resources) {
+		return true
+	}
+
+	return false
+}
+
+// SetResources gets a reference to the given []string and assigns it to the Resources field.
+func (o *RequirementRef) SetResources(v []string) {
+	o.Resources = v
+}
+
 func (o RequirementRef) MarshalJSON() ([]byte, error) {
 	toSerialize,err := o.ToMap()
 	if err != nil {
@@ -191,6 +262,12 @@ func (o RequirementRef) ToMap() (map[string]interface{}, error) {
 	}
 	if !IsNil(o.Description) {
 		toSerialize["description"] = o.Description
+	}
+	if !IsNil(o.Tier) {
+		toSerialize["tier"] = o.Tier
+	}
+	if !IsNil(o.Resources) {
+		toSerialize["resources"] = o.Resources
 	}
 	return toSerialize, nil
 }

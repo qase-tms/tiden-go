@@ -18,7 +18,7 @@ import (
 // checks if the BranchRequirementLinkProposal type satisfies the MappedNullable interface at compile time
 var _ MappedNullable = &BranchRequirementLinkProposal{}
 
-// BranchRequirementLinkProposal struct for BranchRequirementLinkProposal
+// BranchRequirementLinkProposal BranchRequirementLinkProposal is one proposed test-requirement link recorded on a branch; accepted proposals materialize into durable links when the branch merges to main.
 type BranchRequirementLinkProposal struct {
 	Id *string `json:"id,omitempty"`
 	BranchId *string `json:"branchId,omitempty"`

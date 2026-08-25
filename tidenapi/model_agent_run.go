@@ -18,7 +18,7 @@ import (
 // checks if the AgentRun type satisfies the MappedNullable interface at compile time
 var _ MappedNullable = &AgentRun{}
 
-// AgentRun struct for AgentRun
+// AgentRun AgentRun is one execution of an agent config, from \"pending\" through a terminal status, with LLM token/cost accounting, an optional produced branch, and an optional structured result.
 type AgentRun struct {
 	Id *string `json:"id,omitempty"`
 	AgentConfigId *string `json:"agentConfigId,omitempty"`

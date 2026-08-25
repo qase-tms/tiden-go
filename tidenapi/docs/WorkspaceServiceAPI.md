@@ -4,13 +4,15 @@ All URIs are relative to *https://api.tiden.ai*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
-[**WorkspaceServiceListWorkspaces**](WorkspaceServiceAPI.md#WorkspaceServiceListWorkspaces) | **Get** /v1/workspaces | 
+[**WorkspaceServiceListWorkspaces**](WorkspaceServiceAPI.md#WorkspaceServiceListWorkspaces) | **Get** /v1/workspaces | Lists the workspaces the caller belongs to.
 
 
 
 ## WorkspaceServiceListWorkspaces
 
 > ListWorkspacesResponse WorkspaceServiceListWorkspaces(ctx).PaginationPageSize(paginationPageSize).PaginationPageToken(paginationPageToken).Execute()
+
+Lists the workspaces the caller belongs to.
 
 
 

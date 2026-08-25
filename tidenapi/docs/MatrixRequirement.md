@@ -11,6 +11,7 @@ Name | Type | Description | Notes
 **Title** | Pointer to **string** |  | [optional] 
 **ParentId** | Pointer to **string** |  | [optional] 
 **BranchStatus** | Pointer to **string** |  | [optional] 
+**CanonicalId** | Pointer to **string** | Canonical (main) id of this row: source_id for a branch COW copy, empty otherwise. Branch scope keys rows by their branch-local id while parent_id and Verdict.subjects carry main ids, so a client needs this to rebuild the feature tree the way the server resolver does. | [optional] 
 
 ## Methods
 
@@ -205,6 +206,31 @@ SetBranchStatus sets BranchStatus field to given value.
 `func (o *MatrixRequirement) HasBranchStatus() bool`
 
 HasBranchStatus returns a boolean if a field has been set.
+
+### GetCanonicalId
+
+`func (o *MatrixRequirement) GetCanonicalId() string`
+
+GetCanonicalId returns the CanonicalId field if non-nil, zero value otherwise.
+
+### GetCanonicalIdOk
+
+`func (o *MatrixRequirement) GetCanonicalIdOk() (*string, bool)`
+
+GetCanonicalIdOk returns a tuple with the CanonicalId field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetCanonicalId
+
+`func (o *MatrixRequirement) SetCanonicalId(v string)`
+
+SetCanonicalId sets CanonicalId field to given value.
+
+### HasCanonicalId
+
+`func (o *MatrixRequirement) HasCanonicalId() bool`
+
+HasCanonicalId returns a boolean if a field has been set.
 
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)

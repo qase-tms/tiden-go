@@ -17,7 +17,7 @@ import (
 // checks if the ResultStep type satisfies the MappedNullable interface at compile time
 var _ MappedNullable = &ResultStep{}
 
-// ResultStep struct for ResultStep
+// ResultStep ResultStep is one reported step of a result; steps nest recursively.
 type ResultStep struct {
 	Type *string `json:"type,omitempty"`
 	Data *ResultStepData `json:"data,omitempty"`

@@ -28,6 +28,8 @@ Name | Type | Description | Notes
 **CreatedBy** | Pointer to **string** |  | [optional] 
 **CreatedAt** | Pointer to **time.Time** |  | [optional] 
 **UpdatedAt** | Pointer to **time.Time** |  | [optional] 
+**IntentSessionId** | Pointer to **string** |  | [optional] 
+**IntentBranch** | Pointer to **string** |  | [optional] 
 
 ## Methods
 
@@ -647,6 +649,56 @@ SetUpdatedAt sets UpdatedAt field to given value.
 `func (o *TestRun) HasUpdatedAt() bool`
 
 HasUpdatedAt returns a boolean if a field has been set.
+
+### GetIntentSessionId
+
+`func (o *TestRun) GetIntentSessionId() string`
+
+GetIntentSessionId returns the IntentSessionId field if non-nil, zero value otherwise.
+
+### GetIntentSessionIdOk
+
+`func (o *TestRun) GetIntentSessionIdOk() (*string, bool)`
+
+GetIntentSessionIdOk returns a tuple with the IntentSessionId field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetIntentSessionId
+
+`func (o *TestRun) SetIntentSessionId(v string)`
+
+SetIntentSessionId sets IntentSessionId field to given value.
+
+### HasIntentSessionId
+
+`func (o *TestRun) HasIntentSessionId() bool`
+
+HasIntentSessionId returns a boolean if a field has been set.
+
+### GetIntentBranch
+
+`func (o *TestRun) GetIntentBranch() string`
+
+GetIntentBranch returns the IntentBranch field if non-nil, zero value otherwise.
+
+### GetIntentBranchOk
+
+`func (o *TestRun) GetIntentBranchOk() (*string, bool)`
+
+GetIntentBranchOk returns a tuple with the IntentBranch field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetIntentBranch
+
+`func (o *TestRun) SetIntentBranch(v string)`
+
+SetIntentBranch sets IntentBranch field to given value.
+
+### HasIntentBranch
+
+`func (o *TestRun) HasIntentBranch() bool`
+
+HasIntentBranch returns a boolean if a field has been set.
 
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)

@@ -18,7 +18,7 @@ import (
 // checks if the SourceMap type satisfies the MappedNullable interface at compile time
 var _ MappedNullable = &SourceMap{}
 
-// SourceMap struct for SourceMap
+// SourceMap SourceMap is the metadata of one uploaded source map, keyed by debug_id for matching against incoming error events.
 type SourceMap struct {
 	Id *string `json:"id,omitempty"`
 	ProductId *string `json:"productId,omitempty"`
@@ -26,7 +26,7 @@ type SourceMap struct {
 	FileName *string `json:"fileName,omitempty"`
 	ReleaseName *string `json:"releaseName,omitempty"`
 	ByteSize *string `json:"byteSize,omitempty"`
-	// NOTE: metadata only — never an S3 download URL (maps are private source).
+	// NOTE: metadata only — never a download URL (source maps stay private).
 	CreatedAt *time.Time `json:"createdAt,omitempty"`
 }
 

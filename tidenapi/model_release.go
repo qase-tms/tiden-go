@@ -18,7 +18,7 @@ import (
 // checks if the Release type satisfies the MappedNullable interface at compile time
 var _ MappedNullable = &Release{}
 
-// Release struct for Release
+// Release Release is one shipped version of a product in an environment, upserted from CI keyed on (product, version, environment).
 type Release struct {
 	Id *string `json:"id,omitempty"`
 	ProductId *string `json:"productId,omitempty"`

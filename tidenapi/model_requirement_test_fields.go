@@ -17,7 +17,7 @@ import (
 // checks if the RequirementTestFields type satisfies the MappedNullable interface at compile time
 var _ MappedNullable = &RequirementTestFields{}
 
-// RequirementTestFields struct for RequirementTestFields
+// RequirementTestFields RequirementTestFields are test-relevant facts extracted from the requirement's content for test authoring.
 type RequirementTestFields struct {
 	AcceptanceCriteria []string `json:"acceptanceCriteria,omitempty"`
 	EdgeCases []string `json:"edgeCases,omitempty"`

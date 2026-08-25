@@ -12,6 +12,8 @@ Name | Type | Description | Notes
 **BuildSha** | Pointer to **string** |  | [optional] 
 **StartedAt** | Pointer to **string** |  | [optional] 
 **ClientMeta** | Pointer to **map[string]string** |  | [optional] 
+**IntentSessionId** | Pointer to **string** |  | [optional] 
+**IntentBranch** | Pointer to **string** | The session&#39;s Tiden intent branch: live-documentation sync lands there instead of resolving the free-text git &#x60;branch&#x60; name (which never creates a Tiden branch). Set by an in-session &#x60;tiden run exec&#x60;; empty otherwise. | [optional] 
 
 ## Methods
 
@@ -231,6 +233,56 @@ SetClientMeta sets ClientMeta field to given value.
 `func (o *CreateTestRunBody) HasClientMeta() bool`
 
 HasClientMeta returns a boolean if a field has been set.
+
+### GetIntentSessionId
+
+`func (o *CreateTestRunBody) GetIntentSessionId() string`
+
+GetIntentSessionId returns the IntentSessionId field if non-nil, zero value otherwise.
+
+### GetIntentSessionIdOk
+
+`func (o *CreateTestRunBody) GetIntentSessionIdOk() (*string, bool)`
+
+GetIntentSessionIdOk returns a tuple with the IntentSessionId field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetIntentSessionId
+
+`func (o *CreateTestRunBody) SetIntentSessionId(v string)`
+
+SetIntentSessionId sets IntentSessionId field to given value.
+
+### HasIntentSessionId
+
+`func (o *CreateTestRunBody) HasIntentSessionId() bool`
+
+HasIntentSessionId returns a boolean if a field has been set.
+
+### GetIntentBranch
+
+`func (o *CreateTestRunBody) GetIntentBranch() string`
+
+GetIntentBranch returns the IntentBranch field if non-nil, zero value otherwise.
+
+### GetIntentBranchOk
+
+`func (o *CreateTestRunBody) GetIntentBranchOk() (*string, bool)`
+
+GetIntentBranchOk returns a tuple with the IntentBranch field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetIntentBranch
+
+`func (o *CreateTestRunBody) SetIntentBranch(v string)`
+
+SetIntentBranch sets IntentBranch field to given value.
+
+### HasIntentBranch
+
+`func (o *CreateTestRunBody) HasIntentBranch() bool`
+
+HasIntentBranch returns a boolean if a field has been set.
 
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)

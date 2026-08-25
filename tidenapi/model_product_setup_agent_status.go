@@ -17,7 +17,7 @@ import (
 // checks if the ProductSetupAgentStatus type satisfies the MappedNullable interface at compile time
 var _ MappedNullable = &ProductSetupAgentStatus{}
 
-// ProductSetupAgentStatus struct for ProductSetupAgentStatus
+// ProductSetupAgentStatus ProductSetupAgentStatus reports one coding agent found in the bound repo and whether its Tiden hooks are wired.
 type ProductSetupAgentStatus struct {
 	Agent *string `json:"agent,omitempty"`
 	Detected *bool `json:"detected,omitempty"`

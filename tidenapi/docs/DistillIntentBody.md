@@ -4,7 +4,7 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**Transcript** | Pointer to **string** | Rendered conversation (normalized, slim — user/assistant text only). The backend never sees an agent-specific transcript format. | [optional] 
+**Transcript** | Pointer to **string** | Rendered conversation (normalized, slim — user/assistant text only). Agent-specific transcript formats are not accepted. | [optional] 
 **CredentialId** | Pointer to **string** | Optional LLM credential to use. When empty, the backend picks the first usable llm.* credential in the product&#39;s workspace. | [optional] 
 **Model** | Pointer to **string** | Optional model override; when empty, falls back to the credential&#39;s metadata \&quot;model\&quot; field. | [optional] 
 **Slug** | Pointer to **string** | Optional branch slug override; when empty, defaults to \&quot;session\&quot;. | [optional] 

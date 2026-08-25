@@ -21,8 +21,14 @@ var _ MappedNullable = &CreateBranchBody{}
 type CreateBranchBody struct {
 	Name *string `json:"name,omitempty"`
 	Description *string `json:"description,omitempty"`
-	// Set by the agent worker when an agent run is creating the branch on behalf of a user. Surfaced on the Branch message + UI banner.
+	// Set when an agent run is creating the branch on behalf of a user. Surfaced on the Branch message + UI banner.
 	CreatedByAgentRunId *string `json:"createdByAgentRunId,omitempty"`
+	// Sync metadata (drift-sync v1): a sync/<...> branch records the git range its requirement delta covered — repository is the canonical repo id, base = the repo watermark the delta was computed from, target = repo main HEAD at sync time. On merge, the watermark advances base→target (CAS). Set all three or none; leave unset on every non-sync branch.
+	SyncRepository *string `json:"syncRepository,omitempty"`
+	SyncBaseSha *string `json:"syncBaseSha,omitempty"`
+	SyncTargetSha *string `json:"syncTargetSha,omitempty"`
+	// Coding agent creating this branch on the caller's behalf (e.g. \"claude-code\", \"codex\"), so name + description + agent can be set in one explicit create. Validated server-side against a fixed allowlist; an unrecognized value is stored as empty string, never as free text.
+	CreatedByAgent *string `json:"createdByAgent,omitempty"`
 }
 
 // NewCreateBranchBody instantiates a new CreateBranchBody object
@@ -138,6 +144,134 @@ func (o *CreateBranchBody) SetCreatedByAgentRunId(v string) {
 	o.CreatedByAgentRunId = &v
 }
 
+// GetSyncRepository returns the SyncRepository field value if set, zero value otherwise.
+func (o *CreateBranchBody) GetSyncRepository() string {
+	if o == nil || IsNil(o.SyncRepository) {
+		var ret string
+		return ret
+	}
+	return *o.SyncRepository
+}
+
+// GetSyncRepositoryOk returns a tuple with the SyncRepository field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *CreateBranchBody) GetSyncRepositoryOk() (*string, bool) {
+	if o == nil || IsNil(o.SyncRepository) {
+		return nil, false
+	}
+	return o.SyncRepository, true
+}
+
+// HasSyncRepository returns a boolean if a field has been set.
+func (o *CreateBranchBody) HasSyncRepository() bool {
+	if o != nil && !IsNil(o.SyncRepository) {
+		return true
+	}
+
+	return false
+}
+
+// SetSyncRepository gets a reference to the given string and assigns it to the SyncRepository field.
+func (o *CreateBranchBody) SetSyncRepository(v string) {
+	o.SyncRepository = &v
+}
+
+// GetSyncBaseSha returns the SyncBaseSha field value if set, zero value otherwise.
+func (o *CreateBranchBody) GetSyncBaseSha() string {
+	if o == nil || IsNil(o.SyncBaseSha) {
+		var ret string
+		return ret
+	}
+	return *o.SyncBaseSha
+}
+
+// GetSyncBaseShaOk returns a tuple with the SyncBaseSha field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *CreateBranchBody) GetSyncBaseShaOk() (*string, bool) {
+	if o == nil || IsNil(o.SyncBaseSha) {
+		return nil, false
+	}
+	return o.SyncBaseSha, true
+}
+
+// HasSyncBaseSha returns a boolean if a field has been set.
+func (o *CreateBranchBody) HasSyncBaseSha() bool {
+	if o != nil && !IsNil(o.SyncBaseSha) {
+		return true
+	}
+
+	return false
+}
+
+// SetSyncBaseSha gets a reference to the given string and assigns it to the SyncBaseSha field.
+func (o *CreateBranchBody) SetSyncBaseSha(v string) {
+	o.SyncBaseSha = &v
+}
+
+// GetSyncTargetSha returns the SyncTargetSha field value if set, zero value otherwise.
+func (o *CreateBranchBody) GetSyncTargetSha() string {
+	if o == nil || IsNil(o.SyncTargetSha) {
+		var ret string
+		return ret
+	}
+	return *o.SyncTargetSha
+}
+
+// GetSyncTargetShaOk returns a tuple with the SyncTargetSha field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *CreateBranchBody) GetSyncTargetShaOk() (*string, bool) {
+	if o == nil || IsNil(o.SyncTargetSha) {
+		return nil, false
+	}
+	return o.SyncTargetSha, true
+}
+
+// HasSyncTargetSha returns a boolean if a field has been set.
+func (o *CreateBranchBody) HasSyncTargetSha() bool {
+	if o != nil && !IsNil(o.SyncTargetSha) {
+		return true
+	}
+
+	return false
+}
+
+// SetSyncTargetSha gets a reference to the given string and assigns it to the SyncTargetSha field.
+func (o *CreateBranchBody) SetSyncTargetSha(v string) {
+	o.SyncTargetSha = &v
+}
+
+// GetCreatedByAgent returns the CreatedByAgent field value if set, zero value otherwise.
+func (o *CreateBranchBody) GetCreatedByAgent() string {
+	if o == nil || IsNil(o.CreatedByAgent) {
+		var ret string
+		return ret
+	}
+	return *o.CreatedByAgent
+}
+
+// GetCreatedByAgentOk returns a tuple with the CreatedByAgent field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *CreateBranchBody) GetCreatedByAgentOk() (*string, bool) {
+	if o == nil || IsNil(o.CreatedByAgent) {
+		return nil, false
+	}
+	return o.CreatedByAgent, true
+}
+
+// HasCreatedByAgent returns a boolean if a field has been set.
+func (o *CreateBranchBody) HasCreatedByAgent() bool {
+	if o != nil && !IsNil(o.CreatedByAgent) {
+		return true
+	}
+
+	return false
+}
+
+// SetCreatedByAgent gets a reference to the given string and assigns it to the CreatedByAgent field.
+func (o *CreateBranchBody) SetCreatedByAgent(v string) {
+	o.CreatedByAgent = &v
+}
+
 func (o CreateBranchBody) MarshalJSON() ([]byte, error) {
 	toSerialize,err := o.ToMap()
 	if err != nil {
@@ -156,6 +290,18 @@ func (o CreateBranchBody) ToMap() (map[string]interface{}, error) {
 	}
 	if !IsNil(o.CreatedByAgentRunId) {
 		toSerialize["createdByAgentRunId"] = o.CreatedByAgentRunId
+	}
+	if !IsNil(o.SyncRepository) {
+		toSerialize["syncRepository"] = o.SyncRepository
+	}
+	if !IsNil(o.SyncBaseSha) {
+		toSerialize["syncBaseSha"] = o.SyncBaseSha
+	}
+	if !IsNil(o.SyncTargetSha) {
+		toSerialize["syncTargetSha"] = o.SyncTargetSha
+	}
+	if !IsNil(o.CreatedByAgent) {
+		toSerialize["createdByAgent"] = o.CreatedByAgent
 	}
 	return toSerialize, nil
 }

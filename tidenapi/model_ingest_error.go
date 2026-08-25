@@ -17,7 +17,7 @@ import (
 // checks if the IngestError type satisfies the MappedNullable interface at compile time
 var _ MappedNullable = &IngestError{}
 
-// IngestError struct for IngestError
+// IngestError IngestError is one per-entry validation failure from an ingest batch.
 type IngestError struct {
 	ExternalId *string `json:"externalId,omitempty"`
 	// INVALID_*, AMBIGUOUS_SEQ, SUITE_REQUIRED, ...

@@ -17,7 +17,7 @@ import (
 // checks if the TestParameterGroup type satisfies the MappedNullable interface at compile time
 var _ MappedNullable = &TestParameterGroup{}
 
-// TestParameterGroup struct for TestParameterGroup
+// TestParameterGroup TestParameterGroup names one set of parameter values a parameterized test runs with.
 type TestParameterGroup struct {
 	Id *string `json:"id,omitempty"`
 	Name *string `json:"name,omitempty"`

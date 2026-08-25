@@ -4,23 +4,26 @@ All URIs are relative to *https://api.tiden.ai*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
-[**TestRunServiceAbortTestRun**](TestRunServiceAPI.md#TestRunServiceAbortTestRun) | **Post** /v1/products/{productId}/runs/{runSeq}:abort | 
-[**TestRunServiceCompleteTestRun**](TestRunServiceAPI.md#TestRunServiceCompleteTestRun) | **Post** /v1/products/{productId}/runs/{runSeq}:complete | 
-[**TestRunServiceCreateTestRun**](TestRunServiceAPI.md#TestRunServiceCreateTestRun) | **Post** /v1/products/{productId}/runs | 
-[**TestRunServiceDeleteTestRun**](TestRunServiceAPI.md#TestRunServiceDeleteTestRun) | **Delete** /v1/products/{productId}/runs/{runSeq} | 
-[**TestRunServiceGetRunAttachment**](TestRunServiceAPI.md#TestRunServiceGetRunAttachment) | **Get** /v1/products/{productId}/attachments/{hash} | Resolves a content-hash (uploaded via the reporter multipart route POST /v1/products/{product_id}/attachments:upload) to a presigned download URL. Public so reporter/CLI clients and the SPA (JWT) can both fetch; ATTACHMENT_NOT_FOUND (→ 404) for an unknown hash — the drawer renders \&quot;attachment unavailable\&quot; on that.
-[**TestRunServiceGetRunResult**](TestRunServiceAPI.md#TestRunServiceGetRunResult) | **Get** /v1/products/{productId}/runs/{runSeq}/results/{resultId} | 
-[**TestRunServiceGetRunSummary**](TestRunServiceAPI.md#TestRunServiceGetRunSummary) | **Get** /v1/products/{productId}/runs/{runSeq}/summary | 
-[**TestRunServiceGetTestRun**](TestRunServiceAPI.md#TestRunServiceGetTestRun) | **Get** /v1/products/{productId}/runs/{runSeq} | 
-[**TestRunServiceListRunResults**](TestRunServiceAPI.md#TestRunServiceListRunResults) | **Get** /v1/products/{productId}/runs/{runSeq}/results | 
-[**TestRunServiceListTestRuns**](TestRunServiceAPI.md#TestRunServiceListTestRuns) | **Get** /v1/products/{productId}/runs | 
-[**TestRunServiceReportResults**](TestRunServiceAPI.md#TestRunServiceReportResults) | **Post** /v1/products/{productId}/runs/{runSeq}/results:report | 
+[**TestRunServiceAbortTestRun**](TestRunServiceAPI.md#TestRunServiceAbortTestRun) | **Post** /v1/products/{productId}/runs/{runSeq}:abort | Aborts a run.
+[**TestRunServiceCompleteTestRun**](TestRunServiceAPI.md#TestRunServiceCompleteTestRun) | **Post** /v1/products/{productId}/runs/{runSeq}:complete | Completes a run and computes its final verdict.
+[**TestRunServiceCreateTestRun**](TestRunServiceAPI.md#TestRunServiceCreateTestRun) | **Post** /v1/products/{productId}/runs | Creates a test run to report CI results into.
+[**TestRunServiceDeleteTestRun**](TestRunServiceAPI.md#TestRunServiceDeleteTestRun) | **Delete** /v1/products/{productId}/runs/{runSeq} | Deletes a test run.
+[**TestRunServiceGetRunAttachment**](TestRunServiceAPI.md#TestRunServiceGetRunAttachment) | **Get** /v1/products/{productId}/attachments/{hash} | Resolves an attachment content hash to a download URL.
+[**TestRunServiceGetRunResult**](TestRunServiceAPI.md#TestRunServiceGetRunResult) | **Get** /v1/products/{productId}/runs/{runSeq}/results/{resultId} | Fetches one reported result by id.
+[**TestRunServiceGetRunSummary**](TestRunServiceAPI.md#TestRunServiceGetRunSummary) | **Get** /v1/products/{productId}/runs/{runSeq}/summary | Returns per-suite and per-case rollups of a run.
+[**TestRunServiceGetTestRun**](TestRunServiceAPI.md#TestRunServiceGetTestRun) | **Get** /v1/products/{productId}/runs/{runSeq} | Fetches one test run by its sequence number.
+[**TestRunServiceListRunResults**](TestRunServiceAPI.md#TestRunServiceListRunResults) | **Get** /v1/products/{productId}/runs/{runSeq}/results | Lists a run&#39;s reported results.
+[**TestRunServiceListTestRuns**](TestRunServiceAPI.md#TestRunServiceListTestRuns) | **Get** /v1/products/{productId}/runs | Lists a product&#39;s test runs.
+[**TestRunServiceReportResults**](TestRunServiceAPI.md#TestRunServiceReportResults) | **Post** /v1/products/{productId}/runs/{runSeq}/results:report | Reports a batch of test results into a run.
+[**TestRunServiceUploadRunAttachments**](TestRunServiceAPI.md#TestRunServiceUploadRunAttachments) | **Post** /v1/products/{product_id}/attachments:upload | Uploads run attachments and returns their content hashes.
 
 
 
 ## TestRunServiceAbortTestRun
 
 > AbortTestRunResponse TestRunServiceAbortTestRun(ctx, productId, runSeq).Body(body).Execute()
+
+Aborts a run.
 
 
 
@@ -95,6 +98,8 @@ Name | Type | Description  | Notes
 
 > CompleteTestRunResponse TestRunServiceCompleteTestRun(ctx, productId, runSeq).Body(body).Execute()
 
+Completes a run and computes its final verdict.
+
 
 
 ### Example
@@ -168,6 +173,8 @@ Name | Type | Description  | Notes
 
 > CreateTestRunResponse TestRunServiceCreateTestRun(ctx, productId).CreateTestRunBody(createTestRunBody).Execute()
 
+Creates a test run to report CI results into.
+
 
 
 ### Example
@@ -237,6 +244,8 @@ Name | Type | Description  | Notes
 ## TestRunServiceDeleteTestRun
 
 > map[string]interface{} TestRunServiceDeleteTestRun(ctx, productId, runSeq).Execute()
+
+Deletes a test run.
 
 
 
@@ -309,7 +318,9 @@ Name | Type | Description  | Notes
 
 > GetRunAttachmentResponse TestRunServiceGetRunAttachment(ctx, productId, hash).Execute()
 
-Resolves a content-hash (uploaded via the reporter multipart route POST /v1/products/{product_id}/attachments:upload) to a presigned download URL. Public so reporter/CLI clients and the SPA (JWT) can both fetch; ATTACHMENT_NOT_FOUND (→ 404) for an unknown hash — the drawer renders \"attachment unavailable\" on that.
+Resolves an attachment content hash to a download URL.
+
+
 
 ### Example
 
@@ -379,6 +390,8 @@ Name | Type | Description  | Notes
 ## TestRunServiceGetRunResult
 
 > GetRunResultResponse TestRunServiceGetRunResult(ctx, productId, runSeq, resultId).Execute()
+
+Fetches one reported result by id.
 
 
 
@@ -454,6 +467,8 @@ Name | Type | Description  | Notes
 
 > GetRunSummaryResponse TestRunServiceGetRunSummary(ctx, productId, runSeq).Execute()
 
+Returns per-suite and per-case rollups of a run.
+
 
 
 ### Example
@@ -525,6 +540,8 @@ Name | Type | Description  | Notes
 
 > GetTestRunResponse TestRunServiceGetTestRun(ctx, productId, runSeq).Execute()
 
+Fetches one test run by its sequence number.
+
 
 
 ### Example
@@ -595,6 +612,8 @@ Name | Type | Description  | Notes
 ## TestRunServiceListRunResults
 
 > ListRunResultsResponse TestRunServiceListRunResults(ctx, productId, runSeq).Status(status).Search(search).IdentityKey(identityKey).LatestOnly(latestOnly).PaginationPageSize(paginationPageSize).PaginationPageToken(paginationPageToken).Execute()
+
+Lists a run's reported results.
 
 
 
@@ -679,6 +698,8 @@ Name | Type | Description  | Notes
 
 > ListTestRunsResponse TestRunServiceListTestRuns(ctx, productId).Status(status).Environment(environment).Branch(branch).Search(search).PaginationPageSize(paginationPageSize).PaginationPageToken(paginationPageToken).Execute()
 
+Lists a product's test runs.
+
 
 
 ### Example
@@ -759,6 +780,8 @@ Name | Type | Description  | Notes
 
 > ReportResultsResponse TestRunServiceReportResults(ctx, productId, runSeq).ReportResultsBody(reportResultsBody).Execute()
 
+Reports a batch of test results into a run.
+
 
 
 ### Example
@@ -821,6 +844,78 @@ Name | Type | Description  | Notes
 ### HTTP request headers
 
 - **Content-Type**: application/json
+- **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
+[[Back to Model list]](../README.md#documentation-for-models)
+[[Back to README]](../README.md)
+
+
+## TestRunServiceUploadRunAttachments
+
+> V1UploadRunAttachmentsResponse TestRunServiceUploadRunAttachments(ctx, productId).File(file).Execute()
+
+Uploads run attachments and returns their content hashes.
+
+
+
+### Example
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+	"os"
+	openapiclient "github.com/qase-tms/tiden-go/tidenapi"
+)
+
+func main() {
+	productId := "productId_example" // string | Product the attachments belong to.
+	file := []*os.File{"TODO"} // []*os.File | One part per file, repeated.
+
+	configuration := openapiclient.NewConfiguration()
+	apiClient := openapiclient.NewAPIClient(configuration)
+	resp, r, err := apiClient.TestRunServiceAPI.TestRunServiceUploadRunAttachments(context.Background(), productId).File(file).Execute()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error when calling `TestRunServiceAPI.TestRunServiceUploadRunAttachments``: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+	}
+	// response from `TestRunServiceUploadRunAttachments`: V1UploadRunAttachmentsResponse
+	fmt.Fprintf(os.Stdout, "Response from `TestRunServiceAPI.TestRunServiceUploadRunAttachments`: %v\n", resp)
+}
+```
+
+### Path Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+**productId** | **string** | Product the attachments belong to. | 
+
+### Other Parameters
+
+Other parameters are passed through a pointer to a apiTestRunServiceUploadRunAttachmentsRequest struct via the builder pattern
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+
+ **file** | **[]*os.File** | One part per file, repeated. | 
+
+### Return type
+
+[**V1UploadRunAttachmentsResponse**](V1UploadRunAttachmentsResponse.md)
+
+### Authorization
+
+[BearerAuth](../README.md#BearerAuth)
+
+### HTTP request headers
+
+- **Content-Type**: multipart/form-data
 - **Accept**: application/json
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)

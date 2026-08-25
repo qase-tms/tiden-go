@@ -4,15 +4,17 @@ All URIs are relative to *https://api.tiden.ai*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
-[**ComponentServiceCreateComponent**](ComponentServiceAPI.md#ComponentServiceCreateComponent) | **Post** /v1/products/{productId}/components | 
-[**ComponentServiceListComponents**](ComponentServiceAPI.md#ComponentServiceListComponents) | **Get** /v1/products/{productId}/components | 
-[**ComponentServiceUpdateComponent**](ComponentServiceAPI.md#ComponentServiceUpdateComponent) | **Put** /v1/components/{id} | 
+[**ComponentServiceCreateComponent**](ComponentServiceAPI.md#ComponentServiceCreateComponent) | **Post** /v1/products/{productId}/components | Creates a component in a product.
+[**ComponentServiceListComponents**](ComponentServiceAPI.md#ComponentServiceListComponents) | **Get** /v1/products/{productId}/components | Lists a product&#39;s components.
+[**ComponentServiceUpdateComponent**](ComponentServiceAPI.md#ComponentServiceUpdateComponent) | **Put** /v1/components/{id} | Updates a component.
 
 
 
 ## ComponentServiceCreateComponent
 
 > CreateComponentResponse ComponentServiceCreateComponent(ctx, productId).CreateComponentBody(createComponentBody).Execute()
+
+Creates a component in a product.
 
 
 
@@ -83,6 +85,8 @@ Name | Type | Description  | Notes
 ## ComponentServiceListComponents
 
 > ListComponentsResponse ComponentServiceListComponents(ctx, productId).PaginationPageSize(paginationPageSize).PaginationPageToken(paginationPageToken).Branch(branch).Execute()
+
+Lists a product's components.
 
 
 
@@ -157,6 +161,8 @@ Name | Type | Description  | Notes
 ## ComponentServiceUpdateComponent
 
 > UpdateComponentResponse ComponentServiceUpdateComponent(ctx, id).UpdateComponentBody(updateComponentBody).Execute()
+
+Updates a component.
 
 
 

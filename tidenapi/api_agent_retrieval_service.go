@@ -24,7 +24,35 @@ import (
 type AgentRetrievalServiceAPI interface {
 
 	/*
-	AgentRetrievalServiceAttributeChangedFiles Method for AgentRetrievalServiceAttributeChangedFiles
+	AgentRetrievalServiceAdvanceRepoWatermark Advances the drift watermark of one repository.
+
+	reason baseline inserts the first watermark and never overwrites;
+empty_sync is a compare-and-set on expected_current_sha (a delta run that
+found nothing requirement-worthy); bootstrap writes unconditionally (an
+explicit full re-generation). The sync_merge advance happens server-side
+when a sync branch merges, and ingest happens inside the codebase agent —
+both are rejected here. advanced=false means a lost ordering race, never
+an error: the watermark can under-advance and self-heal, but never move
+backwards.
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param productId
+	@return ApiAgentRetrievalServiceAdvanceRepoWatermarkRequest
+	*/
+	AgentRetrievalServiceAdvanceRepoWatermark(ctx context.Context, productId string) ApiAgentRetrievalServiceAdvanceRepoWatermarkRequest
+
+	// AgentRetrievalServiceAdvanceRepoWatermarkExecute executes the request
+	//  @return AdvanceRepoWatermarkResponse
+	AgentRetrievalServiceAdvanceRepoWatermarkExecute(r ApiAgentRetrievalServiceAdvanceRepoWatermarkRequest) (*AdvanceRepoWatermarkResponse, *http.Response, error)
+
+	/*
+	AgentRetrievalServiceAttributeChangedFiles Attributes a requirement's changed files to owning components.
+
+	Maps repo-qualified changed files to components via the main-branch
+component scopes, declares one idempotent impacts_component edge intent
+per touched component, and sets requirement.component_id when the files
+resolve to exactly one component (clears it when they span several). All
+files must belong to a single repository; unmatched files are returned.
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@param productId
@@ -38,7 +66,12 @@ type AgentRetrievalServiceAPI interface {
 	AgentRetrievalServiceAttributeChangedFilesExecute(r ApiAgentRetrievalServiceAttributeChangedFilesRequest) (*AttributeChangedFilesResponse, *http.Response, error)
 
 	/*
-	AgentRetrievalServiceDeclareRequirementEdgeIntent Method for AgentRetrievalServiceDeclareRequirementEdgeIntent
+	AgentRetrievalServiceDeclareRequirementEdgeIntent Records a deferred graph edge for endpoints not yet on main.
+
+	Stores an edge intent on the given branch (empty = main) instead of
+writing the edge immediately; the intent materializes into a real edge
+when the branch merges to main. Endpoint and edge_type rules match
+WriteRequirementEdge.
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@param productId
@@ -51,7 +84,49 @@ type AgentRetrievalServiceAPI interface {
 	AgentRetrievalServiceDeclareRequirementEdgeIntentExecute(r ApiAgentRetrievalServiceDeclareRequirementEdgeIntentRequest) (*DeclareRequirementEdgeIntentResponse, *http.Response, error)
 
 	/*
-	AgentRetrievalServiceGetRequirementGraph Method for AgentRetrievalServiceGetRequirementGraph
+	AgentRetrievalServiceGetIssueFixContext Returns everything needed to fix one error, in a single call: the issue, its latest occurrence with symbolicated stack frames, the repository files those frames implicate, where the error is happening by environment, and — for each requirement those files implement — whether a test already covers it.
+
+	Prefer this over stitching together GetIssue, GetIssueEventStats and
+requirement lookups: it is one round-trip, and it reports which file path
+matched which requirement so a wrong match is visible rather than silent.
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param productId
+	@param issueId
+	@return ApiAgentRetrievalServiceGetIssueFixContextRequest
+	*/
+	AgentRetrievalServiceGetIssueFixContext(ctx context.Context, productId string, issueId string) ApiAgentRetrievalServiceGetIssueFixContextRequest
+
+	// AgentRetrievalServiceGetIssueFixContextExecute executes the request
+	//  @return GetIssueFixContextResponse
+	AgentRetrievalServiceGetIssueFixContextExecute(r ApiAgentRetrievalServiceGetIssueFixContextRequest) (*GetIssueFixContextResponse, *http.Response, error)
+
+	/*
+	AgentRetrievalServiceGetRepoWatermark Returns the drift watermark of one repository.
+
+	The watermark is the git commit the requirements tree on main reflects the
+repository up to ("github.com/org/repo" canonical id). `tiden intent
+start` compares it against the repo's actual main HEAD to detect drift —
+commits that reached the code outside the intent loop. An unset watermark
+means the repository was never reconciled; the client baselines it.
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param productId
+	@return ApiAgentRetrievalServiceGetRepoWatermarkRequest
+	*/
+	AgentRetrievalServiceGetRepoWatermark(ctx context.Context, productId string) ApiAgentRetrievalServiceGetRepoWatermarkRequest
+
+	// AgentRetrievalServiceGetRepoWatermarkExecute executes the request
+	//  @return GetRepoWatermarkResponse
+	AgentRetrievalServiceGetRepoWatermarkExecute(r ApiAgentRetrievalServiceGetRepoWatermarkRequest) (*GetRepoWatermarkResponse, *http.Response, error)
+
+	/*
+	AgentRetrievalServiceGetRequirementGraph Returns the product's full requirement graph.
+
+	Returns every graph node (requirements plus component nodes reached via
+impacts_component edges, discriminated by kind) and every edge with its
+type, source kind, and confidence — for whole-product visualization or
+offline analysis.
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@param productId
@@ -64,7 +139,14 @@ type AgentRetrievalServiceAPI interface {
 	AgentRetrievalServiceGetRequirementGraphExecute(r ApiAgentRetrievalServiceGetRequirementGraphRequest) (*GetRequirementGraphResponse, *http.Response, error)
 
 	/*
-	AgentRetrievalServiceGetRequirementTestContext Method for AgentRetrievalServiceGetRequirementTestContext
+	AgentRetrievalServiceGetRequirementTestContext Builds the full test-authoring context pack for one requirement.
+
+	Returns the requirement with its parent/children/siblings, component,
+linked/proposed/relevant tests, stale-coverage signals, extracted
+test-oriented fields (acceptance criteria, edge cases, ...), agent memory,
+and citations, resolved in the branch view (empty branch = main). budget
+caps the pack's approximate token size; truncation_signals reports what
+was cut to fit.
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@param productId
@@ -78,7 +160,11 @@ type AgentRetrievalServiceAPI interface {
 	AgentRetrievalServiceGetRequirementTestContextExecute(r ApiAgentRetrievalServiceGetRequirementTestContextRequest) (*GetRequirementTestContextResponse, *http.Response, error)
 
 	/*
-	AgentRetrievalServiceGraphCoverageGaps Method for AgentRetrievalServiceGraphCoverageGaps
+	AgentRetrievalServiceGraphCoverageGaps Filters a requirement set down to those without test coverage.
+
+	Returns the subset of the given requirement_ids that have zero live test
+links. Typically chained after RequirementImpact or RequirementNeighbors
+to find the uncovered part of a blast radius.
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@param productId
@@ -91,7 +177,12 @@ type AgentRetrievalServiceAPI interface {
 	AgentRetrievalServiceGraphCoverageGapsExecute(r ApiAgentRetrievalServiceGraphCoverageGapsRequest) (*GraphCoverageGapsResponse, *http.Response, error)
 
 	/*
-	AgentRetrievalServiceListCoverageGaps Method for AgentRetrievalServiceListCoverageGaps
+	AgentRetrievalServiceListCoverageGaps Lists requirements with insufficient test coverage.
+
+	Returns the product's branch-effective coverage gaps, ranked for agent
+triage. Filter by coverage status (none | partial | covered | stale |
+unknown), component, free-text query, or a feature subtree via
+root_requirement_id. Paginated via pagination.page_size/page_token.
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@param productId
@@ -104,7 +195,11 @@ type AgentRetrievalServiceAPI interface {
 	AgentRetrievalServiceListCoverageGapsExecute(r ApiAgentRetrievalServiceListCoverageGapsRequest) (*ListCoverageGapsResponse, *http.Response, error)
 
 	/*
-	AgentRetrievalServiceListRequirementAnchors Method for AgentRetrievalServiceListRequirementAnchors
+	AgentRetrievalServiceListRequirementAnchors Lists the branch-effective code anchors of all requirements.
+
+	Returns every (requirement_id, repo_path) pair from repo_file source
+anchors as seen from branch (empty = main), so a client can map file
+paths to requirements without fetching full requirements.
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@param productId
@@ -117,7 +212,12 @@ type AgentRetrievalServiceAPI interface {
 	AgentRetrievalServiceListRequirementAnchorsExecute(r ApiAgentRetrievalServiceListRequirementAnchorsRequest) (*ListRequirementAnchorsResponse, *http.Response, error)
 
 	/*
-	AgentRetrievalServicePrepareTestGenerationContext Method for AgentRetrievalServicePrepareTestGenerationContext
+	AgentRetrievalServicePrepareTestGenerationContext Prepares a batched test-generation context for several requirements.
+
+	Aggregates a GetRequirementTestContext pack per requirement_id plus
+codebase hints (framework, test command, style examples) under a shared
+token_budget. POST is used for the large request body only — the call
+computes a context and writes nothing.
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@param productId
@@ -130,7 +230,13 @@ type AgentRetrievalServiceAPI interface {
 	AgentRetrievalServicePrepareTestGenerationContextExecute(r ApiAgentRetrievalServicePrepareTestGenerationContextRequest) (*PrepareTestGenerationContextResponse, *http.Response, error)
 
 	/*
-	AgentRetrievalServiceRequirementImpact Method for AgentRetrievalServiceRequirementImpact
+	AgentRetrievalServiceRequirementImpact Computes the requirement blast radius of a set of changed files.
+
+	Resolves repo_paths to seed requirements via their repo_file source
+anchors, then expands the requirement graph up to depth hops (default 3)
+over the given edge_types (empty = all canonical types). Returns the
+affected requirement ids, the tests covering any of them, and the affected
+requirements with no live test links.
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@param productId
@@ -143,7 +249,11 @@ type AgentRetrievalServiceAPI interface {
 	AgentRetrievalServiceRequirementImpactExecute(r ApiAgentRetrievalServiceRequirementImpactRequest) (*RequirementImpactResponse, *http.Response, error)
 
 	/*
-	AgentRetrievalServiceRequirementNeighbors Method for AgentRetrievalServiceRequirementNeighbors
+	AgentRetrievalServiceRequirementNeighbors Lists the graph neighbors of one requirement.
+
+	Traverses the requirement graph from requirement_id up to depth hops
+(default 1) over the given edge_types (empty = all canonical types) and
+returns the reachable requirement ids.
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@param productId
@@ -157,7 +267,13 @@ type AgentRetrievalServiceAPI interface {
 	AgentRetrievalServiceRequirementNeighborsExecute(r ApiAgentRetrievalServiceRequirementNeighborsRequest) (*RequirementNeighborsResponse, *http.Response, error)
 
 	/*
-	AgentRetrievalServiceResolveFeatureContext Method for AgentRetrievalServiceResolveFeatureContext
+	AgentRetrievalServiceResolveFeatureContext Resolves a coding objective into feature-rooted requirement context.
+
+	Retrieves the requirement-graph slices relevant to the free-text objective
+(and optional changed repo_paths): per feature, the root requirement, the
+touched nodes with their code anchors, the branch-effective coverage of
+that slice, and the retrieval signals (vector | fts | anchor) that
+surfaced the seeds. k bounds each retrieval signal's breadth.
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@param productId
@@ -170,7 +286,13 @@ type AgentRetrievalServiceAPI interface {
 	AgentRetrievalServiceResolveFeatureContextExecute(r ApiAgentRetrievalServiceResolveFeatureContextRequest) (*ResolveFeatureContextResponse, *http.Response, error)
 
 	/*
-	AgentRetrievalServiceWriteRequirementEdge Method for AgentRetrievalServiceWriteRequirementEdge
+	AgentRetrievalServiceWriteRequirementEdge Writes one semantic edge into the requirement graph.
+
+	Creates a src->dst edge with exactly one destination endpoint:
+dst_requirement_id (edge_type depends_on | traces_to) or dst_component_id
+(edge_type impacts_component). confidence is required — an explicit 0.0 is
+valid, omitted is not. The edge is attributed to agent_run_id; the created
+edge id is returned.
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@param productId
@@ -185,6 +307,149 @@ type AgentRetrievalServiceAPI interface {
 
 // AgentRetrievalServiceAPIService AgentRetrievalServiceAPI service
 type AgentRetrievalServiceAPIService service
+
+type ApiAgentRetrievalServiceAdvanceRepoWatermarkRequest struct {
+	ctx context.Context
+	ApiService AgentRetrievalServiceAPI
+	productId string
+	advanceRepoWatermarkBody *AdvanceRepoWatermarkBody
+}
+
+func (r ApiAgentRetrievalServiceAdvanceRepoWatermarkRequest) AdvanceRepoWatermarkBody(advanceRepoWatermarkBody AdvanceRepoWatermarkBody) ApiAgentRetrievalServiceAdvanceRepoWatermarkRequest {
+	r.advanceRepoWatermarkBody = &advanceRepoWatermarkBody
+	return r
+}
+
+func (r ApiAgentRetrievalServiceAdvanceRepoWatermarkRequest) Execute() (*AdvanceRepoWatermarkResponse, *http.Response, error) {
+	return r.ApiService.AgentRetrievalServiceAdvanceRepoWatermarkExecute(r)
+}
+
+/*
+AgentRetrievalServiceAdvanceRepoWatermark Advances the drift watermark of one repository.
+
+reason baseline inserts the first watermark and never overwrites;
+empty_sync is a compare-and-set on expected_current_sha (a delta run that
+found nothing requirement-worthy); bootstrap writes unconditionally (an
+explicit full re-generation). The sync_merge advance happens server-side
+when a sync branch merges, and ingest happens inside the codebase agent —
+both are rejected here. advanced=false means a lost ordering race, never
+an error: the watermark can under-advance and self-heal, but never move
+backwards.
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param productId
+ @return ApiAgentRetrievalServiceAdvanceRepoWatermarkRequest
+*/
+func (a *AgentRetrievalServiceAPIService) AgentRetrievalServiceAdvanceRepoWatermark(ctx context.Context, productId string) ApiAgentRetrievalServiceAdvanceRepoWatermarkRequest {
+	return ApiAgentRetrievalServiceAdvanceRepoWatermarkRequest{
+		ApiService: a,
+		ctx: ctx,
+		productId: productId,
+	}
+}
+
+// Execute executes the request
+//  @return AdvanceRepoWatermarkResponse
+func (a *AgentRetrievalServiceAPIService) AgentRetrievalServiceAdvanceRepoWatermarkExecute(r ApiAgentRetrievalServiceAdvanceRepoWatermarkRequest) (*AdvanceRepoWatermarkResponse, *http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodPost
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *AdvanceRepoWatermarkResponse
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "AgentRetrievalServiceAPIService.AgentRetrievalServiceAdvanceRepoWatermark")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/v1/products/{productId}/repo-watermark:advance"
+	localVarPath = strings.Replace(localVarPath, "{"+"productId"+"}", url.PathEscape(parameterValueToString(r.productId, "productId")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+	if r.advanceRepoWatermarkBody == nil {
+		return localVarReturnValue, nil, reportError("advanceRepoWatermarkBody is required and must be specified")
+	}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{"application/json"}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	// body params
+	localVarPostBody = r.advanceRepoWatermarkBody
+	if r.ctx != nil {
+		// API Key Authentication
+		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
+			if apiKey, ok := auth["BearerAuth"]; ok {
+				var key string
+				if apiKey.Prefix != "" {
+					key = apiKey.Prefix + " " + apiKey.Key
+				} else {
+					key = apiKey.Key
+				}
+				localVarHeaderParams["Authorization"] = key
+			}
+		}
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+			var v Status
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
 
 type ApiAgentRetrievalServiceAttributeChangedFilesRequest struct {
 	ctx context.Context
@@ -204,7 +469,13 @@ func (r ApiAgentRetrievalServiceAttributeChangedFilesRequest) Execute() (*Attrib
 }
 
 /*
-AgentRetrievalServiceAttributeChangedFiles Method for AgentRetrievalServiceAttributeChangedFiles
+AgentRetrievalServiceAttributeChangedFiles Attributes a requirement's changed files to owning components.
+
+Maps repo-qualified changed files to components via the main-branch
+component scopes, declares one idempotent impacts_component edge intent
+per touched component, and sets requirement.component_id when the files
+resolve to exactly one component (clears it when they span several). All
+files must belong to a single repository; unmatched files are returned.
 
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @param productId
@@ -341,7 +612,12 @@ func (r ApiAgentRetrievalServiceDeclareRequirementEdgeIntentRequest) Execute() (
 }
 
 /*
-AgentRetrievalServiceDeclareRequirementEdgeIntent Method for AgentRetrievalServiceDeclareRequirementEdgeIntent
+AgentRetrievalServiceDeclareRequirementEdgeIntent Records a deferred graph edge for endpoints not yet on main.
+
+Stores an edge intent on the given branch (empty = main) instead of
+writing the edge immediately; the intent materializes into a real edge
+when the branch merges to main. Endpoint and edge_type rules match
+WriteRequirementEdge.
 
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @param productId
@@ -458,6 +734,296 @@ func (a *AgentRetrievalServiceAPIService) AgentRetrievalServiceDeclareRequiremen
 	return localVarReturnValue, localVarHTTPResponse, nil
 }
 
+type ApiAgentRetrievalServiceGetIssueFixContextRequest struct {
+	ctx context.Context
+	ApiService AgentRetrievalServiceAPI
+	productId string
+	issueId string
+	branch *string
+	maxFrames *int32
+}
+
+// branch scopes the requirement lookup to a branch&#39;s effective view. \&quot;\&quot; &#x3D; main.
+func (r ApiAgentRetrievalServiceGetIssueFixContextRequest) Branch(branch string) ApiAgentRetrievalServiceGetIssueFixContextRequest {
+	r.branch = &branch
+	return r
+}
+
+// max_frames bounds how many stack frames come back. &lt;&#x3D; 0 uses the server default (10); the cap is 50.
+func (r ApiAgentRetrievalServiceGetIssueFixContextRequest) MaxFrames(maxFrames int32) ApiAgentRetrievalServiceGetIssueFixContextRequest {
+	r.maxFrames = &maxFrames
+	return r
+}
+
+func (r ApiAgentRetrievalServiceGetIssueFixContextRequest) Execute() (*GetIssueFixContextResponse, *http.Response, error) {
+	return r.ApiService.AgentRetrievalServiceGetIssueFixContextExecute(r)
+}
+
+/*
+AgentRetrievalServiceGetIssueFixContext Returns everything needed to fix one error, in a single call: the issue, its latest occurrence with symbolicated stack frames, the repository files those frames implicate, where the error is happening by environment, and — for each requirement those files implement — whether a test already covers it.
+
+Prefer this over stitching together GetIssue, GetIssueEventStats and
+requirement lookups: it is one round-trip, and it reports which file path
+matched which requirement so a wrong match is visible rather than silent.
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param productId
+ @param issueId
+ @return ApiAgentRetrievalServiceGetIssueFixContextRequest
+*/
+func (a *AgentRetrievalServiceAPIService) AgentRetrievalServiceGetIssueFixContext(ctx context.Context, productId string, issueId string) ApiAgentRetrievalServiceGetIssueFixContextRequest {
+	return ApiAgentRetrievalServiceGetIssueFixContextRequest{
+		ApiService: a,
+		ctx: ctx,
+		productId: productId,
+		issueId: issueId,
+	}
+}
+
+// Execute executes the request
+//  @return GetIssueFixContextResponse
+func (a *AgentRetrievalServiceAPIService) AgentRetrievalServiceGetIssueFixContextExecute(r ApiAgentRetrievalServiceGetIssueFixContextRequest) (*GetIssueFixContextResponse, *http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *GetIssueFixContextResponse
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "AgentRetrievalServiceAPIService.AgentRetrievalServiceGetIssueFixContext")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/v1/products/{productId}/issues/{issueId}/fix-context"
+	localVarPath = strings.Replace(localVarPath, "{"+"productId"+"}", url.PathEscape(parameterValueToString(r.productId, "productId")), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"issueId"+"}", url.PathEscape(parameterValueToString(r.issueId, "issueId")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+
+	if r.branch != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "branch", r.branch, "form", "")
+	}
+	if r.maxFrames != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "maxFrames", r.maxFrames, "form", "")
+	}
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	if r.ctx != nil {
+		// API Key Authentication
+		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
+			if apiKey, ok := auth["BearerAuth"]; ok {
+				var key string
+				if apiKey.Prefix != "" {
+					key = apiKey.Prefix + " " + apiKey.Key
+				} else {
+					key = apiKey.Key
+				}
+				localVarHeaderParams["Authorization"] = key
+			}
+		}
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+			var v Status
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type ApiAgentRetrievalServiceGetRepoWatermarkRequest struct {
+	ctx context.Context
+	ApiService AgentRetrievalServiceAPI
+	productId string
+	repository *string
+}
+
+// Canonical repo id (\&quot;github.com/org/repo\&quot; — the components.repository format), never a local path and never a clone URL.
+func (r ApiAgentRetrievalServiceGetRepoWatermarkRequest) Repository(repository string) ApiAgentRetrievalServiceGetRepoWatermarkRequest {
+	r.repository = &repository
+	return r
+}
+
+func (r ApiAgentRetrievalServiceGetRepoWatermarkRequest) Execute() (*GetRepoWatermarkResponse, *http.Response, error) {
+	return r.ApiService.AgentRetrievalServiceGetRepoWatermarkExecute(r)
+}
+
+/*
+AgentRetrievalServiceGetRepoWatermark Returns the drift watermark of one repository.
+
+The watermark is the git commit the requirements tree on main reflects the
+repository up to ("github.com/org/repo" canonical id). `tiden intent
+start` compares it against the repo's actual main HEAD to detect drift —
+commits that reached the code outside the intent loop. An unset watermark
+means the repository was never reconciled; the client baselines it.
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param productId
+ @return ApiAgentRetrievalServiceGetRepoWatermarkRequest
+*/
+func (a *AgentRetrievalServiceAPIService) AgentRetrievalServiceGetRepoWatermark(ctx context.Context, productId string) ApiAgentRetrievalServiceGetRepoWatermarkRequest {
+	return ApiAgentRetrievalServiceGetRepoWatermarkRequest{
+		ApiService: a,
+		ctx: ctx,
+		productId: productId,
+	}
+}
+
+// Execute executes the request
+//  @return GetRepoWatermarkResponse
+func (a *AgentRetrievalServiceAPIService) AgentRetrievalServiceGetRepoWatermarkExecute(r ApiAgentRetrievalServiceGetRepoWatermarkRequest) (*GetRepoWatermarkResponse, *http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *GetRepoWatermarkResponse
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "AgentRetrievalServiceAPIService.AgentRetrievalServiceGetRepoWatermark")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/v1/products/{productId}/repo-watermark"
+	localVarPath = strings.Replace(localVarPath, "{"+"productId"+"}", url.PathEscape(parameterValueToString(r.productId, "productId")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+
+	if r.repository != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "repository", r.repository, "form", "")
+	}
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	if r.ctx != nil {
+		// API Key Authentication
+		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
+			if apiKey, ok := auth["BearerAuth"]; ok {
+				var key string
+				if apiKey.Prefix != "" {
+					key = apiKey.Prefix + " " + apiKey.Key
+				} else {
+					key = apiKey.Key
+				}
+				localVarHeaderParams["Authorization"] = key
+			}
+		}
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+			var v Status
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
 type ApiAgentRetrievalServiceGetRequirementGraphRequest struct {
 	ctx context.Context
 	ApiService AgentRetrievalServiceAPI
@@ -469,7 +1035,12 @@ func (r ApiAgentRetrievalServiceGetRequirementGraphRequest) Execute() (*GetRequi
 }
 
 /*
-AgentRetrievalServiceGetRequirementGraph Method for AgentRetrievalServiceGetRequirementGraph
+AgentRetrievalServiceGetRequirementGraph Returns the product's full requirement graph.
+
+Returns every graph node (requirements plus component nodes reached via
+impacts_component edges, discriminated by kind) and every edge with its
+type, source kind, and confidence — for whole-product visualization or
+offline analysis.
 
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @param productId
@@ -595,6 +1166,7 @@ func (r ApiAgentRetrievalServiceGetRequirementTestContextRequest) Branch(branch 
 	return r
 }
 
+// budget bounds the pack&#39;s approximate token size: smaller budgets shrink per-list limits and trim long excerpts; &lt;&#x3D; 0 uses server defaults.
 func (r ApiAgentRetrievalServiceGetRequirementTestContextRequest) Budget(budget int32) ApiAgentRetrievalServiceGetRequirementTestContextRequest {
 	r.budget = &budget
 	return r
@@ -605,7 +1177,14 @@ func (r ApiAgentRetrievalServiceGetRequirementTestContextRequest) Execute() (*Ge
 }
 
 /*
-AgentRetrievalServiceGetRequirementTestContext Method for AgentRetrievalServiceGetRequirementTestContext
+AgentRetrievalServiceGetRequirementTestContext Builds the full test-authoring context pack for one requirement.
+
+Returns the requirement with its parent/children/siblings, component,
+linked/proposed/relevant tests, stale-coverage signals, extracted
+test-oriented fields (acceptance criteria, edge cases, ...), agent memory,
+and citations, resolved in the branch view (empty branch = main). budget
+caps the pack's approximate token size; truncation_signals reports what
+was cut to fit.
 
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @param productId
@@ -744,7 +1323,11 @@ func (r ApiAgentRetrievalServiceGraphCoverageGapsRequest) Execute() (*GraphCover
 }
 
 /*
-AgentRetrievalServiceGraphCoverageGaps Method for AgentRetrievalServiceGraphCoverageGaps
+AgentRetrievalServiceGraphCoverageGaps Filters a requirement set down to those without test coverage.
+
+Returns the subset of the given requirement_ids that have zero live test
+links. Typically chained after RequirementImpact or RequirementNeighbors
+to find the uncovered part of a blast radius.
 
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @param productId
@@ -921,7 +1504,12 @@ func (r ApiAgentRetrievalServiceListCoverageGapsRequest) Execute() (*ListCoverag
 }
 
 /*
-AgentRetrievalServiceListCoverageGaps Method for AgentRetrievalServiceListCoverageGaps
+AgentRetrievalServiceListCoverageGaps Lists requirements with insufficient test coverage.
+
+Returns the product's branch-effective coverage gaps, ranked for agent
+triage. Filter by coverage status (none | partial | covered | stale |
+unknown), component, free-text query, or a feature subtree via
+root_requirement_id. Paginated via pagination.page_size/page_token.
 
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @param productId
@@ -1080,7 +1668,11 @@ func (r ApiAgentRetrievalServiceListRequirementAnchorsRequest) Execute() (*ListR
 }
 
 /*
-AgentRetrievalServiceListRequirementAnchors Method for AgentRetrievalServiceListRequirementAnchors
+AgentRetrievalServiceListRequirementAnchors Lists the branch-effective code anchors of all requirements.
+
+Returns every (requirement_id, repo_path) pair from repo_file source
+anchors as seen from branch (empty = main), so a client can map file
+paths to requirements without fetching full requirements.
 
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @param productId
@@ -1212,7 +1804,12 @@ func (r ApiAgentRetrievalServicePrepareTestGenerationContextRequest) Execute() (
 }
 
 /*
-AgentRetrievalServicePrepareTestGenerationContext Method for AgentRetrievalServicePrepareTestGenerationContext
+AgentRetrievalServicePrepareTestGenerationContext Prepares a batched test-generation context for several requirements.
+
+Aggregates a GetRequirementTestContext pack per requirement_id plus
+codebase hints (framework, test command, style examples) under a shared
+token_budget. POST is used for the large request body only — the call
+computes a context and writes nothing.
 
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @param productId
@@ -1336,6 +1933,8 @@ type ApiAgentRetrievalServiceRequirementImpactRequest struct {
 	repoPaths *[]string
 	depth *int32
 	edgeTypes *[]string
+	repository *string
+	minConfidence *float64
 }
 
 // repo_paths is the set of changed file paths (e.g. from a merged PR). The backend resolves these to seeded requirement IDs via requirement_sources.
@@ -1356,12 +1955,30 @@ func (r ApiAgentRetrievalServiceRequirementImpactRequest) EdgeTypes(edgeTypes []
 	return r
 }
 
+// repository scopes repo_paths to one repository: the canonical repo id (e.g. \&quot;github.com/acme/backend\&quot;) OR a local checkout alias resolved via component repository_aliases — same semantics as ChangedFile.repository.  Anchors carry only a repo-relative path, so identical paths in different repositories (\&quot;.github/workflows/ci.yml\&quot;, \&quot;Makefile\&quot;, \&quot;CLAUDE.md\&quot;) collide. When set, a seed is kept only if its requirement&#39;s component resolves to this repository; requirements with no component still seed (fail-open) and are counted in ImpactCoverage.unverified_repository_seeds.  Empty &#x3D; no repository filtering (pre-existing behaviour).
+func (r ApiAgentRetrievalServiceRequirementImpactRequest) Repository(repository string) ApiAgentRetrievalServiceRequirementImpactRequest {
+	r.repository = &repository
+	return r
+}
+
+// min_confidence bounds which edges the traversal may step onto: a NULL confidence always passes (parent edges carry none, so the requirement tree is never pruned), and a derived edge (co_anchored/covers, confidence &#x3D; 1/fan-out) below the floor is not admitted. Default 0 &#x3D; no floor, the pre-existing unbounded behaviour — every caller that omits this field sees byte-identical results to before it existed. A caller that wants to bound a hub-file&#39;s fan-out (e.g. the intent-loop close gate) sets it explicitly; impact-analysis callers that want the deliberately broad radius leave it at 0.
+func (r ApiAgentRetrievalServiceRequirementImpactRequest) MinConfidence(minConfidence float64) ApiAgentRetrievalServiceRequirementImpactRequest {
+	r.minConfidence = &minConfidence
+	return r
+}
+
 func (r ApiAgentRetrievalServiceRequirementImpactRequest) Execute() (*RequirementImpactResponse, *http.Response, error) {
 	return r.ApiService.AgentRetrievalServiceRequirementImpactExecute(r)
 }
 
 /*
-AgentRetrievalServiceRequirementImpact Method for AgentRetrievalServiceRequirementImpact
+AgentRetrievalServiceRequirementImpact Computes the requirement blast radius of a set of changed files.
+
+Resolves repo_paths to seed requirements via their repo_file source
+anchors, then expands the requirement graph up to depth hops (default 3)
+over the given edge_types (empty = all canonical types). Returns the
+affected requirement ids, the tests covering any of them, and the affected
+requirements with no live test links.
 
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @param productId
@@ -1421,6 +2038,12 @@ func (a *AgentRetrievalServiceAPIService) AgentRetrievalServiceRequirementImpact
 		} else {
 			parameterAddToHeaderOrQuery(localVarQueryParams, "edgeTypes", t, "form", "multi")
 		}
+	}
+	if r.repository != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "repository", r.repository, "form", "")
+	}
+	if r.minConfidence != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "minConfidence", r.minConfidence, "form", "")
 	}
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
@@ -1524,7 +2147,11 @@ func (r ApiAgentRetrievalServiceRequirementNeighborsRequest) Execute() (*Require
 }
 
 /*
-AgentRetrievalServiceRequirementNeighbors Method for AgentRetrievalServiceRequirementNeighbors
+AgentRetrievalServiceRequirementNeighbors Lists the graph neighbors of one requirement.
+
+Traverses the requirement graph from requirement_id up to depth hops
+(default 1) over the given edge_types (empty = all canonical types) and
+returns the reachable requirement ids.
 
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @param productId
@@ -1692,7 +2319,13 @@ func (r ApiAgentRetrievalServiceResolveFeatureContextRequest) Execute() (*Resolv
 }
 
 /*
-AgentRetrievalServiceResolveFeatureContext Method for AgentRetrievalServiceResolveFeatureContext
+AgentRetrievalServiceResolveFeatureContext Resolves a coding objective into feature-rooted requirement context.
+
+Retrieves the requirement-graph slices relevant to the free-text objective
+(and optional changed repo_paths): per feature, the root requirement, the
+touched nodes with their code anchors, the branch-effective coverage of
+that slice, and the retrieval signals (vector | fts | anchor) that
+surfaced the seeds. k bounds each retrieval signal's breadth.
 
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @param productId
@@ -1841,7 +2474,13 @@ func (r ApiAgentRetrievalServiceWriteRequirementEdgeRequest) Execute() (*WriteRe
 }
 
 /*
-AgentRetrievalServiceWriteRequirementEdge Method for AgentRetrievalServiceWriteRequirementEdge
+AgentRetrievalServiceWriteRequirementEdge Writes one semantic edge into the requirement graph.
+
+Creates a src->dst edge with exactly one destination endpoint:
+dst_requirement_id (edge_type depends_on | traces_to) or dst_component_id
+(edge_type impacts_component). confidence is required — an explicit 0.0 is
+valid, omitted is not. The edge is attributed to agent_run_id; the created
+edge id is returned.
 
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @param productId

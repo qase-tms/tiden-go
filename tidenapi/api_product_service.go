@@ -23,7 +23,12 @@ import (
 type ProductServiceAPI interface {
 
 	/*
-	ProductServiceCreateProduct Method for ProductServiceCreateProduct
+	ProductServiceCreateProduct Creates a product in a workspace.
+
+	A product is the top-level container for requirements, tests, runs, and
+releases. code becomes the reference prefix for entity sequence numbers
+(e.g. "QA" yields QA-1, QA-2). team_id makes the product team-owned;
+empty leaves it workspace-owned and visible to all workspace members.
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@param workspaceId
@@ -36,7 +41,11 @@ type ProductServiceAPI interface {
 	ProductServiceCreateProductExecute(r ApiProductServiceCreateProductRequest) (*CreateProductResponse, *http.Response, error)
 
 	/*
-	ProductServiceGetProduct GetProduct fetches one product by id so the CLI / agents can resolve a bound product's details (e.g. its name for `tiden doctor`) without paging the whole workspace list. Tenancy is enforced via the id's TENANT_ANCHOR_PRODUCT anchor.
+	ProductServiceGetProduct Fetches one product by id.
+
+	Lets the CLI / agents resolve a bound product's details (e.g. its name for
+`tiden doctor`) without paging the whole workspace list. Tenancy is
+enforced via the id's TENANT_ANCHOR_PRODUCT anchor.
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@param id
@@ -49,7 +58,12 @@ type ProductServiceAPI interface {
 	ProductServiceGetProductExecute(r ApiProductServiceGetProductRequest) (*GetProductResponse, *http.Response, error)
 
 	/*
-	ProductServiceListProducts Method for ProductServiceListProducts
+	ProductServiceListProducts Lists a workspace's products.
+
+	Returns the products page twice: products (bare) and items — the same page
+wrapped with per-product rollups (requirement/test-case counts, open
+branches, activation state, last activity) for list pages. Paginated via
+pagination.page_size/page_token.
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@param workspaceId
@@ -62,7 +76,12 @@ type ProductServiceAPI interface {
 	ProductServiceListProductsExecute(r ApiProductServiceListProductsRequest) (*ListProductsResponse, *http.Response, error)
 
 	/*
-	ProductServiceVerifyProductSetup Method for ProductServiceVerifyProductSetup
+	ProductServiceVerifyProductSetup Records a CLI setup verification snapshot for the product.
+
+	Appends a per-user setup snapshot — repo fingerprint/binding, git-hook
+wiring, per-agent detected/wired statuses — stamped verified_at=now.
+repo_fingerprint is required; source defaults to "cli". The web
+onboarding checklist reads the latest snapshot.
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@param productId
@@ -95,7 +114,12 @@ func (r ApiProductServiceCreateProductRequest) Execute() (*CreateProductResponse
 }
 
 /*
-ProductServiceCreateProduct Method for ProductServiceCreateProduct
+ProductServiceCreateProduct Creates a product in a workspace.
+
+A product is the top-level container for requirements, tests, runs, and
+releases. code becomes the reference prefix for entity sequence numbers
+(e.g. "QA" yields QA-1, QA-2). team_id makes the product team-owned;
+empty leaves it workspace-owned and visible to all workspace members.
 
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @param workspaceId
@@ -223,7 +247,11 @@ func (r ApiProductServiceGetProductRequest) Execute() (*GetProductResponse, *htt
 }
 
 /*
-ProductServiceGetProduct GetProduct fetches one product by id so the CLI / agents can resolve a bound product's details (e.g. its name for `tiden doctor`) without paging the whole workspace list. Tenancy is enforced via the id's TENANT_ANCHOR_PRODUCT anchor.
+ProductServiceGetProduct Fetches one product by id.
+
+Lets the CLI / agents resolve a bound product's details (e.g. its name for
+`tiden doctor`) without paging the whole workspace list. Tenancy is
+enforced via the id's TENANT_ANCHOR_PRODUCT anchor.
 
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @param id
@@ -358,7 +386,12 @@ func (r ApiProductServiceListProductsRequest) Execute() (*ListProductsResponse, 
 }
 
 /*
-ProductServiceListProducts Method for ProductServiceListProducts
+ProductServiceListProducts Lists a workspace's products.
+
+Returns the products page twice: products (bare) and items — the same page
+wrapped with per-product rollups (requirement/test-case counts, open
+branches, activation state, last activity) for list pages. Paginated via
+pagination.page_size/page_token.
 
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @param workspaceId
@@ -493,7 +526,12 @@ func (r ApiProductServiceVerifyProductSetupRequest) Execute() (*VerifyProductSet
 }
 
 /*
-ProductServiceVerifyProductSetup Method for ProductServiceVerifyProductSetup
+ProductServiceVerifyProductSetup Records a CLI setup verification snapshot for the product.
+
+Appends a per-user setup snapshot — repo fingerprint/binding, git-hook
+wiring, per-agent detected/wired statuses — stamped verified_at=now.
+repo_fingerprint is required; source defaults to "cli". The web
+onboarding checklist reads the latest snapshot.
 
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @param productId

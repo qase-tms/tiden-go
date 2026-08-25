@@ -4,9 +4,9 @@ All URIs are relative to *https://api.tiden.ai*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
-[**ReleaseServiceCreateRelease**](ReleaseServiceAPI.md#ReleaseServiceCreateRelease) | **Post** /v1/products/{productId}/releases | Create a release from an external source (CI/SDK). Idempotent upsert on (product, version, environment). The environment is matched by slug and auto-created if unknown.
-[**ReleaseServiceGetRelease**](ReleaseServiceAPI.md#ReleaseServiceGetRelease) | **Get** /v1/releases/{id} | 
-[**ReleaseServiceListReleases**](ReleaseServiceAPI.md#ReleaseServiceListReleases) | **Get** /v1/products/{productId}/releases | 
+[**ReleaseServiceCreateRelease**](ReleaseServiceAPI.md#ReleaseServiceCreateRelease) | **Post** /v1/products/{productId}/releases | Creates a release from an external source (CI/SDK).
+[**ReleaseServiceGetRelease**](ReleaseServiceAPI.md#ReleaseServiceGetRelease) | **Get** /v1/releases/{id} | Fetches one release by id.
+[**ReleaseServiceListReleases**](ReleaseServiceAPI.md#ReleaseServiceListReleases) | **Get** /v1/products/{productId}/releases | Lists a product&#39;s releases.
 
 
 
@@ -14,7 +14,9 @@ Method | HTTP request | Description
 
 > CreateReleaseResponse ReleaseServiceCreateRelease(ctx, productId).CreateReleaseBody(createReleaseBody).Execute()
 
-Create a release from an external source (CI/SDK). Idempotent upsert on (product, version, environment). The environment is matched by slug and auto-created if unknown.
+Creates a release from an external source (CI/SDK).
+
+
 
 ### Example
 
@@ -84,6 +86,8 @@ Name | Type | Description  | Notes
 
 > GetReleaseResponse ReleaseServiceGetRelease(ctx, id).Execute()
 
+Fetches one release by id.
+
 
 
 ### Example
@@ -151,6 +155,8 @@ Name | Type | Description  | Notes
 ## ReleaseServiceListReleases
 
 > ListReleasesResponse ReleaseServiceListReleases(ctx, productId).Environment(environment).PaginationPageSize(paginationPageSize).PaginationPageToken(paginationPageToken).Execute()
+
+Lists a product's releases.
 
 
 

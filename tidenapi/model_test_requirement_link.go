@@ -18,7 +18,7 @@ import (
 // checks if the TestRequirementLink type satisfies the MappedNullable interface at compile time
 var _ MappedNullable = &TestRequirementLink{}
 
-// TestRequirementLink struct for TestRequirementLink
+// TestRequirementLink TestRequirementLink is one durable test-case-to-requirement coverage link on main; linked cases' executions count toward the requirement's coverage.
 type TestRequirementLink struct {
 	Id *string `json:"id,omitempty"`
 	TestId *string `json:"testId,omitempty"`

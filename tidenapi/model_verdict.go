@@ -18,7 +18,7 @@ import (
 // checks if the Verdict type satisfies the MappedNullable interface at compile time
 var _ MappedNullable = &Verdict{}
 
-// Verdict struct for Verdict
+// Verdict Verdict is one immutable quality-gate decision snapshot for a (scope, ref): overall status, per-subject criterion breakdowns, and agent-actionable fix hints. invalidated_at marks snapshots superseded by newer data.
 type Verdict struct {
 	Id *string `json:"id,omitempty"`
 	ProductId *string `json:"productId,omitempty"`

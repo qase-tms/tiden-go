@@ -23,7 +23,12 @@ import (
 type AgentServiceAPI interface {
 
 	/*
-	AgentServiceCreateAgentConfig Method for AgentServiceCreateAgentConfig
+	AgentServiceCreateAgentConfig Creates an agent configuration in a product.
+
+	Binds an agent_type to the product with a name, inputs_json matching the
+type's input schema, optional LLM/data credential references, and an
+optional cron schedule (schedule_cron + schedule_timezone). Runs are
+started separately via StartAgentRun, the schedule, or a trigger.
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@param productId
@@ -36,7 +41,10 @@ type AgentServiceAPI interface {
 	AgentServiceCreateAgentConfigExecute(r ApiAgentServiceCreateAgentConfigRequest) (*CreateAgentConfigResponse, *http.Response, error)
 
 	/*
-	AgentServiceDeleteAgentConfig Method for AgentServiceDeleteAgentConfig
+	AgentServiceDeleteAgentConfig Deletes an agent configuration.
+
+	Permanently removes the config; scheduled executions stop. Not
+reversible.
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@param id
@@ -49,7 +57,10 @@ type AgentServiceAPI interface {
 	AgentServiceDeleteAgentConfigExecute(r ApiAgentServiceDeleteAgentConfigRequest) (map[string]interface{}, *http.Response, error)
 
 	/*
-	AgentServiceGetAgentConfig Method for AgentServiceGetAgentConfig
+	AgentServiceGetAgentConfig Fetches one agent configuration by id.
+
+	Returns the config including inputs_json (parse against the agent type's
+input_schema_json), schedule, and credential references.
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@param id
@@ -62,7 +73,10 @@ type AgentServiceAPI interface {
 	AgentServiceGetAgentConfigExecute(r ApiAgentServiceGetAgentConfigRequest) (*GetAgentConfigResponse, *http.Response, error)
 
 	/*
-	AgentServiceListAgentConfigs Method for AgentServiceListAgentConfigs
+	AgentServiceListAgentConfigs Lists a product's agent configurations.
+
+	Returns every agent config of the product, including its inputs, optional
+cron schedule, and credential references (never credential secrets).
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@param productId
@@ -75,7 +89,12 @@ type AgentServiceAPI interface {
 	AgentServiceListAgentConfigsExecute(r ApiAgentServiceListAgentConfigsRequest) (*ListAgentConfigsResponse, *http.Response, error)
 
 	/*
-	AgentServiceListAgentTypes Method for AgentServiceListAgentTypes
+	AgentServiceListAgentTypes Lists the catalog of available agent types.
+
+	Returns every code-defined agent capability with its input JSON Schema
+(input_schema_json), supported LLM providers, per-provider default models,
+and whether it needs a data credential or produces a branch. The catalog
+is global — not product-scoped.
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@return ApiAgentServiceListAgentTypesRequest
@@ -107,7 +126,12 @@ func (r ApiAgentServiceCreateAgentConfigRequest) Execute() (*CreateAgentConfigRe
 }
 
 /*
-AgentServiceCreateAgentConfig Method for AgentServiceCreateAgentConfig
+AgentServiceCreateAgentConfig Creates an agent configuration in a product.
+
+Binds an agent_type to the product with a name, inputs_json matching the
+type's input schema, optional LLM/data credential references, and an
+optional cron schedule (schedule_cron + schedule_timezone). Runs are
+started separately via StartAgentRun, the schedule, or a trigger.
 
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @param productId
@@ -235,7 +259,10 @@ func (r ApiAgentServiceDeleteAgentConfigRequest) Execute() (map[string]interface
 }
 
 /*
-AgentServiceDeleteAgentConfig Method for AgentServiceDeleteAgentConfig
+AgentServiceDeleteAgentConfig Deletes an agent configuration.
+
+Permanently removes the config; scheduled executions stop. Not
+reversible.
 
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @param id
@@ -358,7 +385,10 @@ func (r ApiAgentServiceGetAgentConfigRequest) Execute() (*GetAgentConfigResponse
 }
 
 /*
-AgentServiceGetAgentConfig Method for AgentServiceGetAgentConfig
+AgentServiceGetAgentConfig Fetches one agent configuration by id.
+
+Returns the config including inputs_json (parse against the agent type's
+input_schema_json), schedule, and credential references.
 
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @param id
@@ -481,7 +511,10 @@ func (r ApiAgentServiceListAgentConfigsRequest) Execute() (*ListAgentConfigsResp
 }
 
 /*
-AgentServiceListAgentConfigs Method for AgentServiceListAgentConfigs
+AgentServiceListAgentConfigs Lists a product's agent configurations.
+
+Returns every agent config of the product, including its inputs, optional
+cron schedule, and credential references (never credential secrets).
 
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @param productId
@@ -603,7 +636,12 @@ func (r ApiAgentServiceListAgentTypesRequest) Execute() (*ListAgentTypesResponse
 }
 
 /*
-AgentServiceListAgentTypes Method for AgentServiceListAgentTypes
+AgentServiceListAgentTypes Lists the catalog of available agent types.
+
+Returns every code-defined agent capability with its input JSON Schema
+(input_schema_json), supported LLM providers, per-provider default models,
+and whether it needs a data credential or produces a branch. The catalog
+is global — not product-scoped.
 
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @return ApiAgentServiceListAgentTypesRequest

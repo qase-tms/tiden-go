@@ -17,7 +17,7 @@ import (
 // checks if the FixHint type satisfies the MappedNullable interface at compile time
 var _ MappedNullable = &FixHint{}
 
-// FixHint struct for FixHint
+// FixHint FixHint is one agent-actionable remediation step attached to a verdict.
 type FixHint struct {
 	Component *string `json:"component,omitempty"`
 	Action *string `json:"action,omitempty"`

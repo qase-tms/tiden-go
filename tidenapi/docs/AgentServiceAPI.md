@@ -4,17 +4,19 @@ All URIs are relative to *https://api.tiden.ai*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
-[**AgentServiceCreateAgentConfig**](AgentServiceAPI.md#AgentServiceCreateAgentConfig) | **Post** /v1/products/{productId}/agent-configs | 
-[**AgentServiceDeleteAgentConfig**](AgentServiceAPI.md#AgentServiceDeleteAgentConfig) | **Delete** /v1/agent-configs/{id} | 
-[**AgentServiceGetAgentConfig**](AgentServiceAPI.md#AgentServiceGetAgentConfig) | **Get** /v1/agent-configs/{id} | 
-[**AgentServiceListAgentConfigs**](AgentServiceAPI.md#AgentServiceListAgentConfigs) | **Get** /v1/products/{productId}/agent-configs | 
-[**AgentServiceListAgentTypes**](AgentServiceAPI.md#AgentServiceListAgentTypes) | **Get** /v1/agent-types | 
+[**AgentServiceCreateAgentConfig**](AgentServiceAPI.md#AgentServiceCreateAgentConfig) | **Post** /v1/products/{productId}/agent-configs | Creates an agent configuration in a product.
+[**AgentServiceDeleteAgentConfig**](AgentServiceAPI.md#AgentServiceDeleteAgentConfig) | **Delete** /v1/agent-configs/{id} | Deletes an agent configuration.
+[**AgentServiceGetAgentConfig**](AgentServiceAPI.md#AgentServiceGetAgentConfig) | **Get** /v1/agent-configs/{id} | Fetches one agent configuration by id.
+[**AgentServiceListAgentConfigs**](AgentServiceAPI.md#AgentServiceListAgentConfigs) | **Get** /v1/products/{productId}/agent-configs | Lists a product&#39;s agent configurations.
+[**AgentServiceListAgentTypes**](AgentServiceAPI.md#AgentServiceListAgentTypes) | **Get** /v1/agent-types | Lists the catalog of available agent types.
 
 
 
 ## AgentServiceCreateAgentConfig
 
 > CreateAgentConfigResponse AgentServiceCreateAgentConfig(ctx, productId).CreateAgentConfigBody(createAgentConfigBody).Execute()
+
+Creates an agent configuration in a product.
 
 
 
@@ -86,6 +88,8 @@ Name | Type | Description  | Notes
 
 > map[string]interface{} AgentServiceDeleteAgentConfig(ctx, id).Execute()
 
+Deletes an agent configuration.
+
 
 
 ### Example
@@ -153,6 +157,8 @@ Name | Type | Description  | Notes
 ## AgentServiceGetAgentConfig
 
 > GetAgentConfigResponse AgentServiceGetAgentConfig(ctx, id).Execute()
+
+Fetches one agent configuration by id.
 
 
 
@@ -222,6 +228,8 @@ Name | Type | Description  | Notes
 
 > ListAgentConfigsResponse AgentServiceListAgentConfigs(ctx, productId).Execute()
 
+Lists a product's agent configurations.
+
 
 
 ### Example
@@ -289,6 +297,8 @@ Name | Type | Description  | Notes
 ## AgentServiceListAgentTypes
 
 > ListAgentTypesResponse AgentServiceListAgentTypes(ctx).Execute()
+
+Lists the catalog of available agent types.
 
 
 

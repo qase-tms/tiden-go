@@ -8,12 +8,13 @@ Name | Type | Description | Notes
 **Modifications** | Pointer to [**[]MergeModification**](MergeModification.md) |  | [optional] 
 **Deletions** | Pointer to [**[]Requirement**](Requirement.md) |  | [optional] 
 **Stats** | Pointer to [**MergeStats**](MergeStats.md) |  | [optional] 
-**TestAdditions** | Pointer to [**[]Test**](Test.md) | Test-side merge effects (Phase 4 extension). Empty when the branch holds no test changes. | [optional] 
+**TestAdditions** | Pointer to [**[]Test**](Test.md) | Test-side merge effects. Empty when the branch holds no test changes. | [optional] 
 **TestModifications** | Pointer to [**[]TestMergeModification**](TestMergeModification.md) |  | [optional] 
 **TestDeletions** | Pointer to [**[]Test**](Test.md) |  | [optional] 
 **ComponentAdditions** | Pointer to [**[]Component**](Component.md) | Component-side merge effects. Empty when the branch holds no component changes. | [optional] 
 **ComponentModifications** | Pointer to [**[]ComponentMergeModification**](ComponentMergeModification.md) |  | [optional] 
 **ComponentDeletions** | Pointer to [**[]Component**](Component.md) |  | [optional] 
+**IntentSession** | Pointer to [**MergeIntentSessionState**](MergeIntentSessionState.md) |  | [optional] 
 
 ## Methods
 
@@ -283,6 +284,31 @@ SetComponentDeletions sets ComponentDeletions field to given value.
 `func (o *GetMergePreviewResponse) HasComponentDeletions() bool`
 
 HasComponentDeletions returns a boolean if a field has been set.
+
+### GetIntentSession
+
+`func (o *GetMergePreviewResponse) GetIntentSession() MergeIntentSessionState`
+
+GetIntentSession returns the IntentSession field if non-nil, zero value otherwise.
+
+### GetIntentSessionOk
+
+`func (o *GetMergePreviewResponse) GetIntentSessionOk() (*MergeIntentSessionState, bool)`
+
+GetIntentSessionOk returns a tuple with the IntentSession field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetIntentSession
+
+`func (o *GetMergePreviewResponse) SetIntentSession(v MergeIntentSessionState)`
+
+SetIntentSession sets IntentSession field to given value.
+
+### HasIntentSession
+
+`func (o *GetMergePreviewResponse) HasIntentSession() bool`
+
+HasIntentSession returns a boolean if a field has been set.
 
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)

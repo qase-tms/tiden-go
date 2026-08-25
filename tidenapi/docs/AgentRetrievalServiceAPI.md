@@ -4,24 +4,101 @@ All URIs are relative to *https://api.tiden.ai*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
-[**AgentRetrievalServiceAttributeChangedFiles**](AgentRetrievalServiceAPI.md#AgentRetrievalServiceAttributeChangedFiles) | **Post** /v1/products/{productId}/requirements/{requirementId}:attribute-changed-files | 
-[**AgentRetrievalServiceDeclareRequirementEdgeIntent**](AgentRetrievalServiceAPI.md#AgentRetrievalServiceDeclareRequirementEdgeIntent) | **Post** /v1/products/{productId}/requirement-edge-intents | 
-[**AgentRetrievalServiceGetRequirementGraph**](AgentRetrievalServiceAPI.md#AgentRetrievalServiceGetRequirementGraph) | **Get** /v1/products/{productId}/requirement-graph | 
-[**AgentRetrievalServiceGetRequirementTestContext**](AgentRetrievalServiceAPI.md#AgentRetrievalServiceGetRequirementTestContext) | **Get** /v1/products/{productId}/requirements/{requirementId}/test-context | 
-[**AgentRetrievalServiceGraphCoverageGaps**](AgentRetrievalServiceAPI.md#AgentRetrievalServiceGraphCoverageGaps) | **Get** /v1/products/{productId}/requirements/graph-coverage-gaps | 
-[**AgentRetrievalServiceListCoverageGaps**](AgentRetrievalServiceAPI.md#AgentRetrievalServiceListCoverageGaps) | **Get** /v1/products/{productId}/coverage-gaps | 
-[**AgentRetrievalServiceListRequirementAnchors**](AgentRetrievalServiceAPI.md#AgentRetrievalServiceListRequirementAnchors) | **Get** /v1/products/{productId}/requirement-anchors | 
-[**AgentRetrievalServicePrepareTestGenerationContext**](AgentRetrievalServiceAPI.md#AgentRetrievalServicePrepareTestGenerationContext) | **Post** /v1/products/{productId}/test-generation-context:prepare | 
-[**AgentRetrievalServiceRequirementImpact**](AgentRetrievalServiceAPI.md#AgentRetrievalServiceRequirementImpact) | **Get** /v1/products/{productId}/requirements/impact | 
-[**AgentRetrievalServiceRequirementNeighbors**](AgentRetrievalServiceAPI.md#AgentRetrievalServiceRequirementNeighbors) | **Get** /v1/products/{productId}/requirements/{requirementId}/neighbors | 
-[**AgentRetrievalServiceResolveFeatureContext**](AgentRetrievalServiceAPI.md#AgentRetrievalServiceResolveFeatureContext) | **Get** /v1/products/{productId}/feature-context | 
-[**AgentRetrievalServiceWriteRequirementEdge**](AgentRetrievalServiceAPI.md#AgentRetrievalServiceWriteRequirementEdge) | **Post** /v1/products/{productId}/requirement-edges | 
+[**AgentRetrievalServiceAdvanceRepoWatermark**](AgentRetrievalServiceAPI.md#AgentRetrievalServiceAdvanceRepoWatermark) | **Post** /v1/products/{productId}/repo-watermark:advance | Advances the drift watermark of one repository.
+[**AgentRetrievalServiceAttributeChangedFiles**](AgentRetrievalServiceAPI.md#AgentRetrievalServiceAttributeChangedFiles) | **Post** /v1/products/{productId}/requirements/{requirementId}:attribute-changed-files | Attributes a requirement&#39;s changed files to owning components.
+[**AgentRetrievalServiceDeclareRequirementEdgeIntent**](AgentRetrievalServiceAPI.md#AgentRetrievalServiceDeclareRequirementEdgeIntent) | **Post** /v1/products/{productId}/requirement-edge-intents | Records a deferred graph edge for endpoints not yet on main.
+[**AgentRetrievalServiceGetIssueFixContext**](AgentRetrievalServiceAPI.md#AgentRetrievalServiceGetIssueFixContext) | **Get** /v1/products/{productId}/issues/{issueId}/fix-context | Returns everything needed to fix one error, in a single call: the issue, its latest occurrence with symbolicated stack frames, the repository files those frames implicate, where the error is happening by environment, and — for each requirement those files implement — whether a test already covers it.
+[**AgentRetrievalServiceGetRepoWatermark**](AgentRetrievalServiceAPI.md#AgentRetrievalServiceGetRepoWatermark) | **Get** /v1/products/{productId}/repo-watermark | Returns the drift watermark of one repository.
+[**AgentRetrievalServiceGetRequirementGraph**](AgentRetrievalServiceAPI.md#AgentRetrievalServiceGetRequirementGraph) | **Get** /v1/products/{productId}/requirement-graph | Returns the product&#39;s full requirement graph.
+[**AgentRetrievalServiceGetRequirementTestContext**](AgentRetrievalServiceAPI.md#AgentRetrievalServiceGetRequirementTestContext) | **Get** /v1/products/{productId}/requirements/{requirementId}/test-context | Builds the full test-authoring context pack for one requirement.
+[**AgentRetrievalServiceGraphCoverageGaps**](AgentRetrievalServiceAPI.md#AgentRetrievalServiceGraphCoverageGaps) | **Get** /v1/products/{productId}/requirements/graph-coverage-gaps | Filters a requirement set down to those without test coverage.
+[**AgentRetrievalServiceListCoverageGaps**](AgentRetrievalServiceAPI.md#AgentRetrievalServiceListCoverageGaps) | **Get** /v1/products/{productId}/coverage-gaps | Lists requirements with insufficient test coverage.
+[**AgentRetrievalServiceListRequirementAnchors**](AgentRetrievalServiceAPI.md#AgentRetrievalServiceListRequirementAnchors) | **Get** /v1/products/{productId}/requirement-anchors | Lists the branch-effective code anchors of all requirements.
+[**AgentRetrievalServicePrepareTestGenerationContext**](AgentRetrievalServiceAPI.md#AgentRetrievalServicePrepareTestGenerationContext) | **Post** /v1/products/{productId}/test-generation-context:prepare | Prepares a batched test-generation context for several requirements.
+[**AgentRetrievalServiceRequirementImpact**](AgentRetrievalServiceAPI.md#AgentRetrievalServiceRequirementImpact) | **Get** /v1/products/{productId}/requirements/impact | Computes the requirement blast radius of a set of changed files.
+[**AgentRetrievalServiceRequirementNeighbors**](AgentRetrievalServiceAPI.md#AgentRetrievalServiceRequirementNeighbors) | **Get** /v1/products/{productId}/requirements/{requirementId}/neighbors | Lists the graph neighbors of one requirement.
+[**AgentRetrievalServiceResolveFeatureContext**](AgentRetrievalServiceAPI.md#AgentRetrievalServiceResolveFeatureContext) | **Get** /v1/products/{productId}/feature-context | Resolves a coding objective into feature-rooted requirement context.
+[**AgentRetrievalServiceWriteRequirementEdge**](AgentRetrievalServiceAPI.md#AgentRetrievalServiceWriteRequirementEdge) | **Post** /v1/products/{productId}/requirement-edges | Writes one semantic edge into the requirement graph.
 
+
+
+## AgentRetrievalServiceAdvanceRepoWatermark
+
+> AdvanceRepoWatermarkResponse AgentRetrievalServiceAdvanceRepoWatermark(ctx, productId).AdvanceRepoWatermarkBody(advanceRepoWatermarkBody).Execute()
+
+Advances the drift watermark of one repository.
+
+
+
+### Example
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+	"os"
+	openapiclient "github.com/qase-tms/tiden-go/tidenapi"
+)
+
+func main() {
+	productId := "productId_example" // string | 
+	advanceRepoWatermarkBody := *openapiclient.NewAdvanceRepoWatermarkBody() // AdvanceRepoWatermarkBody | 
+
+	configuration := openapiclient.NewConfiguration()
+	apiClient := openapiclient.NewAPIClient(configuration)
+	resp, r, err := apiClient.AgentRetrievalServiceAPI.AgentRetrievalServiceAdvanceRepoWatermark(context.Background(), productId).AdvanceRepoWatermarkBody(advanceRepoWatermarkBody).Execute()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error when calling `AgentRetrievalServiceAPI.AgentRetrievalServiceAdvanceRepoWatermark``: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+	}
+	// response from `AgentRetrievalServiceAdvanceRepoWatermark`: AdvanceRepoWatermarkResponse
+	fmt.Fprintf(os.Stdout, "Response from `AgentRetrievalServiceAPI.AgentRetrievalServiceAdvanceRepoWatermark`: %v\n", resp)
+}
+```
+
+### Path Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+**productId** | **string** |  | 
+
+### Other Parameters
+
+Other parameters are passed through a pointer to a apiAgentRetrievalServiceAdvanceRepoWatermarkRequest struct via the builder pattern
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+
+ **advanceRepoWatermarkBody** | [**AdvanceRepoWatermarkBody**](AdvanceRepoWatermarkBody.md) |  | 
+
+### Return type
+
+[**AdvanceRepoWatermarkResponse**](AdvanceRepoWatermarkResponse.md)
+
+### Authorization
+
+[BearerAuth](../README.md#BearerAuth)
+
+### HTTP request headers
+
+- **Content-Type**: application/json
+- **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
+[[Back to Model list]](../README.md#documentation-for-models)
+[[Back to README]](../README.md)
 
 
 ## AgentRetrievalServiceAttributeChangedFiles
 
 > AttributeChangedFilesResponse AgentRetrievalServiceAttributeChangedFiles(ctx, productId, requirementId).AttributeChangedFilesBody(attributeChangedFilesBody).Execute()
+
+Attributes a requirement's changed files to owning components.
 
 
 
@@ -96,6 +173,8 @@ Name | Type | Description  | Notes
 
 > DeclareRequirementEdgeIntentResponse AgentRetrievalServiceDeclareRequirementEdgeIntent(ctx, productId).DeclareRequirementEdgeIntentBody(declareRequirementEdgeIntentBody).Execute()
 
+Records a deferred graph edge for endpoints not yet on main.
+
 
 
 ### Example
@@ -162,9 +241,160 @@ Name | Type | Description  | Notes
 [[Back to README]](../README.md)
 
 
+## AgentRetrievalServiceGetIssueFixContext
+
+> GetIssueFixContextResponse AgentRetrievalServiceGetIssueFixContext(ctx, productId, issueId).Branch(branch).MaxFrames(maxFrames).Execute()
+
+Returns everything needed to fix one error, in a single call: the issue, its latest occurrence with symbolicated stack frames, the repository files those frames implicate, where the error is happening by environment, and — for each requirement those files implement — whether a test already covers it.
+
+
+
+### Example
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+	"os"
+	openapiclient "github.com/qase-tms/tiden-go/tidenapi"
+)
+
+func main() {
+	productId := "productId_example" // string | 
+	issueId := "issueId_example" // string | 
+	branch := "branch_example" // string | branch scopes the requirement lookup to a branch's effective view. \"\" = main. (optional)
+	maxFrames := int32(56) // int32 | max_frames bounds how many stack frames come back. <= 0 uses the server default (10); the cap is 50. (optional)
+
+	configuration := openapiclient.NewConfiguration()
+	apiClient := openapiclient.NewAPIClient(configuration)
+	resp, r, err := apiClient.AgentRetrievalServiceAPI.AgentRetrievalServiceGetIssueFixContext(context.Background(), productId, issueId).Branch(branch).MaxFrames(maxFrames).Execute()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error when calling `AgentRetrievalServiceAPI.AgentRetrievalServiceGetIssueFixContext``: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+	}
+	// response from `AgentRetrievalServiceGetIssueFixContext`: GetIssueFixContextResponse
+	fmt.Fprintf(os.Stdout, "Response from `AgentRetrievalServiceAPI.AgentRetrievalServiceGetIssueFixContext`: %v\n", resp)
+}
+```
+
+### Path Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+**productId** | **string** |  | 
+**issueId** | **string** |  | 
+
+### Other Parameters
+
+Other parameters are passed through a pointer to a apiAgentRetrievalServiceGetIssueFixContextRequest struct via the builder pattern
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+
+
+ **branch** | **string** | branch scopes the requirement lookup to a branch&#39;s effective view. \&quot;\&quot; &#x3D; main. | 
+ **maxFrames** | **int32** | max_frames bounds how many stack frames come back. &lt;&#x3D; 0 uses the server default (10); the cap is 50. | 
+
+### Return type
+
+[**GetIssueFixContextResponse**](GetIssueFixContextResponse.md)
+
+### Authorization
+
+[BearerAuth](../README.md#BearerAuth)
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
+[[Back to Model list]](../README.md#documentation-for-models)
+[[Back to README]](../README.md)
+
+
+## AgentRetrievalServiceGetRepoWatermark
+
+> GetRepoWatermarkResponse AgentRetrievalServiceGetRepoWatermark(ctx, productId).Repository(repository).Execute()
+
+Returns the drift watermark of one repository.
+
+
+
+### Example
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+	"os"
+	openapiclient "github.com/qase-tms/tiden-go/tidenapi"
+)
+
+func main() {
+	productId := "productId_example" // string | 
+	repository := "repository_example" // string | Canonical repo id (\"github.com/org/repo\" — the components.repository format), never a local path and never a clone URL. (optional)
+
+	configuration := openapiclient.NewConfiguration()
+	apiClient := openapiclient.NewAPIClient(configuration)
+	resp, r, err := apiClient.AgentRetrievalServiceAPI.AgentRetrievalServiceGetRepoWatermark(context.Background(), productId).Repository(repository).Execute()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error when calling `AgentRetrievalServiceAPI.AgentRetrievalServiceGetRepoWatermark``: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+	}
+	// response from `AgentRetrievalServiceGetRepoWatermark`: GetRepoWatermarkResponse
+	fmt.Fprintf(os.Stdout, "Response from `AgentRetrievalServiceAPI.AgentRetrievalServiceGetRepoWatermark`: %v\n", resp)
+}
+```
+
+### Path Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+**productId** | **string** |  | 
+
+### Other Parameters
+
+Other parameters are passed through a pointer to a apiAgentRetrievalServiceGetRepoWatermarkRequest struct via the builder pattern
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+
+ **repository** | **string** | Canonical repo id (\&quot;github.com/org/repo\&quot; — the components.repository format), never a local path and never a clone URL. | 
+
+### Return type
+
+[**GetRepoWatermarkResponse**](GetRepoWatermarkResponse.md)
+
+### Authorization
+
+[BearerAuth](../README.md#BearerAuth)
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
+[[Back to Model list]](../README.md#documentation-for-models)
+[[Back to README]](../README.md)
+
+
 ## AgentRetrievalServiceGetRequirementGraph
 
 > GetRequirementGraphResponse AgentRetrievalServiceGetRequirementGraph(ctx, productId).Execute()
+
+Returns the product's full requirement graph.
 
 
 
@@ -234,6 +464,8 @@ Name | Type | Description  | Notes
 
 > GetRequirementTestContextResponse AgentRetrievalServiceGetRequirementTestContext(ctx, productId, requirementId).Branch(branch).Budget(budget).Execute()
 
+Builds the full test-authoring context pack for one requirement.
+
 
 
 ### Example
@@ -252,7 +484,7 @@ func main() {
 	productId := "productId_example" // string | 
 	requirementId := "requirementId_example" // string | 
 	branch := "branch_example" // string |  (optional)
-	budget := int32(56) // int32 |  (optional)
+	budget := int32(56) // int32 | budget bounds the pack's approximate token size: smaller budgets shrink per-list limits and trim long excerpts; <= 0 uses server defaults. (optional)
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
@@ -285,7 +517,7 @@ Name | Type | Description  | Notes
 
 
  **branch** | **string** |  | 
- **budget** | **int32** |  | 
+ **budget** | **int32** | budget bounds the pack&#39;s approximate token size: smaller budgets shrink per-list limits and trim long excerpts; &lt;&#x3D; 0 uses server defaults. | 
 
 ### Return type
 
@@ -308,6 +540,8 @@ Name | Type | Description  | Notes
 ## AgentRetrievalServiceGraphCoverageGaps
 
 > GraphCoverageGapsResponse AgentRetrievalServiceGraphCoverageGaps(ctx, productId).RequirementIds(requirementIds).Execute()
+
+Filters a requirement set down to those without test coverage.
 
 
 
@@ -378,6 +612,8 @@ Name | Type | Description  | Notes
 ## AgentRetrievalServiceListCoverageGaps
 
 > ListCoverageGapsResponse AgentRetrievalServiceListCoverageGaps(ctx, productId).Branch(branch).CoverageStatuses(coverageStatuses).ComponentId(componentId).Query(query).PaginationPageSize(paginationPageSize).PaginationPageToken(paginationPageToken).RootRequirementId(rootRequirementId).Execute()
+
+Lists requirements with insufficient test coverage.
 
 
 
@@ -461,6 +697,8 @@ Name | Type | Description  | Notes
 
 > ListRequirementAnchorsResponse AgentRetrievalServiceListRequirementAnchors(ctx, productId).Branch(branch).Execute()
 
+Lists the branch-effective code anchors of all requirements.
+
 
 
 ### Example
@@ -531,6 +769,8 @@ Name | Type | Description  | Notes
 
 > PrepareTestGenerationContextResponse AgentRetrievalServicePrepareTestGenerationContext(ctx, productId).PrepareTestGenerationContextBody(prepareTestGenerationContextBody).Execute()
 
+Prepares a batched test-generation context for several requirements.
+
 
 
 ### Example
@@ -599,7 +839,9 @@ Name | Type | Description  | Notes
 
 ## AgentRetrievalServiceRequirementImpact
 
-> RequirementImpactResponse AgentRetrievalServiceRequirementImpact(ctx, productId).RepoPaths(repoPaths).Depth(depth).EdgeTypes(edgeTypes).Execute()
+> RequirementImpactResponse AgentRetrievalServiceRequirementImpact(ctx, productId).RepoPaths(repoPaths).Depth(depth).EdgeTypes(edgeTypes).Repository(repository).MinConfidence(minConfidence).Execute()
+
+Computes the requirement blast radius of a set of changed files.
 
 
 
@@ -620,10 +862,12 @@ func main() {
 	repoPaths := []string{"Inner_example"} // []string | repo_paths is the set of changed file paths (e.g. from a merged PR). The backend resolves these to seeded requirement IDs via requirement_sources. (optional)
 	depth := int32(56) // int32 | depth controls how many hops the graph traversal expands beyond the seeds. Defaults to 3 on the server if <= 0. (optional)
 	edgeTypes := []string{"Inner_example"} // []string | edge_types filters which edge types to traverse. Empty = all canonical types. (optional)
+	repository := "repository_example" // string | repository scopes repo_paths to one repository: the canonical repo id (e.g. \"github.com/acme/backend\") OR a local checkout alias resolved via component repository_aliases — same semantics as ChangedFile.repository.  Anchors carry only a repo-relative path, so identical paths in different repositories (\".github/workflows/ci.yml\", \"Makefile\", \"CLAUDE.md\") collide. When set, a seed is kept only if its requirement's component resolves to this repository; requirements with no component still seed (fail-open) and are counted in ImpactCoverage.unverified_repository_seeds.  Empty = no repository filtering (pre-existing behaviour). (optional)
+	minConfidence := float64(1.2) // float64 | min_confidence bounds which edges the traversal may step onto: a NULL confidence always passes (parent edges carry none, so the requirement tree is never pruned), and a derived edge (co_anchored/covers, confidence = 1/fan-out) below the floor is not admitted. Default 0 = no floor, the pre-existing unbounded behaviour — every caller that omits this field sees byte-identical results to before it existed. A caller that wants to bound a hub-file's fan-out (e.g. the intent-loop close gate) sets it explicitly; impact-analysis callers that want the deliberately broad radius leave it at 0. (optional)
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
-	resp, r, err := apiClient.AgentRetrievalServiceAPI.AgentRetrievalServiceRequirementImpact(context.Background(), productId).RepoPaths(repoPaths).Depth(depth).EdgeTypes(edgeTypes).Execute()
+	resp, r, err := apiClient.AgentRetrievalServiceAPI.AgentRetrievalServiceRequirementImpact(context.Background(), productId).RepoPaths(repoPaths).Depth(depth).EdgeTypes(edgeTypes).Repository(repository).MinConfidence(minConfidence).Execute()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error when calling `AgentRetrievalServiceAPI.AgentRetrievalServiceRequirementImpact``: %v\n", err)
 		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
@@ -652,6 +896,8 @@ Name | Type | Description  | Notes
  **repoPaths** | **[]string** | repo_paths is the set of changed file paths (e.g. from a merged PR). The backend resolves these to seeded requirement IDs via requirement_sources. | 
  **depth** | **int32** | depth controls how many hops the graph traversal expands beyond the seeds. Defaults to 3 on the server if &lt;&#x3D; 0. | 
  **edgeTypes** | **[]string** | edge_types filters which edge types to traverse. Empty &#x3D; all canonical types. | 
+ **repository** | **string** | repository scopes repo_paths to one repository: the canonical repo id (e.g. \&quot;github.com/acme/backend\&quot;) OR a local checkout alias resolved via component repository_aliases — same semantics as ChangedFile.repository.  Anchors carry only a repo-relative path, so identical paths in different repositories (\&quot;.github/workflows/ci.yml\&quot;, \&quot;Makefile\&quot;, \&quot;CLAUDE.md\&quot;) collide. When set, a seed is kept only if its requirement&#39;s component resolves to this repository; requirements with no component still seed (fail-open) and are counted in ImpactCoverage.unverified_repository_seeds.  Empty &#x3D; no repository filtering (pre-existing behaviour). | 
+ **minConfidence** | **float64** | min_confidence bounds which edges the traversal may step onto: a NULL confidence always passes (parent edges carry none, so the requirement tree is never pruned), and a derived edge (co_anchored/covers, confidence &#x3D; 1/fan-out) below the floor is not admitted. Default 0 &#x3D; no floor, the pre-existing unbounded behaviour — every caller that omits this field sees byte-identical results to before it existed. A caller that wants to bound a hub-file&#39;s fan-out (e.g. the intent-loop close gate) sets it explicitly; impact-analysis callers that want the deliberately broad radius leave it at 0. | 
 
 ### Return type
 
@@ -674,6 +920,8 @@ Name | Type | Description  | Notes
 ## AgentRetrievalServiceRequirementNeighbors
 
 > RequirementNeighborsResponse AgentRetrievalServiceRequirementNeighbors(ctx, productId, requirementId).Depth(depth).EdgeTypes(edgeTypes).Execute()
+
+Lists the graph neighbors of one requirement.
 
 
 
@@ -750,6 +998,8 @@ Name | Type | Description  | Notes
 
 > ResolveFeatureContextResponse AgentRetrievalServiceResolveFeatureContext(ctx, productId).Branch(branch).Text(text).RepoPaths(repoPaths).K(k).Execute()
 
+Resolves a coding objective into feature-rooted requirement context.
+
 
 
 ### Example
@@ -825,6 +1075,8 @@ Name | Type | Description  | Notes
 ## AgentRetrievalServiceWriteRequirementEdge
 
 > WriteRequirementEdgeResponse AgentRetrievalServiceWriteRequirementEdge(ctx, productId).WriteRequirementEdgeBody(writeRequirementEdgeBody).Execute()
+
+Writes one semantic edge into the requirement graph.
 
 
 

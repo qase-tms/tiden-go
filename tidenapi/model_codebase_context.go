@@ -17,7 +17,7 @@ import (
 // checks if the CodebaseContext type satisfies the MappedNullable interface at compile time
 var _ MappedNullable = &CodebaseContext{}
 
-// CodebaseContext struct for CodebaseContext
+// CodebaseContext CodebaseContext carries repository hints for test generation: relevant source/test files, the detected framework and test command, and style/ fixture examples to imitate.
 type CodebaseContext struct {
 	SourceFiles []CodebaseFile `json:"sourceFiles,omitempty"`
 	TestFiles []CodebaseFile `json:"testFiles,omitempty"`

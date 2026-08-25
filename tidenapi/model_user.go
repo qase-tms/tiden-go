@@ -18,7 +18,7 @@ import (
 // checks if the User type satisfies the MappedNullable interface at compile time
 var _ MappedNullable = &User{}
 
-// User struct for User
+// User User is a Tiden account as exposed to clients; credentials are never included.
 type User struct {
 	Id *string `json:"id,omitempty"`
 	Email *string `json:"email,omitempty"`

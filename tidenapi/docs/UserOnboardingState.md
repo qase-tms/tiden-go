@@ -10,6 +10,8 @@ Name | Type | Description | Notes
 **CompletedAt** | Pointer to **time.Time** |  | [optional] 
 **CreatedAt** | Pointer to **time.Time** |  | [optional] 
 **UpdatedAt** | Pointer to **time.Time** |  | [optional] 
+**WizardStep** | Pointer to **string** | Current wizard screen; \&quot;\&quot; means the wizard was never started. | [optional] 
+**Answers** | Pointer to [**OnboardingAnswers**](OnboardingAnswers.md) |  | [optional] 
 
 ## Methods
 
@@ -179,6 +181,56 @@ SetUpdatedAt sets UpdatedAt field to given value.
 `func (o *UserOnboardingState) HasUpdatedAt() bool`
 
 HasUpdatedAt returns a boolean if a field has been set.
+
+### GetWizardStep
+
+`func (o *UserOnboardingState) GetWizardStep() string`
+
+GetWizardStep returns the WizardStep field if non-nil, zero value otherwise.
+
+### GetWizardStepOk
+
+`func (o *UserOnboardingState) GetWizardStepOk() (*string, bool)`
+
+GetWizardStepOk returns a tuple with the WizardStep field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetWizardStep
+
+`func (o *UserOnboardingState) SetWizardStep(v string)`
+
+SetWizardStep sets WizardStep field to given value.
+
+### HasWizardStep
+
+`func (o *UserOnboardingState) HasWizardStep() bool`
+
+HasWizardStep returns a boolean if a field has been set.
+
+### GetAnswers
+
+`func (o *UserOnboardingState) GetAnswers() OnboardingAnswers`
+
+GetAnswers returns the Answers field if non-nil, zero value otherwise.
+
+### GetAnswersOk
+
+`func (o *UserOnboardingState) GetAnswersOk() (*OnboardingAnswers, bool)`
+
+GetAnswersOk returns a tuple with the Answers field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetAnswers
+
+`func (o *UserOnboardingState) SetAnswers(v OnboardingAnswers)`
+
+SetAnswers sets Answers field to given value.
+
+### HasAnswers
+
+`func (o *UserOnboardingState) HasAnswers() bool`
+
+HasAnswers returns a boolean if a field has been set.
 
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)

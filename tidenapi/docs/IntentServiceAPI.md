@@ -4,13 +4,15 @@ All URIs are relative to *https://api.tiden.ai*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
-[**IntentServiceDistillIntent**](IntentServiceAPI.md#IntentServiceDistillIntent) | **Post** /v1/products/{productId}/intent:distill | 
+[**IntentServiceDistillIntent**](IntentServiceAPI.md#IntentServiceDistillIntent) | **Post** /v1/products/{productId}/intent:distill | Distills a coding-session transcript into requirement changes.
 
 
 
 ## IntentServiceDistillIntent
 
 > DistillIntentResponse IntentServiceDistillIntent(ctx, productId).DistillIntentBody(distillIntentBody).Execute()
+
+Distills a coding-session transcript into requirement changes.
 
 
 
