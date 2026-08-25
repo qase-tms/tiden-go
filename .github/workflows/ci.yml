@@ -20,7 +20,7 @@ jobs:
       - name: gofmt
         if: matrix.module == '.'
         # testdata holds intentionally-broken fixture sources (build-failure goldens);
-        # tidenapi/ is generated code (from qase-tms/tiden-specs) - exempt, never hand-formatted
+        # tidenapi/ is generated code (from the OpenAPI spec) - exempt, never hand-formatted
         run: |
           UNFORMATTED=$(gofmt -l . | grep -v '/testdata/' | grep -v '^tidenapi/' || true)
           test -z "$UNFORMATTED" || (echo "$UNFORMATTED" && exit 1)
