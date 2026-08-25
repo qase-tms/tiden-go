@@ -1,0 +1,22 @@
+README.md
+  s_08994899526032::t_ab830fa67fa8d4 40
+  s_08994899526032::t_5838fb04de1ff4 81-82
+.github/workflows/ci.yml
+  s_08994899526032::t_0ec36d680286d5 23
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.24",
+  "base_commit_sha": "adb6b64a2f5baa4a696bffb64dd3e0e7a176a108",
+  "prompts": {},
+  "sessions": {
+    "s_08994899526032": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "ce9d07e4-1f0f-4374-a531-8faf01911c87",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Nikolay Pisarev <npisarev@qase.io>"
+    }
+  }
+}
