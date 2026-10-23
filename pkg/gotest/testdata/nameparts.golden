@@ -1,0 +1,10 @@
+TestNormalizeRemoteURL	=>	["TestNormalizeRemoteURL"]
+TestLogin/expired_token	=>	["TestLogin","expired_token"]
+TestLogin/nested/deep leaf	=>	["TestLogin","nested","deep leaf"]
+TestResolveSkillForce/prompt declined	=>	["TestResolveSkillForce","prompt declined"]
+TestWeird/Ünïcode_and spaces/tabs	inside	=>	["TestWeird","Ünïcode_and spaces","tabs\tinside"]
+TestParens/case_(1)	=>	["TestParens","case_(1)"]
+TestTable/#00	=>	["TestTable","#00"]
+TestTable/same_name#01	=>	["TestTable","same_name#01"]
+TestSlash//empty_element	=>	["TestSlash","","empty_element"]
+	=>	null

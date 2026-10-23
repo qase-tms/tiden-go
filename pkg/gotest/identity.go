@@ -24,6 +24,31 @@ func Signature(pkgImportPath, testPath string) string {
 	return pkgImportPath + "::" + testPath
 }
 
+// NameParts splits a go test path ("TestLogin/expired_token") into the
+// elements of its name: ["TestLogin", "expired_token"]. It is the "name" part
+// of the identity Tiden's server builds its case key from, next to the scope
+// (the package) and the repository; a reporter sends them, the server does
+// any normalizing.
+//
+// The split is on "/" and nothing else: elements keep their case, spaces,
+// "#NN" disambiguation suffixes and any empty element, exactly as `go test`
+// wrote them, so joining them with "/" gives testPath back. An empty testPath
+// has no elements and returns nil.
+//
+// A "/" inside a name passed to t.Run is indistinguishable from a level
+// separator in the path go test reports; that is a property of go test's
+// naming, not of this function.
+//
+// Unlike Signature, whose format is frozen, this function has its own golden
+// (testdata/nameparts.golden): its output for an existing input must not
+// change either, because the server keys cases on it.
+func NameParts(testPath string) []string {
+	if testPath == "" {
+		return nil
+	}
+	return strings.Split(testPath, "/")
+}
+
 // SuiteSegment is one level of the suite tree, root → leaf.
 type SuiteSegment struct {
 	// Title is the display name of this level (one path element).
