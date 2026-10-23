@@ -1,0 +1,27 @@
+pkg/gotest/testdata/nameparts.golden
+  s_167fffd223cbe1::t_b25110bd9b1ce0 1-10
+pkg/gotest/identity_test.go
+  s_167fffd223cbe1::t_9869120b80a012 107,113-117,122
+  s_167fffd223cbe1::t_46727ba4ca4cfd 4,53-106,108-112,118-121,123
+  s_167fffd223cbe1::t_fdb6025f3c9ec1 124
+pkg/gotest/identity.go
+  s_167fffd223cbe1::t_46727ba4ca4cfd 27-51
+README.md
+  s_167fffd223cbe1::t_187b5eebdb054f 30-34
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "3a55f7722adbcce513c447ac7fe2d57b1859a46b",
+  "prompts": {},
+  "sessions": {
+    "s_167fffd223cbe1": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "e135bf6c-9a07-4bc4-8606-5e4560437095",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Nikolay Pisarev <npisarev@qase.io>"
+    }
+  }
+}
