@@ -1,6 +1,7 @@
 package gotest
 
 import (
+	"encoding/json"
 	"flag"
 	"fmt"
 	"os"
@@ -46,6 +47,78 @@ func TestSignatureStabilityGolden(t *testing.T) {
 	}
 	if got != string(want) {
 		t.Fatalf("SIGNATURE DRIFT — this duplicates repository cases on live-doc sync.\ngot:\n%s\nwant:\n%s", got, string(want))
+	}
+}
+
+// REGRESSION-CLASS TEST. NameParts is the "name" half of the identity parts
+// the server builds its case key from: a changed output for an existing test
+// path moves the case's key. Same rule as the signature golden above: never
+// regenerate to "fix" a diff.
+func TestNamePartsGolden(t *testing.T) {
+	inputs := []string{
+		"TestNormalizeRemoteURL",
+		"TestLogin/expired_token",
+		"TestLogin/nested/deep leaf",
+		"TestResolveSkillForce/prompt declined",
+		"TestWeird/Ünïcode_and spaces/tabs\tinside",
+		"TestParens/case_(1)",
+		"TestTable/#00",
+		"TestTable/same_name#01",
+		"TestSlash//empty_element",
+		"",
+	}
+	var b strings.Builder
+	for _, in := range inputs {
+		parts, err := json.Marshal(NameParts(in))
+		if err != nil {
+			t.Fatal(err)
+		}
+		fmt.Fprintf(&b, "%s\t=>\t%s\n", in, parts)
+	}
+	got := b.String()
+
+	goldenPath := filepath.Join("testdata", "nameparts.golden")
+	if *update {
+		if err := os.WriteFile(goldenPath, []byte(got), 0o644); err != nil {
+			t.Fatal(err)
+		}
+	}
+	want, err := os.ReadFile(goldenPath)
+	if err != nil {
+		t.Fatalf("golden missing (run with -update once): %v", err)
+	}
+	if got != string(want) {
+		t.Fatalf("NAME PARTS DRIFT — this moves case keys on the server.\ngot:\n%s\nwant:\n%s", got, string(want))
+	}
+}
+
+func TestNamePartsJoinBackToTheTestPath(t *testing.T) {
+	for _, in := range []string{"TestA", "TestA/b", "TestA/b/c d", "TestA//c", "TestA/#00"} {
+		if got := strings.Join(NameParts(in), "/"); got != in {
+			t.Errorf("join(NameParts(%q)) = %q", in, got)
+		}
+	}
+}
+
+func TestNamePartsAgreeWithTheLeafPathTheParserReports(t *testing.T) {
+	p := NewParser(Options{})
+	for _, l := range []string{
+		`{"Action":"run","Package":"p","Test":"TestParent"}`,
+		`{"Action":"run","Package":"p","Test":"TestParent/child_one"}`,
+		`{"Action":"pass","Package":"p","Test":"TestParent/child_one"}`,
+		`{"Action":"pass","Package":"p","Test":"TestParent"}`,
+	} {
+		p.ParseLine(l)
+	}
+	results := p.Finalize().Results
+	if len(results) != 1 {
+		t.Fatalf("want one leaf result, got %+v", results)
+	}
+	for _, r := range results {
+		parts := NameParts(r.Test)
+		if len(parts) != 2 || parts[0] != "TestParent" || strings.Join(parts, "/") != r.Test {
+			t.Errorf("result %q split into %q", r.Test, parts)
+		}
 	}
 }
 

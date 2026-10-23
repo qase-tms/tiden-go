@@ -27,6 +27,11 @@ attachments) is the planned second phase and will live in this repository.
   case; `TestLogin` is only a container when it has subtests.
 - **Signature** = `"<package import path>::<full test path>"` — param-free,
   case-sensitive, byte-stable across releases (golden-tested).
+- **Name parts** = `gotest.NameParts(testPath)`, the full test path split on
+  `/` (`TestLogin/expired_token` → `["TestLogin", "expired_token"]`). With the
+  package as scope and the repository, these are the identity parts a reporter
+  sends and the server builds its case key from. Golden-tested
+  (`pkg/gotest/testdata/nameparts.golden`) like the signature.
 - **Suite path** = module-relative package path, one segment per element.
 - Dynamic subtest names (`fmt.Sprintf` with counters, timestamps, random
   values) are an anti-pattern for reporting: Tiden's live documentation
