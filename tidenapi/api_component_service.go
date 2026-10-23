@@ -23,7 +23,12 @@ import (
 type ComponentServiceAPI interface {
 
 	/*
-	ComponentServiceCreateComponent Method for ComponentServiceCreateComponent
+	ComponentServiceCreateComponent Creates a component in a product.
+
+	Components are the product's deployment/architectural units. repository
+(canonical repo id), component_paths (path-prefix scopes within it), and
+repository_aliases (local checkout paths) scope the component so changed
+files can be attributed to it. branch (empty = main) writes copy-on-write.
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@param productId
@@ -36,7 +41,10 @@ type ComponentServiceAPI interface {
 	ComponentServiceCreateComponentExecute(r ApiComponentServiceCreateComponentRequest) (*CreateComponentResponse, *http.Response, error)
 
 	/*
-	ComponentServiceListComponents Method for ComponentServiceListComponents
+	ComponentServiceListComponents Lists a product's components.
+
+	Returns the components in the branch view (empty branch = main), with
+page_size/page_token pagination.
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@param productId
@@ -49,7 +57,13 @@ type ComponentServiceAPI interface {
 	ComponentServiceListComponentsExecute(r ApiComponentServiceListComponentsRequest) (*ListComponentsResponse, *http.Response, error)
 
 	/*
-	ComponentServiceUpdateComponent Method for ComponentServiceUpdateComponent
+	ComponentServiceUpdateComponent Updates a component.
+
+	name/description change only when present — omitted fields keep their
+stored value. Repository scoping uses explicit flags: set_repository,
+set_component_paths, and set_repository_aliases must be true for the
+paired value to be applied (including clearing it); false leaves the
+stored value untouched. branch (empty = main) writes copy-on-write.
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@param id
@@ -82,7 +96,12 @@ func (r ApiComponentServiceCreateComponentRequest) Execute() (*CreateComponentRe
 }
 
 /*
-ComponentServiceCreateComponent Method for ComponentServiceCreateComponent
+ComponentServiceCreateComponent Creates a component in a product.
+
+Components are the product's deployment/architectural units. repository
+(canonical repo id), component_paths (path-prefix scopes within it), and
+repository_aliases (local checkout paths) scope the component so changed
+files can be attributed to it. branch (empty = main) writes copy-on-write.
 
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @param productId
@@ -228,7 +247,10 @@ func (r ApiComponentServiceListComponentsRequest) Execute() (*ListComponentsResp
 }
 
 /*
-ComponentServiceListComponents Method for ComponentServiceListComponents
+ComponentServiceListComponents Lists a product's components.
+
+Returns the components in the branch view (empty branch = main), with
+page_size/page_token pagination.
 
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @param productId
@@ -366,7 +388,13 @@ func (r ApiComponentServiceUpdateComponentRequest) Execute() (*UpdateComponentRe
 }
 
 /*
-ComponentServiceUpdateComponent Method for ComponentServiceUpdateComponent
+ComponentServiceUpdateComponent Updates a component.
+
+name/description change only when present — omitted fields keep their
+stored value. Repository scoping uses explicit flags: set_repository,
+set_component_paths, and set_repository_aliases must be true for the
+paired value to be applied (including clearing it); false leaves the
+stored value untouched. branch (empty = main) writes copy-on-write.
 
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @param id

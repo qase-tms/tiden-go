@@ -23,7 +23,13 @@ import (
 type QualityGateServiceAPI interface {
 
 	/*
-	QualityGateServiceAcceptRisk Record a sign-off on a 🟡 (soft-signal) verdict so it becomes shippable. Hard-blocked (🔴) verdicts can't be accepted. High-severity components need a distinct 2nd approver (ApproveRisk); low-severity self-approve.
+	QualityGateServiceAcceptRisk Signs off the residual risk on a soft-signal verdict.
+
+	Records a risk acceptance (reason required) for the whole verdict or one
+component, so a verdict failing only soft signals becomes shippable.
+Hard-blocked verdicts cannot be accepted. High-severity components need a
+distinct second approver via ApproveRisk; low-severity ones self-approve.
+Returns the recomputed verdict reflecting the acceptance.
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@param productId
@@ -36,7 +42,11 @@ type QualityGateServiceAPI interface {
 	QualityGateServiceAcceptRiskExecute(r ApiQualityGateServiceAcceptRiskRequest) (*AcceptRiskResponse, *http.Response, error)
 
 	/*
-	QualityGateServiceApproveRisk Second-approver sign-off for a pending acceptance (must differ from the recorder).
+	QualityGateServiceApproveRisk Second-approver sign-off for a pending risk acceptance.
+
+	Approves the acceptance identified by acceptance_id; the approver must be
+a different user than the one who recorded it. Returns the recomputed
+verdict.
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@param productId
@@ -49,7 +59,14 @@ type QualityGateServiceAPI interface {
 	QualityGateServiceApproveRiskExecute(r ApiQualityGateServiceApproveRiskRequest) (*ApproveRiskResponse, *http.Response, error)
 
 	/*
-	QualityGateServiceComputeVerdict Compute (or recompute) the verdict for a release or branch scope and persist an immutable snapshot. Side-effecting; the engine is idempotent on the current data state (CAS on publish).
+	QualityGateServiceComputeVerdict Computes and persists a quality-gate verdict.
+
+	Computes (or recomputes) the go/no-go verdict for a scope — RELEASE
+(release_id required), BRANCH (branch name required), or MAIN — and
+persists an immutable snapshot. Side-effecting, but idempotent on the
+current data state: recomputing unchanged data yields the same verdict.
+subject_type/subject_id narrow the returned breakdown to one
+component/feature/product subject.
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@param productId
@@ -62,7 +79,31 @@ type QualityGateServiceAPI interface {
 	QualityGateServiceComputeVerdictExecute(r ApiQualityGateServiceComputeVerdictRequest) (*ComputeVerdictResponse, *http.Response, error)
 
 	/*
-	QualityGateServiceGetTraceability The traceability-matrix slice the verdict was computed over (req x case by component), for the matrix page and audit.
+	QualityGateServiceGetSessionProgress Returns one intent session's per-requirement progress slice.
+
+	For the supplied requirement ids (the session's slice of interest) on the
+intent branch's merge-preview view, returns each requirement's coverage
+ladder step (no_test → not_run → failing → verified), its linked tests
+with per-test status and session attribution, a summary, an advisory
+`ready` flag, and deterministic next actions. Read-only; unknown
+requirement ids are silently omitted.
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param productId
+	@return ApiQualityGateServiceGetSessionProgressRequest
+	*/
+	QualityGateServiceGetSessionProgress(ctx context.Context, productId string) ApiQualityGateServiceGetSessionProgressRequest
+
+	// QualityGateServiceGetSessionProgressExecute executes the request
+	//  @return GetSessionProgressResponse
+	QualityGateServiceGetSessionProgressExecute(r ApiQualityGateServiceGetSessionProgressRequest) (*GetSessionProgressResponse, *http.Response, error)
+
+	/*
+	QualityGateServiceGetTraceability Returns the traceability matrix behind a verdict.
+
+	Returns the requirement-by-test-case slice (grouped by component) the
+verdict was computed over, for the matrix page and audit.
+subject_type/subject_id filter the matrix to one component or feature.
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@param productId
@@ -75,7 +116,11 @@ type QualityGateServiceAPI interface {
 	QualityGateServiceGetTraceabilityExecute(r ApiQualityGateServiceGetTraceabilityRequest) (*GetTraceabilityResponse, *http.Response, error)
 
 	/*
-	QualityGateServiceGetVerdict Latest non-invalidated verdict for a (scope, ref). On no-go the agent reads the structured component/criterion breakdown + fix hints from here.
+	QualityGateServiceGetVerdict Fetches the latest verdict for a scope.
+
+	Returns the latest non-invalidated verdict for the (scope, ref). On a
+blocked verdict, clients read the structured per-subject criterion
+breakdown and agent-actionable fix hints from here.
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@param productId
@@ -86,6 +131,40 @@ type QualityGateServiceAPI interface {
 	// QualityGateServiceGetVerdictExecute executes the request
 	//  @return GetVerdictResponse
 	QualityGateServiceGetVerdictExecute(r ApiQualityGateServiceGetVerdictRequest) (*GetVerdictResponse, *http.Response, error)
+
+	/*
+	QualityGateServiceRecordSessionRiskAcceptances Records one intent session's risk acceptances and test deferrals.
+
+	Persists the close-policy ledger of a single intent session as
+agent_artifact provenance rows on that session's draft requirement. A
+re-run REPLACES this session's records for the same requirement set —
+keyed by (phase, session, requirement set), deliberately NOT by criterion,
+so a corrected criterion supersedes the earlier judgement instead of
+leaving two contradicting ones. Every other row on the draft is carried
+over.
+
+ORDERING: this endpoint rewrites the draft's whole source array. A caller
+that also writes sources to the same draft (the CLI's close extends the
+session_reconcile row in its own PUT) MUST call this FIRST and then
+RE-FETCH the requirement before building that write — a request assembled
+from a snapshot taken before this call silently erases the rows this call
+wrote.
+
+Validation is STRUCTURAL only: a known criterion, non-empty single-line
+evidence, a known follow-up kind, requirement refs that resolve on the
+intent branch, and a draft that lives there. The server never judges
+whether a reason is a good one — that judgment belongs to the agent's
+instructions and to the human reading merge-preview.
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param productId
+	@return ApiQualityGateServiceRecordSessionRiskAcceptancesRequest
+	*/
+	QualityGateServiceRecordSessionRiskAcceptances(ctx context.Context, productId string) ApiQualityGateServiceRecordSessionRiskAcceptancesRequest
+
+	// QualityGateServiceRecordSessionRiskAcceptancesExecute executes the request
+	//  @return RecordSessionRiskAcceptancesResponse
+	QualityGateServiceRecordSessionRiskAcceptancesExecute(r ApiQualityGateServiceRecordSessionRiskAcceptancesRequest) (*RecordSessionRiskAcceptancesResponse, *http.Response, error)
 }
 
 // QualityGateServiceAPIService QualityGateServiceAPI service
@@ -108,7 +187,13 @@ func (r ApiQualityGateServiceAcceptRiskRequest) Execute() (*AcceptRiskResponse, 
 }
 
 /*
-QualityGateServiceAcceptRisk Record a sign-off on a 🟡 (soft-signal) verdict so it becomes shippable. Hard-blocked (🔴) verdicts can't be accepted. High-severity components need a distinct 2nd approver (ApproveRisk); low-severity self-approve.
+QualityGateServiceAcceptRisk Signs off the residual risk on a soft-signal verdict.
+
+Records a risk acceptance (reason required) for the whole verdict or one
+component, so a verdict failing only soft signals becomes shippable.
+Hard-blocked verdicts cannot be accepted. High-severity components need a
+distinct second approver via ApproveRisk; low-severity ones self-approve.
+Returns the recomputed verdict reflecting the acceptance.
 
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @param productId
@@ -242,7 +327,11 @@ func (r ApiQualityGateServiceApproveRiskRequest) Execute() (*ApproveRiskResponse
 }
 
 /*
-QualityGateServiceApproveRisk Second-approver sign-off for a pending acceptance (must differ from the recorder).
+QualityGateServiceApproveRisk Second-approver sign-off for a pending risk acceptance.
+
+Approves the acceptance identified by acceptance_id; the approver must be
+a different user than the one who recorded it. Returns the recomputed
+verdict.
 
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @param productId
@@ -376,7 +465,14 @@ func (r ApiQualityGateServiceComputeVerdictRequest) Execute() (*ComputeVerdictRe
 }
 
 /*
-QualityGateServiceComputeVerdict Compute (or recompute) the verdict for a release or branch scope and persist an immutable snapshot. Side-effecting; the engine is idempotent on the current data state (CAS on publish).
+QualityGateServiceComputeVerdict Computes and persists a quality-gate verdict.
+
+Computes (or recomputes) the go/no-go verdict for a scope — RELEASE
+(release_id required), BRANCH (branch name required), or MAIN — and
+persists an immutable snapshot. Side-effecting, but idempotent on the
+current data state: recomputing unchanged data yields the same verdict.
+subject_type/subject_id narrow the returned breakdown to one
+component/feature/product subject.
 
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @param productId
@@ -493,6 +589,147 @@ func (a *QualityGateServiceAPIService) QualityGateServiceComputeVerdictExecute(r
 	return localVarReturnValue, localVarHTTPResponse, nil
 }
 
+type ApiQualityGateServiceGetSessionProgressRequest struct {
+	ctx context.Context
+	ApiService QualityGateServiceAPI
+	productId string
+	getSessionProgressBody *GetSessionProgressBody
+}
+
+func (r ApiQualityGateServiceGetSessionProgressRequest) GetSessionProgressBody(getSessionProgressBody GetSessionProgressBody) ApiQualityGateServiceGetSessionProgressRequest {
+	r.getSessionProgressBody = &getSessionProgressBody
+	return r
+}
+
+func (r ApiQualityGateServiceGetSessionProgressRequest) Execute() (*GetSessionProgressResponse, *http.Response, error) {
+	return r.ApiService.QualityGateServiceGetSessionProgressExecute(r)
+}
+
+/*
+QualityGateServiceGetSessionProgress Returns one intent session's per-requirement progress slice.
+
+For the supplied requirement ids (the session's slice of interest) on the
+intent branch's merge-preview view, returns each requirement's coverage
+ladder step (no_test → not_run → failing → verified), its linked tests
+with per-test status and session attribution, a summary, an advisory
+`ready` flag, and deterministic next actions. Read-only; unknown
+requirement ids are silently omitted.
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param productId
+ @return ApiQualityGateServiceGetSessionProgressRequest
+*/
+func (a *QualityGateServiceAPIService) QualityGateServiceGetSessionProgress(ctx context.Context, productId string) ApiQualityGateServiceGetSessionProgressRequest {
+	return ApiQualityGateServiceGetSessionProgressRequest{
+		ApiService: a,
+		ctx: ctx,
+		productId: productId,
+	}
+}
+
+// Execute executes the request
+//  @return GetSessionProgressResponse
+func (a *QualityGateServiceAPIService) QualityGateServiceGetSessionProgressExecute(r ApiQualityGateServiceGetSessionProgressRequest) (*GetSessionProgressResponse, *http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodPost
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *GetSessionProgressResponse
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "QualityGateServiceAPIService.QualityGateServiceGetSessionProgress")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/v1/products/{productId}/quality-gate:session-progress"
+	localVarPath = strings.Replace(localVarPath, "{"+"productId"+"}", url.PathEscape(parameterValueToString(r.productId, "productId")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+	if r.getSessionProgressBody == nil {
+		return localVarReturnValue, nil, reportError("getSessionProgressBody is required and must be specified")
+	}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{"application/json"}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	// body params
+	localVarPostBody = r.getSessionProgressBody
+	if r.ctx != nil {
+		// API Key Authentication
+		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
+			if apiKey, ok := auth["BearerAuth"]; ok {
+				var key string
+				if apiKey.Prefix != "" {
+					key = apiKey.Prefix + " " + apiKey.Key
+				} else {
+					key = apiKey.Key
+				}
+				localVarHeaderParams["Authorization"] = key
+			}
+		}
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+			var v Status
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
 type ApiQualityGateServiceGetTraceabilityRequest struct {
 	ctx context.Context
 	ApiService QualityGateServiceAPI
@@ -537,7 +774,11 @@ func (r ApiQualityGateServiceGetTraceabilityRequest) Execute() (*GetTraceability
 }
 
 /*
-QualityGateServiceGetTraceability The traceability-matrix slice the verdict was computed over (req x case by component), for the matrix page and audit.
+QualityGateServiceGetTraceability Returns the traceability matrix behind a verdict.
+
+Returns the requirement-by-test-case slice (grouped by component) the
+verdict was computed over, for the matrix page and audit.
+subject_type/subject_id filter the matrix to one component or feature.
 
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @param productId
@@ -712,7 +953,11 @@ func (r ApiQualityGateServiceGetVerdictRequest) Execute() (*GetVerdictResponse, 
 }
 
 /*
-QualityGateServiceGetVerdict Latest non-invalidated verdict for a (scope, ref). On no-go the agent reads the structured component/criterion breakdown + fix hints from here.
+QualityGateServiceGetVerdict Fetches the latest verdict for a scope.
+
+Returns the latest non-invalidated verdict for the (scope, ref). On a
+blocked verdict, clients read the structured per-subject criterion
+breakdown and agent-actionable fix hints from here.
 
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @param productId
@@ -784,6 +1029,161 @@ func (a *QualityGateServiceAPIService) QualityGateServiceGetVerdictExecute(r Api
 	if localVarHTTPHeaderAccept != "" {
 		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
 	}
+	if r.ctx != nil {
+		// API Key Authentication
+		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
+			if apiKey, ok := auth["BearerAuth"]; ok {
+				var key string
+				if apiKey.Prefix != "" {
+					key = apiKey.Prefix + " " + apiKey.Key
+				} else {
+					key = apiKey.Key
+				}
+				localVarHeaderParams["Authorization"] = key
+			}
+		}
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+			var v Status
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type ApiQualityGateServiceRecordSessionRiskAcceptancesRequest struct {
+	ctx context.Context
+	ApiService QualityGateServiceAPI
+	productId string
+	recordSessionRiskAcceptancesBody *RecordSessionRiskAcceptancesBody
+}
+
+func (r ApiQualityGateServiceRecordSessionRiskAcceptancesRequest) RecordSessionRiskAcceptancesBody(recordSessionRiskAcceptancesBody RecordSessionRiskAcceptancesBody) ApiQualityGateServiceRecordSessionRiskAcceptancesRequest {
+	r.recordSessionRiskAcceptancesBody = &recordSessionRiskAcceptancesBody
+	return r
+}
+
+func (r ApiQualityGateServiceRecordSessionRiskAcceptancesRequest) Execute() (*RecordSessionRiskAcceptancesResponse, *http.Response, error) {
+	return r.ApiService.QualityGateServiceRecordSessionRiskAcceptancesExecute(r)
+}
+
+/*
+QualityGateServiceRecordSessionRiskAcceptances Records one intent session's risk acceptances and test deferrals.
+
+Persists the close-policy ledger of a single intent session as
+agent_artifact provenance rows on that session's draft requirement. A
+re-run REPLACES this session's records for the same requirement set —
+keyed by (phase, session, requirement set), deliberately NOT by criterion,
+so a corrected criterion supersedes the earlier judgement instead of
+leaving two contradicting ones. Every other row on the draft is carried
+over.
+
+ORDERING: this endpoint rewrites the draft's whole source array. A caller
+that also writes sources to the same draft (the CLI's close extends the
+session_reconcile row in its own PUT) MUST call this FIRST and then
+RE-FETCH the requirement before building that write — a request assembled
+from a snapshot taken before this call silently erases the rows this call
+wrote.
+
+Validation is STRUCTURAL only: a known criterion, non-empty single-line
+evidence, a known follow-up kind, requirement refs that resolve on the
+intent branch, and a draft that lives there. The server never judges
+whether a reason is a good one — that judgment belongs to the agent's
+instructions and to the human reading merge-preview.
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param productId
+ @return ApiQualityGateServiceRecordSessionRiskAcceptancesRequest
+*/
+func (a *QualityGateServiceAPIService) QualityGateServiceRecordSessionRiskAcceptances(ctx context.Context, productId string) ApiQualityGateServiceRecordSessionRiskAcceptancesRequest {
+	return ApiQualityGateServiceRecordSessionRiskAcceptancesRequest{
+		ApiService: a,
+		ctx: ctx,
+		productId: productId,
+	}
+}
+
+// Execute executes the request
+//  @return RecordSessionRiskAcceptancesResponse
+func (a *QualityGateServiceAPIService) QualityGateServiceRecordSessionRiskAcceptancesExecute(r ApiQualityGateServiceRecordSessionRiskAcceptancesRequest) (*RecordSessionRiskAcceptancesResponse, *http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodPost
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *RecordSessionRiskAcceptancesResponse
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "QualityGateServiceAPIService.QualityGateServiceRecordSessionRiskAcceptances")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/v1/products/{productId}/quality-gate:session-acceptances"
+	localVarPath = strings.Replace(localVarPath, "{"+"productId"+"}", url.PathEscape(parameterValueToString(r.productId, "productId")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+	if r.recordSessionRiskAcceptancesBody == nil {
+		return localVarReturnValue, nil, reportError("recordSessionRiskAcceptancesBody is required and must be specified")
+	}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{"application/json"}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	// body params
+	localVarPostBody = r.recordSessionRiskAcceptancesBody
 	if r.ctx != nil {
 		// API Key Authentication
 		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {

@@ -15,7 +15,7 @@ import (
 	"fmt"
 )
 
-// VerdictStatus the model 'VerdictStatus'
+// VerdictStatus - VERDICT_STATUS_RISK_ACCEPTED: v2 (soft-gate override) — reserved
 type VerdictStatus string
 
 // List of VerdictStatus

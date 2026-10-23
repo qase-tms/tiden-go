@@ -18,7 +18,7 @@ import (
 // checks if the ProductSetupState type satisfies the MappedNullable interface at compile time
 var _ MappedNullable = &ProductSetupState{}
 
-// ProductSetupState struct for ProductSetupState
+// ProductSetupState ProductSetupState is one recorded setup-verification snapshot for a (product, user): repo binding, git-hook wiring, and per-agent statuses.
 type ProductSetupState struct {
 	ProductId *string `json:"productId,omitempty"`
 	UserId *string `json:"userId,omitempty"`

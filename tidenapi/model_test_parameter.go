@@ -17,7 +17,7 @@ import (
 // checks if the TestParameter type satisfies the MappedNullable interface at compile time
 var _ MappedNullable = &TestParameter{}
 
-// TestParameter struct for TestParameter
+// TestParameter TestParameter is one key/value of a parameterized test combination.
 type TestParameter struct {
 	Key *string `json:"key,omitempty"`
 	Value *string `json:"value,omitempty"`

@@ -18,7 +18,7 @@ import (
 // checks if the CoverageGap type satisfies the MappedNullable interface at compile time
 var _ MappedNullable = &CoverageGap{}
 
-// CoverageGap struct for CoverageGap
+// CoverageGap CoverageGap is one under-covered requirement with its coverage counters, the reason for its status, and the signals that ranked it.
 type CoverageGap struct {
 	Requirement *Requirement `json:"requirement,omitempty"`
 	CoverageStatus *string `json:"coverageStatus,omitempty"`
@@ -29,6 +29,9 @@ type CoverageGap struct {
 	LastTestUpdatedAt *time.Time `json:"lastTestUpdatedAt,omitempty"`
 	CoverageStatusReason *string `json:"coverageStatusReason,omitempty"`
 	RankingSignals []string `json:"rankingSignals,omitempty"`
+	// Prior intent sessions' JUDGEMENTS on this requirement's missing verification: risk acceptances that priced it, and test deferrals that handed the missing test to a next session. Both are read from the close artifacts recorded on session drafts, matched by main twin. They are next- session input (\"someone already looked at this\"), not coverage — neither moves coverage_status.  Read them with these four properties in mind, because none of them are obvious from the names:   - They count ARTIFACT ROWS, not sessions. One session that accepts under     two criteria naming this requirement contributes 2, and two sessions     that each accept it once also contribute 2.   - Nothing marks a judgement resolved. A deferral of a requirement that     has since been covered still counts, and a risk acceptance survives the     condition it was signed against.   - A judgement from an intent branch that was ABANDONED and never merged     counts exactly like one that landed: the artifacts live on the session     draft, and an unmerged draft is still a requirement. \"Someone already     priced this\" can therefore refer to a decision that never shipped.   - 0 means nobody judged it — not that nobody could.  Deliberately NOT folded into proposed_test_count (field 4): that one is derived from branch test-link proposals and is not writable from a close.
+	RiskAcceptedCount *int32 `json:"riskAcceptedCount,omitempty"`
+	DeferredTestCount *int32 `json:"deferredTestCount,omitempty"`
 }
 
 // NewCoverageGap instantiates a new CoverageGap object
@@ -336,6 +339,70 @@ func (o *CoverageGap) SetRankingSignals(v []string) {
 	o.RankingSignals = v
 }
 
+// GetRiskAcceptedCount returns the RiskAcceptedCount field value if set, zero value otherwise.
+func (o *CoverageGap) GetRiskAcceptedCount() int32 {
+	if o == nil || IsNil(o.RiskAcceptedCount) {
+		var ret int32
+		return ret
+	}
+	return *o.RiskAcceptedCount
+}
+
+// GetRiskAcceptedCountOk returns a tuple with the RiskAcceptedCount field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *CoverageGap) GetRiskAcceptedCountOk() (*int32, bool) {
+	if o == nil || IsNil(o.RiskAcceptedCount) {
+		return nil, false
+	}
+	return o.RiskAcceptedCount, true
+}
+
+// HasRiskAcceptedCount returns a boolean if a field has been set.
+func (o *CoverageGap) HasRiskAcceptedCount() bool {
+	if o != nil && !IsNil(o.RiskAcceptedCount) {
+		return true
+	}
+
+	return false
+}
+
+// SetRiskAcceptedCount gets a reference to the given int32 and assigns it to the RiskAcceptedCount field.
+func (o *CoverageGap) SetRiskAcceptedCount(v int32) {
+	o.RiskAcceptedCount = &v
+}
+
+// GetDeferredTestCount returns the DeferredTestCount field value if set, zero value otherwise.
+func (o *CoverageGap) GetDeferredTestCount() int32 {
+	if o == nil || IsNil(o.DeferredTestCount) {
+		var ret int32
+		return ret
+	}
+	return *o.DeferredTestCount
+}
+
+// GetDeferredTestCountOk returns a tuple with the DeferredTestCount field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *CoverageGap) GetDeferredTestCountOk() (*int32, bool) {
+	if o == nil || IsNil(o.DeferredTestCount) {
+		return nil, false
+	}
+	return o.DeferredTestCount, true
+}
+
+// HasDeferredTestCount returns a boolean if a field has been set.
+func (o *CoverageGap) HasDeferredTestCount() bool {
+	if o != nil && !IsNil(o.DeferredTestCount) {
+		return true
+	}
+
+	return false
+}
+
+// SetDeferredTestCount gets a reference to the given int32 and assigns it to the DeferredTestCount field.
+func (o *CoverageGap) SetDeferredTestCount(v int32) {
+	o.DeferredTestCount = &v
+}
+
 func (o CoverageGap) MarshalJSON() ([]byte, error) {
 	toSerialize,err := o.ToMap()
 	if err != nil {
@@ -372,6 +439,12 @@ func (o CoverageGap) ToMap() (map[string]interface{}, error) {
 	}
 	if !IsNil(o.RankingSignals) {
 		toSerialize["rankingSignals"] = o.RankingSignals
+	}
+	if !IsNil(o.RiskAcceptedCount) {
+		toSerialize["riskAcceptedCount"] = o.RiskAcceptedCount
+	}
+	if !IsNil(o.DeferredTestCount) {
+		toSerialize["deferredTestCount"] = o.DeferredTestCount
 	}
 	return toSerialize, nil
 }

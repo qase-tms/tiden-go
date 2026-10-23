@@ -18,7 +18,7 @@ import (
 // checks if the RequirementSource type satisfies the MappedNullable interface at compile time
 var _ MappedNullable = &RequirementSource{}
 
-// RequirementSource struct for RequirementSource
+// RequirementSource RequirementSource is one provenance record of a requirement — where it came from: a repo file anchor (repo_path + optional line range), a documentation URL, manual input, an attachment, or an agent artifact.
 type RequirementSource struct {
 	Id *string `json:"id,omitempty"`
 	ProductId *string `json:"productId,omitempty"`

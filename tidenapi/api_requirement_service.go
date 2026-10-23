@@ -23,7 +23,33 @@ import (
 type RequirementServiceAPI interface {
 
 	/*
-	RequirementServiceCreateRequirement Method for RequirementServiceCreateRequirement
+	RequirementServiceAttributeRequirementComponents Derives requirement-component attribution from each requirement's own repo_file anchors.
+
+	Mirrors the test-side attributeTestComponents: a requirement whose
+anchors resolve to exactly one component gets that component_id set;
+anchors spanning more than one component, or owned by none (including a
+repository-ambiguous anchor path), leave the requirement untouched. Only
+NULL component_id rows are written — an explicit or previously-derived
+attribution is never overwritten. Idempotent.
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param productId
+	@return ApiRequirementServiceAttributeRequirementComponentsRequest
+	*/
+	RequirementServiceAttributeRequirementComponents(ctx context.Context, productId string) ApiRequirementServiceAttributeRequirementComponentsRequest
+
+	// RequirementServiceAttributeRequirementComponentsExecute executes the request
+	//  @return AttributeRequirementComponentsResponse
+	RequirementServiceAttributeRequirementComponentsExecute(r ApiRequirementServiceAttributeRequirementComponentsRequest) (*AttributeRequirementComponentsResponse, *http.Response, error)
+
+	/*
+	RequirementServiceCreateRequirement Creates a requirement.
+
+	Creates the requirement under parent_id (empty = root) on branch (empty =
+main; a missing branch name is auto-created and edits stay copy-on-write
+until merge). Optional status/priority/type classify it; sources attach
+provenance (repo files, documentation URLs, manual input). Returns the
+requirement with its product-wide seq_num.
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@param productId
@@ -36,7 +62,12 @@ type RequirementServiceAPI interface {
 	RequirementServiceCreateRequirementExecute(r ApiRequirementServiceCreateRequirementRequest) (*CreateRequirementResponse, *http.Response, error)
 
 	/*
-	RequirementServiceDeleteRequirement Method for RequirementServiceDeleteRequirement
+	RequirementServiceDeleteRequirement Deletes a requirement.
+
+	On a branch (branch set, non-main) a main-row delete records a
+copy-on-write deletion marker that applies at merge; on main the row is
+deleted directly. Returns history_id, which the web-only
+RestoreRequirement RPC accepts to undo the delete.
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@param id
@@ -49,7 +80,9 @@ type RequirementServiceAPI interface {
 	RequirementServiceDeleteRequirementExecute(r ApiRequirementServiceDeleteRequirementRequest) (*DeleteRequirementResponse, *http.Response, error)
 
 	/*
-	RequirementServiceGetRequirement Method for RequirementServiceGetRequirement
+	RequirementServiceGetRequirement Fetches one requirement by id.
+
+	Returns the requirement including its sources and branch status.
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@param id
@@ -62,7 +95,12 @@ type RequirementServiceAPI interface {
 	RequirementServiceGetRequirementExecute(r ApiRequirementServiceGetRequirementRequest) (*GetRequirementResponse, *http.Response, error)
 
 	/*
-	RequirementServiceListRequirements Method for RequirementServiceListRequirements
+	RequirementServiceListRequirements Lists a product's requirements.
+
+	Returns the flat requirement list (parent_id encodes the tree) in the
+branch view (empty = main), paginated. Set include_sources to embed each
+requirement's full provenance sources — agents need them for source-based
+identity matching; otherwise only source_count is populated.
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@param productId
@@ -75,7 +113,12 @@ type RequirementServiceAPI interface {
 	RequirementServiceListRequirementsExecute(r ApiRequirementServiceListRequirementsRequest) (*ListRequirementsResponse, *http.Response, error)
 
 	/*
-	RequirementServiceUpdateRequirement Method for RequirementServiceUpdateRequirement
+	RequirementServiceUpdateRequirement Updates a requirement.
+
+	Only fields present on the request change; omitted optional fields keep
+their stored value. branch (empty = main) applies the edit copy-on-write.
+sources_update replaces the requirement's source set, or unions it with
+anchor-key dedup when merge=true (the agent-write mode).
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@param id
@@ -90,6 +133,136 @@ type RequirementServiceAPI interface {
 
 // RequirementServiceAPIService RequirementServiceAPI service
 type RequirementServiceAPIService service
+
+type ApiRequirementServiceAttributeRequirementComponentsRequest struct {
+	ctx context.Context
+	ApiService RequirementServiceAPI
+	productId string
+}
+
+func (r ApiRequirementServiceAttributeRequirementComponentsRequest) Execute() (*AttributeRequirementComponentsResponse, *http.Response, error) {
+	return r.ApiService.RequirementServiceAttributeRequirementComponentsExecute(r)
+}
+
+/*
+RequirementServiceAttributeRequirementComponents Derives requirement-component attribution from each requirement's own repo_file anchors.
+
+Mirrors the test-side attributeTestComponents: a requirement whose
+anchors resolve to exactly one component gets that component_id set;
+anchors spanning more than one component, or owned by none (including a
+repository-ambiguous anchor path), leave the requirement untouched. Only
+NULL component_id rows are written — an explicit or previously-derived
+attribution is never overwritten. Idempotent.
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param productId
+ @return ApiRequirementServiceAttributeRequirementComponentsRequest
+*/
+func (a *RequirementServiceAPIService) RequirementServiceAttributeRequirementComponents(ctx context.Context, productId string) ApiRequirementServiceAttributeRequirementComponentsRequest {
+	return ApiRequirementServiceAttributeRequirementComponentsRequest{
+		ApiService: a,
+		ctx: ctx,
+		productId: productId,
+	}
+}
+
+// Execute executes the request
+//  @return AttributeRequirementComponentsResponse
+func (a *RequirementServiceAPIService) RequirementServiceAttributeRequirementComponentsExecute(r ApiRequirementServiceAttributeRequirementComponentsRequest) (*AttributeRequirementComponentsResponse, *http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodPost
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *AttributeRequirementComponentsResponse
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "RequirementServiceAPIService.RequirementServiceAttributeRequirementComponents")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/v1/products/{productId}/requirement-components:derive"
+	localVarPath = strings.Replace(localVarPath, "{"+"productId"+"}", url.PathEscape(parameterValueToString(r.productId, "productId")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	if r.ctx != nil {
+		// API Key Authentication
+		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
+			if apiKey, ok := auth["BearerAuth"]; ok {
+				var key string
+				if apiKey.Prefix != "" {
+					key = apiKey.Prefix + " " + apiKey.Key
+				} else {
+					key = apiKey.Key
+				}
+				localVarHeaderParams["Authorization"] = key
+			}
+		}
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+			var v Status
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
 
 type ApiRequirementServiceCreateRequirementRequest struct {
 	ctx context.Context
@@ -108,7 +281,13 @@ func (r ApiRequirementServiceCreateRequirementRequest) Execute() (*CreateRequire
 }
 
 /*
-RequirementServiceCreateRequirement Method for RequirementServiceCreateRequirement
+RequirementServiceCreateRequirement Creates a requirement.
+
+Creates the requirement under parent_id (empty = root) on branch (empty =
+main; a missing branch name is auto-created and edits stay copy-on-write
+until merge). Optional status/priority/type classify it; sources attach
+provenance (repo files, documentation URLs, manual input). Returns the
+requirement with its product-wide seq_num.
 
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @param productId
@@ -242,7 +421,12 @@ func (r ApiRequirementServiceDeleteRequirementRequest) Execute() (*DeleteRequire
 }
 
 /*
-RequirementServiceDeleteRequirement Method for RequirementServiceDeleteRequirement
+RequirementServiceDeleteRequirement Deletes a requirement.
+
+On a branch (branch set, non-main) a main-row delete records a
+copy-on-write deletion marker that applies at merge; on main the row is
+deleted directly. Returns history_id, which the web-only
+RestoreRequirement RPC accepts to undo the delete.
 
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @param id
@@ -368,7 +552,9 @@ func (r ApiRequirementServiceGetRequirementRequest) Execute() (*GetRequirementRe
 }
 
 /*
-RequirementServiceGetRequirement Method for RequirementServiceGetRequirement
+RequirementServiceGetRequirement Fetches one requirement by id.
+
+Returns the requirement including its sources and branch status.
 
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @param id
@@ -516,7 +702,12 @@ func (r ApiRequirementServiceListRequirementsRequest) Execute() (*ListRequiremen
 }
 
 /*
-RequirementServiceListRequirements Method for RequirementServiceListRequirements
+RequirementServiceListRequirements Lists a product's requirements.
+
+Returns the flat requirement list (parent_id encodes the tree) in the
+branch view (empty = main), paginated. Set include_sources to embed each
+requirement's full provenance sources — agents need them for source-based
+identity matching; otherwise only source_count is populated.
 
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @param productId
@@ -657,7 +848,12 @@ func (r ApiRequirementServiceUpdateRequirementRequest) Execute() (*UpdateRequire
 }
 
 /*
-RequirementServiceUpdateRequirement Method for RequirementServiceUpdateRequirement
+RequirementServiceUpdateRequirement Updates a requirement.
+
+Only fields present on the request change; omitted optional fields keep
+their stored value. branch (empty = main) applies the edit copy-on-write.
+sources_update replaces the requirement's source set, or unions it with
+anchor-key dedup when merge=true (the agent-write mode).
 
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @param id

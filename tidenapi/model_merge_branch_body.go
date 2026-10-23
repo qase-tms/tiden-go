@@ -19,8 +19,10 @@ var _ MappedNullable = &MergeBranchBody{}
 
 // MergeBranchBody struct for MergeBranchBody
 type MergeBranchBody struct {
-	// Resolution map keys are prefixed: \"req:<uuid>\", \"test:<uuid>\", or \"comp:<uuid>\". Server accepts un-prefixed keys as `req:` for v1 backwards compat (deprecated; logged with warning, removal scheduled for v2).
+	// Resolution map keys are prefixed: \"req:<uuid>\", \"test:<uuid>\", or \"comp:<uuid>\". Server accepts un-prefixed keys as `req:` for v1 backwards compat (deprecated; use prefixed keys).
 	Resolutions *map[string]string `json:"resolutions,omitempty"`
+	// allow_undistilled overrides the INTENT_UNDISTILLED merge guard: a branch carrying an intent session that is not closed, has no recorded settlement, and has requirement changes normally refuses to merge. This is a recorded human decision — true merges anyway and stamps the override (session id, actor) onto the merge's activity event. Branches with no intent session record are never blocked, so this is a no-op for them.
+	AllowUndistilled *bool `json:"allowUndistilled,omitempty"`
 }
 
 // NewMergeBranchBody instantiates a new MergeBranchBody object
@@ -72,6 +74,38 @@ func (o *MergeBranchBody) SetResolutions(v map[string]string) {
 	o.Resolutions = &v
 }
 
+// GetAllowUndistilled returns the AllowUndistilled field value if set, zero value otherwise.
+func (o *MergeBranchBody) GetAllowUndistilled() bool {
+	if o == nil || IsNil(o.AllowUndistilled) {
+		var ret bool
+		return ret
+	}
+	return *o.AllowUndistilled
+}
+
+// GetAllowUndistilledOk returns a tuple with the AllowUndistilled field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *MergeBranchBody) GetAllowUndistilledOk() (*bool, bool) {
+	if o == nil || IsNil(o.AllowUndistilled) {
+		return nil, false
+	}
+	return o.AllowUndistilled, true
+}
+
+// HasAllowUndistilled returns a boolean if a field has been set.
+func (o *MergeBranchBody) HasAllowUndistilled() bool {
+	if o != nil && !IsNil(o.AllowUndistilled) {
+		return true
+	}
+
+	return false
+}
+
+// SetAllowUndistilled gets a reference to the given bool and assigns it to the AllowUndistilled field.
+func (o *MergeBranchBody) SetAllowUndistilled(v bool) {
+	o.AllowUndistilled = &v
+}
+
 func (o MergeBranchBody) MarshalJSON() ([]byte, error) {
 	toSerialize,err := o.ToMap()
 	if err != nil {
@@ -84,6 +118,9 @@ func (o MergeBranchBody) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	if !IsNil(o.Resolutions) {
 		toSerialize["resolutions"] = o.Resolutions
+	}
+	if !IsNil(o.AllowUndistilled) {
+		toSerialize["allowUndistilled"] = o.AllowUndistilled
 	}
 	return toSerialize, nil
 }

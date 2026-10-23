@@ -17,7 +17,7 @@ import (
 // checks if the AttributeChangedFilesBody type satisfies the MappedNullable interface at compile time
 var _ MappedNullable = &AttributeChangedFilesBody{}
 
-// AttributeChangedFilesBody AttributeChangedFiles (shift-left v4) maps a requirement's repo-qualified changed files to components via the MAIN component scope, declares one idempotent impacts_component edge-intent per touched component, and sets/clears requirement.component_id. Enforces the one-repo-per-node invariant: the changed files must belong to a single repository.
+// AttributeChangedFilesBody AttributeChangedFiles maps a requirement's repo-qualified changed files to components via the MAIN component scope, declares one idempotent impacts_component edge-intent per touched component, and sets/clears requirement.component_id. Enforces the one-repo-per-node invariant: the changed files must belong to a single repository.
 type AttributeChangedFilesBody struct {
 	// branch the requirement lives on (empty = main).
 	Branch *string `json:"branch,omitempty"`

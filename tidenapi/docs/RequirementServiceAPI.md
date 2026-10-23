@@ -4,17 +4,90 @@ All URIs are relative to *https://api.tiden.ai*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
-[**RequirementServiceCreateRequirement**](RequirementServiceAPI.md#RequirementServiceCreateRequirement) | **Post** /v1/products/{productId}/requirements | 
-[**RequirementServiceDeleteRequirement**](RequirementServiceAPI.md#RequirementServiceDeleteRequirement) | **Delete** /v1/requirements/{id} | 
-[**RequirementServiceGetRequirement**](RequirementServiceAPI.md#RequirementServiceGetRequirement) | **Get** /v1/requirements/{id} | 
-[**RequirementServiceListRequirements**](RequirementServiceAPI.md#RequirementServiceListRequirements) | **Get** /v1/products/{productId}/requirements | 
-[**RequirementServiceUpdateRequirement**](RequirementServiceAPI.md#RequirementServiceUpdateRequirement) | **Put** /v1/requirements/{id} | 
+[**RequirementServiceAttributeRequirementComponents**](RequirementServiceAPI.md#RequirementServiceAttributeRequirementComponents) | **Post** /v1/products/{productId}/requirement-components:derive | Derives requirement-component attribution from each requirement&#39;s own repo_file anchors.
+[**RequirementServiceCreateRequirement**](RequirementServiceAPI.md#RequirementServiceCreateRequirement) | **Post** /v1/products/{productId}/requirements | Creates a requirement.
+[**RequirementServiceDeleteRequirement**](RequirementServiceAPI.md#RequirementServiceDeleteRequirement) | **Delete** /v1/requirements/{id} | Deletes a requirement.
+[**RequirementServiceGetRequirement**](RequirementServiceAPI.md#RequirementServiceGetRequirement) | **Get** /v1/requirements/{id} | Fetches one requirement by id.
+[**RequirementServiceListRequirements**](RequirementServiceAPI.md#RequirementServiceListRequirements) | **Get** /v1/products/{productId}/requirements | Lists a product&#39;s requirements.
+[**RequirementServiceUpdateRequirement**](RequirementServiceAPI.md#RequirementServiceUpdateRequirement) | **Put** /v1/requirements/{id} | Updates a requirement.
 
+
+
+## RequirementServiceAttributeRequirementComponents
+
+> AttributeRequirementComponentsResponse RequirementServiceAttributeRequirementComponents(ctx, productId).Execute()
+
+Derives requirement-component attribution from each requirement's own repo_file anchors.
+
+
+
+### Example
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+	"os"
+	openapiclient "github.com/qase-tms/tiden-go/tidenapi"
+)
+
+func main() {
+	productId := "productId_example" // string | 
+
+	configuration := openapiclient.NewConfiguration()
+	apiClient := openapiclient.NewAPIClient(configuration)
+	resp, r, err := apiClient.RequirementServiceAPI.RequirementServiceAttributeRequirementComponents(context.Background(), productId).Execute()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error when calling `RequirementServiceAPI.RequirementServiceAttributeRequirementComponents``: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+	}
+	// response from `RequirementServiceAttributeRequirementComponents`: AttributeRequirementComponentsResponse
+	fmt.Fprintf(os.Stdout, "Response from `RequirementServiceAPI.RequirementServiceAttributeRequirementComponents`: %v\n", resp)
+}
+```
+
+### Path Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+**productId** | **string** |  | 
+
+### Other Parameters
+
+Other parameters are passed through a pointer to a apiRequirementServiceAttributeRequirementComponentsRequest struct via the builder pattern
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+
+
+### Return type
+
+[**AttributeRequirementComponentsResponse**](AttributeRequirementComponentsResponse.md)
+
+### Authorization
+
+[BearerAuth](../README.md#BearerAuth)
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
+[[Back to Model list]](../README.md#documentation-for-models)
+[[Back to README]](../README.md)
 
 
 ## RequirementServiceCreateRequirement
 
 > CreateRequirementResponse RequirementServiceCreateRequirement(ctx, productId).CreateRequirementBody(createRequirementBody).Execute()
+
+Creates a requirement.
 
 
 
@@ -86,6 +159,8 @@ Name | Type | Description  | Notes
 
 > DeleteRequirementResponse RequirementServiceDeleteRequirement(ctx, id).Branch(branch).Execute()
 
+Deletes a requirement.
+
 
 
 ### Example
@@ -156,6 +231,8 @@ Name | Type | Description  | Notes
 
 > GetRequirementResponse RequirementServiceGetRequirement(ctx, id).Execute()
 
+Fetches one requirement by id.
+
 
 
 ### Example
@@ -223,6 +300,8 @@ Name | Type | Description  | Notes
 ## RequirementServiceListRequirements
 
 > ListRequirementsResponse RequirementServiceListRequirements(ctx, productId).PaginationPageSize(paginationPageSize).PaginationPageToken(paginationPageToken).Branch(branch).IncludeSources(includeSources).Execute()
+
+Lists a product's requirements.
 
 
 
@@ -299,6 +378,8 @@ Name | Type | Description  | Notes
 ## RequirementServiceUpdateRequirement
 
 > UpdateRequirementResponse RequirementServiceUpdateRequirement(ctx, id).UpdateRequirementBody(updateRequirementBody).Execute()
+
+Updates a requirement.
 
 
 

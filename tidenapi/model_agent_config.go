@@ -18,7 +18,7 @@ import (
 // checks if the AgentConfig type satisfies the MappedNullable interface at compile time
 var _ MappedNullable = &AgentConfig{}
 
-// AgentConfig struct for AgentConfig
+// AgentConfig AgentConfig binds an agent type to a product with a name, inputs, optional LLM/data credential references, and an optional cron schedule.
 type AgentConfig struct {
 	Id *string `json:"id,omitempty"`
 	ProductId *string `json:"productId,omitempty"`

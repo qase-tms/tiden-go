@@ -17,7 +17,7 @@ import (
 // checks if the IngestTest type satisfies the MappedNullable interface at compile time
 var _ MappedNullable = &IngestTest{}
 
-// IngestTest struct for IngestTest
+// IngestTest IngestTest is one reporter-observed test, identified by external_id within its suite_path (root to leaf).
 type IngestTest struct {
 	ExternalId *string `json:"externalId,omitempty"`
 	SuitePath []IngestSuiteSegment `json:"suitePath,omitempty"`

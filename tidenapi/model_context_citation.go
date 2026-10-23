@@ -17,7 +17,7 @@ import (
 // checks if the ContextCitation type satisfies the MappedNullable interface at compile time
 var _ MappedNullable = &ContextCitation{}
 
-// ContextCitation struct for ContextCitation
+// ContextCitation ContextCitation resolves a citation_id referenced elsewhere in a context pack to its source (a test, memory entry, source anchor, ...).
 type ContextCitation struct {
 	Id *string `json:"id,omitempty"`
 	SourceType *string `json:"sourceType,omitempty"`

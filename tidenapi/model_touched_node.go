@@ -24,8 +24,9 @@ type TouchedNode struct {
 	Title *string `json:"title,omitempty"`
 	Description *string `json:"description,omitempty"`
 	Resources []string `json:"resources,omitempty"`
-	// repository is the canonical repo id of this node's component (shift-left v3), or \"\" when unscoped. Lets the CLI verdict compare changed files vs resources per-repo (avoids cross-repo path collisions). resources are repo-relative.
+	// repository is the canonical repo id of this node's component, or \"\" when unscoped. Lets the CLI verdict compare changed files vs resources per-repo (avoids cross-repo path collisions). resources are repo-relative.
 	Repository *string `json:"repository,omitempty"`
+	Tier *RequirementTier `json:"tier,omitempty"`
 }
 
 // NewTouchedNode instantiates a new TouchedNode object
@@ -34,6 +35,8 @@ type TouchedNode struct {
 // will change when the set of required properties is changed
 func NewTouchedNode() *TouchedNode {
 	this := TouchedNode{}
+	var tier RequirementTier = REQUIREMENT_TIER_UNSPECIFIED
+	this.Tier = &tier
 	return &this
 }
 
@@ -42,6 +45,8 @@ func NewTouchedNode() *TouchedNode {
 // but it doesn't guarantee that properties required by API are set
 func NewTouchedNodeWithDefaults() *TouchedNode {
 	this := TouchedNode{}
+	var tier RequirementTier = REQUIREMENT_TIER_UNSPECIFIED
+	this.Tier = &tier
 	return &this
 }
 
@@ -237,6 +242,38 @@ func (o *TouchedNode) SetRepository(v string) {
 	o.Repository = &v
 }
 
+// GetTier returns the Tier field value if set, zero value otherwise.
+func (o *TouchedNode) GetTier() RequirementTier {
+	if o == nil || IsNil(o.Tier) {
+		var ret RequirementTier
+		return ret
+	}
+	return *o.Tier
+}
+
+// GetTierOk returns a tuple with the Tier field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *TouchedNode) GetTierOk() (*RequirementTier, bool) {
+	if o == nil || IsNil(o.Tier) {
+		return nil, false
+	}
+	return o.Tier, true
+}
+
+// HasTier returns a boolean if a field has been set.
+func (o *TouchedNode) HasTier() bool {
+	if o != nil && !IsNil(o.Tier) {
+		return true
+	}
+
+	return false
+}
+
+// SetTier gets a reference to the given RequirementTier and assigns it to the Tier field.
+func (o *TouchedNode) SetTier(v RequirementTier) {
+	o.Tier = &v
+}
+
 func (o TouchedNode) MarshalJSON() ([]byte, error) {
 	toSerialize,err := o.ToMap()
 	if err != nil {
@@ -264,6 +301,9 @@ func (o TouchedNode) ToMap() (map[string]interface{}, error) {
 	}
 	if !IsNil(o.Repository) {
 		toSerialize["repository"] = o.Repository
+	}
+	if !IsNil(o.Tier) {
+		toSerialize["tier"] = o.Tier
 	}
 	return toSerialize, nil
 }

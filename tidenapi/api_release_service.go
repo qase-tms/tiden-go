@@ -23,7 +23,12 @@ import (
 type ReleaseServiceAPI interface {
 
 	/*
-	ReleaseServiceCreateRelease Create a release from an external source (CI/SDK). Idempotent upsert on (product, version, environment). The environment is matched by slug and auto-created if unknown.
+	ReleaseServiceCreateRelease Creates a release from an external source (CI/SDK).
+
+	Idempotent upsert keyed on (product, version, environment): re-posting the
+same version updates the existing release instead of duplicating it. The
+environment is matched by slug and auto-created if unknown; released_at is
+an RFC 3339 timestamp.
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@param productId
@@ -36,7 +41,9 @@ type ReleaseServiceAPI interface {
 	ReleaseServiceCreateReleaseExecute(r ApiReleaseServiceCreateReleaseRequest) (*CreateReleaseResponse, *http.Response, error)
 
 	/*
-	ReleaseServiceGetRelease Method for ReleaseServiceGetRelease
+	ReleaseServiceGetRelease Fetches one release by id.
+
+	Returns the release with its version, environment, and metadata.
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@param id
@@ -49,7 +56,10 @@ type ReleaseServiceAPI interface {
 	ReleaseServiceGetReleaseExecute(r ApiReleaseServiceGetReleaseRequest) (*GetReleaseResponse, *http.Response, error)
 
 	/*
-	ReleaseServiceListReleases Method for ReleaseServiceListReleases
+	ReleaseServiceListReleases Lists a product's releases.
+
+	Optionally filtered by environment slug; paginated via
+pagination.page_size/page_token.
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@param productId
@@ -82,7 +92,12 @@ func (r ApiReleaseServiceCreateReleaseRequest) Execute() (*CreateReleaseResponse
 }
 
 /*
-ReleaseServiceCreateRelease Create a release from an external source (CI/SDK). Idempotent upsert on (product, version, environment). The environment is matched by slug and auto-created if unknown.
+ReleaseServiceCreateRelease Creates a release from an external source (CI/SDK).
+
+Idempotent upsert keyed on (product, version, environment): re-posting the
+same version updates the existing release instead of duplicating it. The
+environment is matched by slug and auto-created if unknown; released_at is
+an RFC 3339 timestamp.
 
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @param productId
@@ -210,7 +225,9 @@ func (r ApiReleaseServiceGetReleaseRequest) Execute() (*GetReleaseResponse, *htt
 }
 
 /*
-ReleaseServiceGetRelease Method for ReleaseServiceGetRelease
+ReleaseServiceGetRelease Fetches one release by id.
+
+Returns the release with its version, environment, and metadata.
 
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @param id
@@ -352,7 +369,10 @@ func (r ApiReleaseServiceListReleasesRequest) Execute() (*ListReleasesResponse, 
 }
 
 /*
-ReleaseServiceListReleases Method for ReleaseServiceListReleases
+ReleaseServiceListReleases Lists a product's releases.
+
+Optionally filtered by environment slug; paginated via
+pagination.page_size/page_token.
 
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @param productId

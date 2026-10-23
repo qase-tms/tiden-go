@@ -65,6 +65,8 @@ type APIClient struct {
 
 	IntentServiceAPI IntentServiceAPI
 
+	IntentSessionServiceAPI IntentSessionServiceAPI
+
 	IssueServiceAPI IssueServiceAPI
 
 	ProductServiceAPI ProductServiceAPI
@@ -106,6 +108,7 @@ func NewAPIClient(cfg *Configuration) *APIClient {
 	c.ComponentServiceAPI = (*ComponentServiceAPIService)(&c.common)
 	c.EnvironmentServiceAPI = (*EnvironmentServiceAPIService)(&c.common)
 	c.IntentServiceAPI = (*IntentServiceAPIService)(&c.common)
+	c.IntentSessionServiceAPI = (*IntentSessionServiceAPIService)(&c.common)
 	c.IssueServiceAPI = (*IssueServiceAPIService)(&c.common)
 	c.ProductServiceAPI = (*ProductServiceAPIService)(&c.common)
 	c.QualityGateServiceAPI = (*QualityGateServiceAPIService)(&c.common)

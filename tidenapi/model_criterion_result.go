@@ -17,7 +17,7 @@ import (
 // checks if the CriterionResult type satisfies the MappedNullable interface at compile time
 var _ MappedNullable = &CriterionResult{}
 
-// CriterionResult struct for CriterionResult
+// CriterionResult CriterionResult is one criterion's outcome within a subject's verdict breakdown.
 type CriterionResult struct {
 	// \"pass_rate\" | \"coverage\" | \"risk\" | \"freshness\" | ...
 	Criterion *string `json:"criterion,omitempty"`

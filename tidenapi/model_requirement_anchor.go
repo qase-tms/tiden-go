@@ -17,7 +17,7 @@ import (
 // checks if the RequirementAnchor type satisfies the MappedNullable interface at compile time
 var _ MappedNullable = &RequirementAnchor{}
 
-// RequirementAnchor struct for RequirementAnchor
+// RequirementAnchor RequirementAnchor is one (requirement, repo-relative path) code-anchor pair.
 type RequirementAnchor struct {
 	RequirementId *string `json:"requirementId,omitempty"`
 	RepoPath *string `json:"repoPath,omitempty"`

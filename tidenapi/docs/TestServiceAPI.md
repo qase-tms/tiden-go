@@ -4,24 +4,26 @@ All URIs are relative to *https://api.tiden.ai*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
-[**TestServiceCreateTest**](TestServiceAPI.md#TestServiceCreateTest) | **Post** /v1/products/{productId}/tests | 
-[**TestServiceDeleteTest**](TestServiceAPI.md#TestServiceDeleteTest) | **Delete** /v1/tests/{id} | 
-[**TestServiceDeriveTestLinks**](TestServiceAPI.md#TestServiceDeriveTestLinks) | **Post** /v1/products/{productId}/test-links:derive | DeriveTestLinks matches requirement repo_file anchors against tests&#39; file_path: exact-file matches are auto-linked (durable, moves the gate), directory-proximity matches are returned for an agent to confirm via LinkRequirement. Idempotent.
-[**TestServiceGetTest**](TestServiceAPI.md#TestServiceGetTest) | **Get** /v1/tests/{id} | 
-[**TestServiceIngestTests**](TestServiceAPI.md#TestServiceIngestTests) | **Post** /v1/products/{productId}/tests:ingest | IngestTests is the reporter-friendly batch upsert endpoint. Idempotent on (product, branch, external_id). Server-validates the entire batch upfront, then either applies all changes or returns 422 with the per-entry errors. Max 1000 tests per call (enforced server-side).
-[**TestServiceLinkRequirement**](TestServiceAPI.md#TestServiceLinkRequirement) | **Post** /v1/tests/{testId}/links | 
-[**TestServiceListBranchLinkProposals**](TestServiceAPI.md#TestServiceListBranchLinkProposals) | **Get** /v1/branches/{branchId}/link-proposals | 
-[**TestServiceListLinks**](TestServiceAPI.md#TestServiceListLinks) | **Get** /v1/tests/{testId}/links | 
-[**TestServiceListTests**](TestServiceAPI.md#TestServiceListTests) | **Get** /v1/products/{productId}/tests | 
-[**TestServiceReviewBranchLinkProposals**](TestServiceAPI.md#TestServiceReviewBranchLinkProposals) | **Post** /v1/branches/{branchId}/link-proposals:review | 
-[**TestServiceUnlinkRequirement**](TestServiceAPI.md#TestServiceUnlinkRequirement) | **Delete** /v1/tests/{testId}/links/{requirementId} | 
-[**TestServiceUpdateTest**](TestServiceAPI.md#TestServiceUpdateTest) | **Put** /v1/tests/{id} | 
+[**TestServiceCreateTest**](TestServiceAPI.md#TestServiceCreateTest) | **Post** /v1/products/{productId}/tests | Creates a test suite or case.
+[**TestServiceDeleteTest**](TestServiceAPI.md#TestServiceDeleteTest) | **Delete** /v1/tests/{id} | Deletes a test.
+[**TestServiceDeriveTestLinks**](TestServiceAPI.md#TestServiceDeriveTestLinks) | **Post** /v1/products/{productId}/test-links:derive | Derives test-requirement links from shared file anchors.
+[**TestServiceGetTest**](TestServiceAPI.md#TestServiceGetTest) | **Get** /v1/tests/{id} | Fetches one test by id.
+[**TestServiceIngestTests**](TestServiceAPI.md#TestServiceIngestTests) | **Post** /v1/products/{productId}/tests:ingest | Batch-upserts tests from a reporter (live-documentation ingest).
+[**TestServiceLinkRequirement**](TestServiceAPI.md#TestServiceLinkRequirement) | **Post** /v1/tests/{testId}/links | Links a test case to a requirement.
+[**TestServiceListBranchLinkProposals**](TestServiceAPI.md#TestServiceListBranchLinkProposals) | **Get** /v1/branches/{branchId}/link-proposals | Lists a branch&#39;s test-requirement link proposals.
+[**TestServiceListLinks**](TestServiceAPI.md#TestServiceListLinks) | **Get** /v1/tests/{testId}/links | Lists a test&#39;s requirement links.
+[**TestServiceListTests**](TestServiceAPI.md#TestServiceListTests) | **Get** /v1/products/{productId}/tests | Lists a product&#39;s tests.
+[**TestServiceReviewBranchLinkProposals**](TestServiceAPI.md#TestServiceReviewBranchLinkProposals) | **Post** /v1/branches/{branchId}/link-proposals:review | Accepts or rejects branch link proposals.
+[**TestServiceUnlinkRequirement**](TestServiceAPI.md#TestServiceUnlinkRequirement) | **Delete** /v1/tests/{testId}/links/{requirementId} | Removes a test-requirement link.
+[**TestServiceUpdateTest**](TestServiceAPI.md#TestServiceUpdateTest) | **Put** /v1/tests/{id} | Updates a test suite or case.
 
 
 
 ## TestServiceCreateTest
 
 > CreateTestResponse TestServiceCreateTest(ctx, productId).CreateTestBody(createTestBody).Execute()
+
+Creates a test suite or case.
 
 
 
@@ -93,6 +95,8 @@ Name | Type | Description  | Notes
 
 > map[string]interface{} TestServiceDeleteTest(ctx, id).Branch(branch).Execute()
 
+Deletes a test.
+
 
 
 ### Example
@@ -163,7 +167,9 @@ Name | Type | Description  | Notes
 
 > DeriveTestLinksResponse TestServiceDeriveTestLinks(ctx, productId).Body(body).Execute()
 
-DeriveTestLinks matches requirement repo_file anchors against tests' file_path: exact-file matches are auto-linked (durable, moves the gate), directory-proximity matches are returned for an agent to confirm via LinkRequirement. Idempotent.
+Derives test-requirement links from shared file anchors.
+
+
 
 ### Example
 
@@ -233,6 +239,8 @@ Name | Type | Description  | Notes
 
 > GetTestResponse TestServiceGetTest(ctx, id).Execute()
 
+Fetches one test by id.
+
 
 
 ### Example
@@ -301,7 +309,9 @@ Name | Type | Description  | Notes
 
 > IngestTestsResponse TestServiceIngestTests(ctx, productId).IngestTestsBody(ingestTestsBody).Execute()
 
-IngestTests is the reporter-friendly batch upsert endpoint. Idempotent on (product, branch, external_id). Server-validates the entire batch upfront, then either applies all changes or returns 422 with the per-entry errors. Max 1000 tests per call (enforced server-side).
+Batch-upserts tests from a reporter (live-documentation ingest).
+
+
 
 ### Example
 
@@ -370,6 +380,8 @@ Name | Type | Description  | Notes
 ## TestServiceLinkRequirement
 
 > map[string]interface{} TestServiceLinkRequirement(ctx, testId).LinkRequirementBody(linkRequirementBody).Execute()
+
+Links a test case to a requirement.
 
 
 
@@ -441,6 +453,8 @@ Name | Type | Description  | Notes
 
 > ListBranchLinkProposalsResponse TestServiceListBranchLinkProposals(ctx, branchId).Statuses(statuses).Execute()
 
+Lists a branch's test-requirement link proposals.
+
 
 
 ### Example
@@ -511,6 +525,8 @@ Name | Type | Description  | Notes
 
 > ListLinksResponse TestServiceListLinks(ctx, testId).Branch(branch).Execute()
 
+Lists a test's requirement links.
+
 
 
 ### Example
@@ -580,6 +596,8 @@ Name | Type | Description  | Notes
 ## TestServiceListTests
 
 > ListTestsResponse TestServiceListTests(ctx, productId).PaginationPageSize(paginationPageSize).PaginationPageToken(paginationPageToken).Branch(branch).Execute()
+
+Lists a product's tests.
 
 
 
@@ -655,6 +673,8 @@ Name | Type | Description  | Notes
 
 > ReviewBranchLinkProposalsResponse TestServiceReviewBranchLinkProposals(ctx, branchId).ReviewBranchLinkProposalsBody(reviewBranchLinkProposalsBody).Execute()
 
+Accepts or rejects branch link proposals.
+
 
 
 ### Example
@@ -724,6 +744,8 @@ Name | Type | Description  | Notes
 ## TestServiceUnlinkRequirement
 
 > map[string]interface{} TestServiceUnlinkRequirement(ctx, testId, requirementId).Branch(branch).Execute()
+
+Removes a test-requirement link.
 
 
 
@@ -797,6 +819,8 @@ Name | Type | Description  | Notes
 ## TestServiceUpdateTest
 
 > UpdateTestResponse TestServiceUpdateTest(ctx, id).UpdateTestBody(updateTestBody).Execute()
+
+Updates a test suite or case.
 
 
 

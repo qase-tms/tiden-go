@@ -28,7 +28,7 @@ type WriteRequirementEdgeBody struct {
 	Confidence *float64 `json:"confidence,omitempty"`
 	// agent_run_id is attributed to the written edge.
 	AgentRunId *string `json:"agentRunId,omitempty"`
-	// dst_component_id sets a req→component endpoint (shift-left v3). Mutually exclusive with dst_requirement_id.
+	// dst_component_id sets a req→component endpoint. Mutually exclusive with dst_requirement_id.
 	DstComponentId *string `json:"dstComponentId,omitempty"`
 }
 

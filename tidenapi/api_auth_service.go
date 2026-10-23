@@ -22,7 +22,11 @@ import (
 type AuthServiceAPI interface {
 
 	/*
-	AuthServiceGetCurrentUser Method for AuthServiceGetCurrentUser
+	AuthServiceGetCurrentUser Returns the authenticated user (whoami).
+
+	Resolves the caller from the presented credential (API token or session)
+and returns the user's id, email, name, and avatar URL. The CLI uses it
+to verify that a token is valid and who it belongs to.
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@return ApiAuthServiceGetCurrentUserRequest
@@ -34,7 +38,12 @@ type AuthServiceAPI interface {
 	AuthServiceGetCurrentUserExecute(r ApiAuthServiceGetCurrentUserRequest) (*GetCurrentUserResponse, *http.Response, error)
 
 	/*
-	AuthServiceUpdateUserOnboarding Method for AuthServiceUpdateUserOnboarding
+	AuthServiceUpdateUserOnboarding Updates the caller's onboarding progress flags.
+
+	One-way latches: each of cli_verified, dismissed, and completed stamps its
+timestamp on the caller's onboarding state when true; false leaves the
+flag unchanged (flags cannot be un-set through this RPC). Returns the
+resulting onboarding state.
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@return ApiAuthServiceUpdateUserOnboardingRequest
@@ -59,7 +68,11 @@ func (r ApiAuthServiceGetCurrentUserRequest) Execute() (*GetCurrentUserResponse,
 }
 
 /*
-AuthServiceGetCurrentUser Method for AuthServiceGetCurrentUser
+AuthServiceGetCurrentUser Returns the authenticated user (whoami).
+
+Resolves the caller from the presented credential (API token or session)
+and returns the user's id, email, name, and avatar URL. The CLI uses it
+to verify that a token is valid and who it belongs to.
 
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @return ApiAuthServiceGetCurrentUserRequest
@@ -174,6 +187,7 @@ type ApiAuthServiceUpdateUserOnboardingRequest struct {
 	updateUserOnboardingRequest *UpdateUserOnboardingRequest
 }
 
+// UpdateUserOnboardingRequest latches onboarding flags: each true field stamps its timestamp; false leaves the flag unchanged. wizard_step and answers are ordinary mutable state: an unset field is left untouched, a set one replaces the stored value.
 func (r ApiAuthServiceUpdateUserOnboardingRequest) UpdateUserOnboardingRequest(updateUserOnboardingRequest UpdateUserOnboardingRequest) ApiAuthServiceUpdateUserOnboardingRequest {
 	r.updateUserOnboardingRequest = &updateUserOnboardingRequest
 	return r
@@ -184,7 +198,12 @@ func (r ApiAuthServiceUpdateUserOnboardingRequest) Execute() (*UpdateUserOnboard
 }
 
 /*
-AuthServiceUpdateUserOnboarding Method for AuthServiceUpdateUserOnboarding
+AuthServiceUpdateUserOnboarding Updates the caller's onboarding progress flags.
+
+One-way latches: each of cli_verified, dismissed, and completed stamps its
+timestamp on the caller's onboarding state when true; false leaves the
+flag unchanged (flags cannot be un-set through this RPC). Returns the
+resulting onboarding state.
 
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @return ApiAuthServiceUpdateUserOnboardingRequest

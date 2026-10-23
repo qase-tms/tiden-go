@@ -4,18 +4,20 @@ All URIs are relative to *https://api.tiden.ai*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
-[**AgentRunServiceCancelAgentRun**](AgentRunServiceAPI.md#AgentRunServiceCancelAgentRun) | **Post** /v1/agent-runs/{id}:cancel | 
-[**AgentRunServiceGetAgentRun**](AgentRunServiceAPI.md#AgentRunServiceGetAgentRun) | **Get** /v1/agent-runs/{id} | 
-[**AgentRunServiceListAgentRunEvents**](AgentRunServiceAPI.md#AgentRunServiceListAgentRunEvents) | **Get** /v1/agent-runs/{runId}/events | 
-[**AgentRunServiceListAgentRuns**](AgentRunServiceAPI.md#AgentRunServiceListAgentRuns) | **Get** /v1/agent-configs/{agentConfigId}/runs | 
-[**AgentRunServiceStartAgentRun**](AgentRunServiceAPI.md#AgentRunServiceStartAgentRun) | **Post** /v1/agent-configs/{agentConfigId}/runs | 
-[**AgentRunServiceStreamAgentRun**](AgentRunServiceAPI.md#AgentRunServiceStreamAgentRun) | **Get** /v1/agent-runs/{runId}/events:stream | 
+[**AgentRunServiceCancelAgentRun**](AgentRunServiceAPI.md#AgentRunServiceCancelAgentRun) | **Post** /v1/agent-runs/{id}:cancel | Cancels a pending or running agent run.
+[**AgentRunServiceGetAgentRun**](AgentRunServiceAPI.md#AgentRunServiceGetAgentRun) | **Get** /v1/agent-runs/{id} | Fetches one agent run by id.
+[**AgentRunServiceListAgentRunEvents**](AgentRunServiceAPI.md#AgentRunServiceListAgentRunEvents) | **Get** /v1/agent-runs/{runId}/events | Lists the event log of an agent run.
+[**AgentRunServiceListAgentRuns**](AgentRunServiceAPI.md#AgentRunServiceListAgentRuns) | **Get** /v1/agent-configs/{agentConfigId}/runs | Lists the runs of an agent configuration.
+[**AgentRunServiceStartAgentRun**](AgentRunServiceAPI.md#AgentRunServiceStartAgentRun) | **Post** /v1/agent-configs/{agentConfigId}/runs | Starts a run of an agent configuration.
+[**AgentRunServiceStreamAgentRun**](AgentRunServiceAPI.md#AgentRunServiceStreamAgentRun) | **Get** /v1/agent-runs/{runId}/events:stream | Streams an agent run&#39;s events as they happen.
 
 
 
 ## AgentRunServiceCancelAgentRun
 
 > CancelAgentRunResponse AgentRunServiceCancelAgentRun(ctx, id).CancelAgentRunBody(cancelAgentRunBody).Execute()
+
+Cancels a pending or running agent run.
 
 
 
@@ -87,6 +89,8 @@ Name | Type | Description  | Notes
 
 > GetAgentRunResponse AgentRunServiceGetAgentRun(ctx, id).Execute()
 
+Fetches one agent run by id.
+
 
 
 ### Example
@@ -154,6 +158,8 @@ Name | Type | Description  | Notes
 ## AgentRunServiceListAgentRunEvents
 
 > ListAgentRunEventsResponse AgentRunServiceListAgentRunEvents(ctx, runId).PageSize(pageSize).PageToken(pageToken).Execute()
+
+Lists the event log of an agent run.
 
 
 
@@ -227,6 +233,8 @@ Name | Type | Description  | Notes
 
 > ListAgentRunsResponse AgentRunServiceListAgentRuns(ctx, agentConfigId).PageSize(pageSize).PageToken(pageToken).Execute()
 
+Lists the runs of an agent configuration.
+
 
 
 ### Example
@@ -299,6 +307,8 @@ Name | Type | Description  | Notes
 
 > StartAgentRunResponse AgentRunServiceStartAgentRun(ctx, agentConfigId).StartAgentRunBody(startAgentRunBody).Execute()
 
+Starts a run of an agent configuration.
+
 
 
 ### Example
@@ -368,6 +378,8 @@ Name | Type | Description  | Notes
 ## AgentRunServiceStreamAgentRun
 
 > StreamResultOfAgentRunEvent AgentRunServiceStreamAgentRun(ctx, runId).AfterEventId(afterEventId).Execute()
+
+Streams an agent run's events as they happen.
 
 
 

@@ -17,9 +17,9 @@ import (
 // checks if the DistillIntentBody type satisfies the MappedNullable interface at compile time
 var _ MappedNullable = &DistillIntentBody{}
 
-// DistillIntentBody struct for DistillIntentBody
+// DistillIntentBody DistillIntentRequest carries one coding session — the rendered transcript plus session metadata — to reconcile into the product's requirement tree.
 type DistillIntentBody struct {
-	// Rendered conversation (normalized, slim — user/assistant text only). The backend never sees an agent-specific transcript format.
+	// Rendered conversation (normalized, slim — user/assistant text only). Agent-specific transcript formats are not accepted.
 	Transcript *string `json:"transcript,omitempty"`
 	// Optional LLM credential to use. When empty, the backend picks the first usable llm.* credential in the product's workspace.
 	CredentialId *string `json:"credentialId,omitempty"`

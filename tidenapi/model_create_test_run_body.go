@@ -27,6 +27,9 @@ type CreateTestRunBody struct {
 	BuildSha *string `json:"buildSha,omitempty"`
 	StartedAt *string `json:"startedAt,omitempty"`
 	ClientMeta *map[string]string `json:"clientMeta,omitempty"`
+	IntentSessionId *string `json:"intentSessionId,omitempty"`
+	// The session's Tiden intent branch: live-documentation sync lands there instead of resolving the free-text git `branch` name (which never creates a Tiden branch). Set by an in-session `tiden run exec`; empty otherwise.
+	IntentBranch *string `json:"intentBranch,omitempty"`
 }
 
 // NewCreateTestRunBody instantiates a new CreateTestRunBody object
@@ -302,6 +305,70 @@ func (o *CreateTestRunBody) SetClientMeta(v map[string]string) {
 	o.ClientMeta = &v
 }
 
+// GetIntentSessionId returns the IntentSessionId field value if set, zero value otherwise.
+func (o *CreateTestRunBody) GetIntentSessionId() string {
+	if o == nil || IsNil(o.IntentSessionId) {
+		var ret string
+		return ret
+	}
+	return *o.IntentSessionId
+}
+
+// GetIntentSessionIdOk returns a tuple with the IntentSessionId field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *CreateTestRunBody) GetIntentSessionIdOk() (*string, bool) {
+	if o == nil || IsNil(o.IntentSessionId) {
+		return nil, false
+	}
+	return o.IntentSessionId, true
+}
+
+// HasIntentSessionId returns a boolean if a field has been set.
+func (o *CreateTestRunBody) HasIntentSessionId() bool {
+	if o != nil && !IsNil(o.IntentSessionId) {
+		return true
+	}
+
+	return false
+}
+
+// SetIntentSessionId gets a reference to the given string and assigns it to the IntentSessionId field.
+func (o *CreateTestRunBody) SetIntentSessionId(v string) {
+	o.IntentSessionId = &v
+}
+
+// GetIntentBranch returns the IntentBranch field value if set, zero value otherwise.
+func (o *CreateTestRunBody) GetIntentBranch() string {
+	if o == nil || IsNil(o.IntentBranch) {
+		var ret string
+		return ret
+	}
+	return *o.IntentBranch
+}
+
+// GetIntentBranchOk returns a tuple with the IntentBranch field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *CreateTestRunBody) GetIntentBranchOk() (*string, bool) {
+	if o == nil || IsNil(o.IntentBranch) {
+		return nil, false
+	}
+	return o.IntentBranch, true
+}
+
+// HasIntentBranch returns a boolean if a field has been set.
+func (o *CreateTestRunBody) HasIntentBranch() bool {
+	if o != nil && !IsNil(o.IntentBranch) {
+		return true
+	}
+
+	return false
+}
+
+// SetIntentBranch gets a reference to the given string and assigns it to the IntentBranch field.
+func (o *CreateTestRunBody) SetIntentBranch(v string) {
+	o.IntentBranch = &v
+}
+
 func (o CreateTestRunBody) MarshalJSON() ([]byte, error) {
 	toSerialize,err := o.ToMap()
 	if err != nil {
@@ -335,6 +402,12 @@ func (o CreateTestRunBody) ToMap() (map[string]interface{}, error) {
 	}
 	if !IsNil(o.ClientMeta) {
 		toSerialize["clientMeta"] = o.ClientMeta
+	}
+	if !IsNil(o.IntentSessionId) {
+		toSerialize["intentSessionId"] = o.IntentSessionId
+	}
+	if !IsNil(o.IntentBranch) {
+		toSerialize["intentBranch"] = o.IntentBranch
 	}
 	return toSerialize, nil
 }

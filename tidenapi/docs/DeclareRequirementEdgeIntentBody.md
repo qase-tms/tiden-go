@@ -10,7 +10,7 @@ Name | Type | Description | Notes
 **EdgeType** | Pointer to **string** | edge_type must be \&quot;depends_on\&quot;/\&quot;traces_to\&quot; (req→req) or \&quot;impacts_component\&quot; (req→component). | [optional] 
 **Confidence** | Pointer to **float64** | confidence must be provided; explicit 0.0 is valid, omitted is not. | [optional] 
 **Rationale** | Pointer to **string** |  | [optional] 
-**DstComponentId** | Pointer to **string** | dst_component_id sets a req→component endpoint (shift-left v3). Mutually exclusive with dst_requirement_id. | [optional] 
+**DstComponentId** | Pointer to **string** | dst_component_id sets a req→component endpoint. Mutually exclusive with dst_requirement_id. | [optional] 
 
 ## Methods
 

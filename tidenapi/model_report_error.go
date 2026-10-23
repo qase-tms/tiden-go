@@ -17,7 +17,7 @@ import (
 // checks if the ReportError type satisfies the MappedNullable interface at compile time
 var _ MappedNullable = &ReportError{}
 
-// ReportError struct for ReportError
+// ReportError ReportError is one per-entry validation failure from a reported batch.
 type ReportError struct {
 	Index *int32 `json:"index,omitempty"`
 	ResultId *string `json:"resultId,omitempty"`

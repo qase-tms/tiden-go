@@ -17,13 +17,18 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
+	"os"
 )
 
 
 type TestRunServiceAPI interface {
 
 	/*
-	TestRunServiceAbortTestRun Method for TestRunServiceAbortTestRun
+	TestRunServiceAbortTestRun Aborts a run.
+
+	Terminally cancels a run from new/in_progress; aborting a completed or
+already-aborted run is rejected. Stats are recomputed so a partial run
+still shows what was reported.
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@param productId
@@ -37,7 +42,14 @@ type TestRunServiceAPI interface {
 	TestRunServiceAbortTestRunExecute(r ApiTestRunServiceAbortTestRunRequest) (*AbortTestRunResponse, *http.Response, error)
 
 	/*
-	TestRunServiceCompleteTestRun Method for TestRunServiceCompleteTestRun
+	TestRunServiceCompleteTestRun Completes a run and computes its final verdict.
+
+	Recounts stats and derives the terminal status (passed | failed) from the
+latest attempt per execution. Idempotent: completing an already-completed
+run returns it unchanged (and retries a stuck or failed live-doc sync);
+aborted runs cannot be completed. When the product has live documentation
+enabled, completion triggers reconciliation of the test repository from
+the run's results.
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@param productId
@@ -51,7 +63,13 @@ type TestRunServiceAPI interface {
 	TestRunServiceCompleteTestRunExecute(r ApiTestRunServiceCompleteTestRunRequest) (*CompleteTestRunResponse, *http.Response, error)
 
 	/*
-	TestRunServiceCreateTestRun Method for TestRunServiceCreateTestRun
+	TestRunServiceCreateTestRun Creates a test run to report CI results into.
+
+	The run is the container ReportResults writes into. environment is a slug,
+auto-created when unknown; branch is the git branch name (CI metadata used
+for test matching — no Tiden branch is created); title defaults to
+"Automated run <RFC3339>" server-side. The returned run's seq_num is the
+run_seq every other run endpoint addresses.
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@param productId
@@ -64,7 +82,9 @@ type TestRunServiceAPI interface {
 	TestRunServiceCreateTestRunExecute(r ApiTestRunServiceCreateTestRunRequest) (*CreateTestRunResponse, *http.Response, error)
 
 	/*
-	TestRunServiceDeleteTestRun Method for TestRunServiceDeleteTestRun
+	TestRunServiceDeleteTestRun Deletes a test run.
+
+	Permanently removes the run and its reported results. Not reversible.
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@param productId
@@ -78,7 +98,14 @@ type TestRunServiceAPI interface {
 	TestRunServiceDeleteTestRunExecute(r ApiTestRunServiceDeleteTestRunRequest) (map[string]interface{}, *http.Response, error)
 
 	/*
-	TestRunServiceGetRunAttachment Resolves a content-hash (uploaded via the reporter multipart route POST /v1/products/{product_id}/attachments:upload) to a presigned download URL. Public so reporter/CLI clients and the SPA (JWT) can both fetch; ATTACHMENT_NOT_FOUND (→ 404) for an unknown hash — the drawer renders \"attachment unavailable\" on that.
+	TestRunServiceGetRunAttachment Resolves an attachment content hash to a download URL.
+
+	Resolves a hash uploaded via the reporter multipart route
+POST /v1/products/{product_id}/attachments:upload to a fresh presigned
+download URL (15-minute expiry, attachment disposition). Content-
+addressed: the same hash always names the same bytes within a product.
+Public so reporter/CLI clients and the SPA (JWT) can both fetch; an
+unknown hash returns ATTACHMENT_NOT_FOUND (HTTP 404).
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@param productId
@@ -92,7 +119,10 @@ type TestRunServiceAPI interface {
 	TestRunServiceGetRunAttachmentExecute(r ApiTestRunServiceGetRunAttachmentRequest) (*GetRunAttachmentResponse, *http.Response, error)
 
 	/*
-	TestRunServiceGetRunResult Method for TestRunServiceGetRunResult
+	TestRunServiceGetRunResult Fetches one reported result by id.
+
+	Returns the full result including steps, parameters, stacktrace, and
+attachment hashes (resolve via GetRunAttachment).
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@param productId
@@ -107,7 +137,11 @@ type TestRunServiceAPI interface {
 	TestRunServiceGetRunResultExecute(r ApiTestRunServiceGetRunResultRequest) (*GetRunResultResponse, *http.Response, error)
 
 	/*
-	TestRunServiceGetRunSummary Method for TestRunServiceGetRunSummary
+	TestRunServiceGetRunSummary Returns per-suite and per-case rollups of a run.
+
+	Aggregates the whole run into suite stats and case summaries (worst
+latest-attempt status across parameter combos, attempts, durations) so
+clients can render the run tree without paginating results.
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@param productId
@@ -121,7 +155,10 @@ type TestRunServiceAPI interface {
 	TestRunServiceGetRunSummaryExecute(r ApiTestRunServiceGetRunSummaryRequest) (*GetRunSummaryResponse, *http.Response, error)
 
 	/*
-	TestRunServiceGetTestRun Method for TestRunServiceGetTestRun
+	TestRunServiceGetTestRun Fetches one test run by its sequence number.
+
+	Returns the run with its status, environment, stats (latest-attempt
+counters), and live-documentation sync state.
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@param productId
@@ -135,7 +172,12 @@ type TestRunServiceAPI interface {
 	TestRunServiceGetTestRunExecute(r ApiTestRunServiceGetTestRunRequest) (*GetTestRunResponse, *http.Response, error)
 
 	/*
-	TestRunServiceListRunResults Method for TestRunServiceListRunResults
+	TestRunServiceListRunResults Lists a run's reported results.
+
+	Filter by latest-attempt status, title substring (search), or
+identity_key (all attempts of one case identity); latest_only collapses
+retries to the latest attempt per execution. Paginated via
+pagination.page_size/page_token.
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@param productId
@@ -149,7 +191,11 @@ type TestRunServiceAPI interface {
 	TestRunServiceListRunResultsExecute(r ApiTestRunServiceListRunResultsRequest) (*ListRunResultsResponse, *http.Response, error)
 
 	/*
-	TestRunServiceListTestRuns Method for TestRunServiceListTestRuns
+	TestRunServiceListTestRuns Lists a product's test runs.
+
+	Filter by status (new | in_progress | passed | failed | aborted),
+environment slug, branch name, or title substring via search. Paginated
+via pagination.page_size/page_token.
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@param productId
@@ -162,7 +208,16 @@ type TestRunServiceAPI interface {
 	TestRunServiceListTestRunsExecute(r ApiTestRunServiceListTestRunsRequest) (*ListTestRunsResponse, *http.Response, error)
 
 	/*
-	TestRunServiceReportResults Method for TestRunServiceReportResults
+	TestRunServiceReportResults Reports a batch of test results into a run.
+
+	Accepts 1..2000 results per call. The batch is validated up front; on
+failure nothing is written and per-entry errors are returned (HTTP 400,
+also attached as google.rpc.Status details for gRPC clients). Each
+result's id is an idempotency key — resends count as duplicates and are
+skipped, so retrying a batch is safe. Results are matched to repository
+cases by testops_ids[0], then external_id, then signature (unmatched
+results are kept). Rejected once the run is completed/aborted
+(RUN_COMPLETED).
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@param productId
@@ -174,6 +229,21 @@ type TestRunServiceAPI interface {
 	// TestRunServiceReportResultsExecute executes the request
 	//  @return ReportResultsResponse
 	TestRunServiceReportResultsExecute(r ApiTestRunServiceReportResultsRequest) (*ReportResultsResponse, *http.Response, error)
+
+	/*
+	TestRunServiceUploadRunAttachments Uploads run attachments and returns their content hashes.
+
+	Multipart upload used by the reporters before ReportResults: each returned hash goes into a result's `attachments`. Not a gRPC method (multipart is not expressible in protobuf), so it is served by a gateway HandlePath route that authenticates the bearer token itself; see app/backend/internal/server/run_attachment_upload.go. Limits per request: 20 files, 32 MiB per file, 128 MiB total, 5 minute read deadline. Repeat the `file[]` part once per file (`file` is also accepted).
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param productId Product the attachments belong to.
+	@return ApiTestRunServiceUploadRunAttachmentsRequest
+	*/
+	TestRunServiceUploadRunAttachments(ctx context.Context, productId string) ApiTestRunServiceUploadRunAttachmentsRequest
+
+	// TestRunServiceUploadRunAttachmentsExecute executes the request
+	//  @return V1UploadRunAttachmentsResponse
+	TestRunServiceUploadRunAttachmentsExecute(r ApiTestRunServiceUploadRunAttachmentsRequest) (*V1UploadRunAttachmentsResponse, *http.Response, error)
 }
 
 // TestRunServiceAPIService TestRunServiceAPI service
@@ -197,7 +267,11 @@ func (r ApiTestRunServiceAbortTestRunRequest) Execute() (*AbortTestRunResponse, 
 }
 
 /*
-TestRunServiceAbortTestRun Method for TestRunServiceAbortTestRun
+TestRunServiceAbortTestRun Aborts a run.
+
+Terminally cancels a run from new/in_progress; aborting a completed or
+already-aborted run is rejected. Stats are recomputed so a partial run
+still shows what was reported.
 
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @param productId
@@ -335,7 +409,14 @@ func (r ApiTestRunServiceCompleteTestRunRequest) Execute() (*CompleteTestRunResp
 }
 
 /*
-TestRunServiceCompleteTestRun Method for TestRunServiceCompleteTestRun
+TestRunServiceCompleteTestRun Completes a run and computes its final verdict.
+
+Recounts stats and derives the terminal status (passed | failed) from the
+latest attempt per execution. Idempotent: completing an already-completed
+run returns it unchanged (and retries a stuck or failed live-doc sync);
+aborted runs cannot be completed. When the product has live documentation
+enabled, completion triggers reconciliation of the test repository from
+the run's results.
 
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @param productId
@@ -472,7 +553,13 @@ func (r ApiTestRunServiceCreateTestRunRequest) Execute() (*CreateTestRunResponse
 }
 
 /*
-TestRunServiceCreateTestRun Method for TestRunServiceCreateTestRun
+TestRunServiceCreateTestRun Creates a test run to report CI results into.
+
+The run is the container ReportResults writes into. environment is a slug,
+auto-created when unknown; branch is the git branch name (CI metadata used
+for test matching — no Tiden branch is created); title defaults to
+"Automated run <RFC3339>" server-side. The returned run's seq_num is the
+run_seq every other run endpoint addresses.
 
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @param productId
@@ -601,7 +688,9 @@ func (r ApiTestRunServiceDeleteTestRunRequest) Execute() (map[string]interface{}
 }
 
 /*
-TestRunServiceDeleteTestRun Method for TestRunServiceDeleteTestRun
+TestRunServiceDeleteTestRun Deletes a test run.
+
+Permanently removes the run and its reported results. Not reversible.
 
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @param productId
@@ -728,7 +817,14 @@ func (r ApiTestRunServiceGetRunAttachmentRequest) Execute() (*GetRunAttachmentRe
 }
 
 /*
-TestRunServiceGetRunAttachment Resolves a content-hash (uploaded via the reporter multipart route POST /v1/products/{product_id}/attachments:upload) to a presigned download URL. Public so reporter/CLI clients and the SPA (JWT) can both fetch; ATTACHMENT_NOT_FOUND (→ 404) for an unknown hash — the drawer renders \"attachment unavailable\" on that.
+TestRunServiceGetRunAttachment Resolves an attachment content hash to a download URL.
+
+Resolves a hash uploaded via the reporter multipart route
+POST /v1/products/{product_id}/attachments:upload to a fresh presigned
+download URL (15-minute expiry, attachment disposition). Content-
+addressed: the same hash always names the same bytes within a product.
+Public so reporter/CLI clients and the SPA (JWT) can both fetch; an
+unknown hash returns ATTACHMENT_NOT_FOUND (HTTP 404).
 
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @param productId
@@ -856,7 +952,10 @@ func (r ApiTestRunServiceGetRunResultRequest) Execute() (*GetRunResultResponse, 
 }
 
 /*
-TestRunServiceGetRunResult Method for TestRunServiceGetRunResult
+TestRunServiceGetRunResult Fetches one reported result by id.
+
+Returns the full result including steps, parameters, stacktrace, and
+attachment hashes (resolve via GetRunAttachment).
 
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @param productId
@@ -986,7 +1085,11 @@ func (r ApiTestRunServiceGetRunSummaryRequest) Execute() (*GetRunSummaryResponse
 }
 
 /*
-TestRunServiceGetRunSummary Method for TestRunServiceGetRunSummary
+TestRunServiceGetRunSummary Returns per-suite and per-case rollups of a run.
+
+Aggregates the whole run into suite stats and case summaries (worst
+latest-attempt status across parameter combos, attempts, durations) so
+clients can render the run tree without paginating results.
 
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @param productId
@@ -1113,7 +1216,10 @@ func (r ApiTestRunServiceGetTestRunRequest) Execute() (*GetTestRunResponse, *htt
 }
 
 /*
-TestRunServiceGetTestRun Method for TestRunServiceGetTestRun
+TestRunServiceGetTestRun Fetches one test run by its sequence number.
+
+Returns the run with its status, environment, stats (latest-attempt
+counters), and live-documentation sync state.
 
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @param productId
@@ -1280,7 +1386,12 @@ func (r ApiTestRunServiceListRunResultsRequest) Execute() (*ListRunResultsRespon
 }
 
 /*
-TestRunServiceListRunResults Method for TestRunServiceListRunResults
+TestRunServiceListRunResults Lists a run's reported results.
+
+Filter by latest-attempt status, title substring (search), or
+identity_key (all attempts of one case identity); latest_only collapses
+retries to the latest attempt per execution. Paginated via
+pagination.page_size/page_token.
 
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @param productId
@@ -1464,7 +1575,11 @@ func (r ApiTestRunServiceListTestRunsRequest) Execute() (*ListTestRunsResponse, 
 }
 
 /*
-TestRunServiceListTestRuns Method for TestRunServiceListTestRuns
+TestRunServiceListTestRuns Lists a product's test runs.
+
+Filter by status (new | in_progress | passed | failed | aborted),
+environment slug, branch name, or title substring via search. Paginated
+via pagination.page_size/page_token.
 
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @param productId
@@ -1612,7 +1727,16 @@ func (r ApiTestRunServiceReportResultsRequest) Execute() (*ReportResultsResponse
 }
 
 /*
-TestRunServiceReportResults Method for TestRunServiceReportResults
+TestRunServiceReportResults Reports a batch of test results into a run.
+
+Accepts 1..2000 results per call. The batch is validated up front; on
+failure nothing is written and per-entry errors are returned (HTTP 400,
+also attached as google.rpc.Status details for gRPC clients). Each
+result's id is an idempotency key — resends count as duplicates and are
+skipped, so retrying a batch is safe. Results are matched to repository
+cases by testops_ids[0], then external_id, then signature (unmatched
+results are kept). Rejected once the run is completed/aborted
+(RUN_COMPLETED).
 
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @param productId
@@ -1717,6 +1841,238 @@ func (a *TestRunServiceAPIService) TestRunServiceReportResultsExecute(r ApiTestR
 			}
 					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
 					newErr.model = v
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type ApiTestRunServiceUploadRunAttachmentsRequest struct {
+	ctx context.Context
+	ApiService TestRunServiceAPI
+	productId string
+	file []*os.File
+}
+
+// One part per file, repeated.
+func (r ApiTestRunServiceUploadRunAttachmentsRequest) File(file []*os.File) ApiTestRunServiceUploadRunAttachmentsRequest {
+	r.file = file
+	return r
+}
+
+func (r ApiTestRunServiceUploadRunAttachmentsRequest) Execute() (*V1UploadRunAttachmentsResponse, *http.Response, error) {
+	return r.ApiService.TestRunServiceUploadRunAttachmentsExecute(r)
+}
+
+/*
+TestRunServiceUploadRunAttachments Uploads run attachments and returns their content hashes.
+
+Multipart upload used by the reporters before ReportResults: each returned hash goes into a result's `attachments`. Not a gRPC method (multipart is not expressible in protobuf), so it is served by a gateway HandlePath route that authenticates the bearer token itself; see app/backend/internal/server/run_attachment_upload.go. Limits per request: 20 files, 32 MiB per file, 128 MiB total, 5 minute read deadline. Repeat the `file[]` part once per file (`file` is also accepted).
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param productId Product the attachments belong to.
+ @return ApiTestRunServiceUploadRunAttachmentsRequest
+*/
+func (a *TestRunServiceAPIService) TestRunServiceUploadRunAttachments(ctx context.Context, productId string) ApiTestRunServiceUploadRunAttachmentsRequest {
+	return ApiTestRunServiceUploadRunAttachmentsRequest{
+		ApiService: a,
+		ctx: ctx,
+		productId: productId,
+	}
+}
+
+// Execute executes the request
+//  @return V1UploadRunAttachmentsResponse
+func (a *TestRunServiceAPIService) TestRunServiceUploadRunAttachmentsExecute(r ApiTestRunServiceUploadRunAttachmentsRequest) (*V1UploadRunAttachmentsResponse, *http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodPost
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *V1UploadRunAttachmentsResponse
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "TestRunServiceAPIService.TestRunServiceUploadRunAttachments")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/v1/products/{product_id}/attachments:upload"
+	localVarPath = strings.Replace(localVarPath, "{"+"product_id"+"}", url.PathEscape(parameterValueToString(r.productId, "productId")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+	if r.file == nil {
+		return localVarReturnValue, nil, reportError("file is required and must be specified")
+	}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{"multipart/form-data"}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	var fileLocalVarFormFileName string
+	var fileLocalVarFileName     string
+	var fileLocalVarFileBytes    []byte
+
+	fileLocalVarFormFileName = "file[]"
+	fileLocalVarFile := r.file
+
+	if fileLocalVarFile != nil {
+		// loop through the array to prepare multiple files upload
+		for _, fileLocalVarFileValue := range fileLocalVarFile {
+			fbs, _ := io.ReadAll(fileLocalVarFileValue)
+
+			fileLocalVarFileBytes = fbs
+			fileLocalVarFileName = fileLocalVarFileValue.Name()
+			fileLocalVarFileValue.Close()
+			formFiles = append(formFiles, formFile{fileBytes: fileLocalVarFileBytes, fileName: fileLocalVarFileName, formFileName: fileLocalVarFormFileName})
+		}
+	}
+	if r.ctx != nil {
+		// API Key Authentication
+		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
+			if apiKey, ok := auth["BearerAuth"]; ok {
+				var key string
+				if apiKey.Prefix != "" {
+					key = apiKey.Prefix + " " + apiKey.Key
+				} else {
+					key = apiKey.Key
+				}
+				localVarHeaderParams["Authorization"] = key
+			}
+		}
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		if localVarHTTPResponse.StatusCode == 400 {
+			var v V1UploadRunAttachmentsError
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 401 {
+			var v V1UploadRunAttachmentsError
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 403 {
+			var v V1UploadRunAttachmentsError
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 404 {
+			var v V1UploadRunAttachmentsError
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 413 {
+			var v V1UploadRunAttachmentsError
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 429 {
+			var v V1UploadRunAttachmentsError
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 500 {
+			var v V1UploadRunAttachmentsError
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 503 {
+			var v V1UploadRunAttachmentsError
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+		}
 		return localVarReturnValue, localVarHTTPResponse, newErr
 	}
 

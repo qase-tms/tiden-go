@@ -17,7 +17,7 @@ import (
 // checks if the RequirementTestContext type satisfies the MappedNullable interface at compile time
 var _ MappedNullable = &RequirementTestContext{}
 
-// RequirementTestContext struct for RequirementTestContext
+// RequirementTestContext RequirementTestContext is the full test-authoring context pack for one requirement: its tree family, component, related tests by link kind, staleness signals, extracted test-oriented fields, agent memory, and the citations resolving every citation_id used in the pack.
 type RequirementTestContext struct {
 	Requirement *Requirement `json:"requirement,omitempty"`
 	Parent *Requirement `json:"parent,omitempty"`

@@ -18,7 +18,7 @@ import (
 // checks if the Workspace type satisfies the MappedNullable interface at compile time
 var _ MappedNullable = &Workspace{}
 
-// Workspace struct for Workspace
+// Workspace Workspace is the team-level container products live in; slug is its stable URL identifier.
 type Workspace struct {
 	Id *string `json:"id,omitempty"`
 	Name *string `json:"name,omitempty"`

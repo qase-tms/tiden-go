@@ -17,7 +17,7 @@ import (
 // checks if the StaleCoverageSignal type satisfies the MappedNullable interface at compile time
 var _ MappedNullable = &StaleCoverageSignal{}
 
-// StaleCoverageSignal struct for StaleCoverageSignal
+// StaleCoverageSignal StaleCoverageSignal flags a linked test last updated before its requirement's last update — coverage that may no longer verify the requirement.
 type StaleCoverageSignal struct {
 	RequirementId *string `json:"requirementId,omitempty"`
 	TestId *string `json:"testId,omitempty"`

@@ -17,7 +17,7 @@ import (
 // checks if the AgentMemoryContext type satisfies the MappedNullable interface at compile time
 var _ MappedNullable = &AgentMemoryContext{}
 
-// AgentMemoryContext struct for AgentMemoryContext
+// AgentMemoryContext AgentMemoryContext is one agent-memory entry surfaced into a context pack.
 type AgentMemoryContext struct {
 	Id *string `json:"id,omitempty"`
 	Key *string `json:"key,omitempty"`

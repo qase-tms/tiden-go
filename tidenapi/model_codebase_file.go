@@ -17,7 +17,7 @@ import (
 // checks if the CodebaseFile type satisfies the MappedNullable interface at compile time
 var _ MappedNullable = &CodebaseFile{}
 
-// CodebaseFile struct for CodebaseFile
+// CodebaseFile CodebaseFile is one repository file excerpt included in codebase context.
 type CodebaseFile struct {
 	Path *string `json:"path,omitempty"`
 	Language *string `json:"language,omitempty"`

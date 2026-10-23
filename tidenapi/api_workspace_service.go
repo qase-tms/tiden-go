@@ -22,7 +22,11 @@ import (
 type WorkspaceServiceAPI interface {
 
 	/*
-	WorkspaceServiceListWorkspaces Method for WorkspaceServiceListWorkspaces
+	WorkspaceServiceListWorkspaces Lists the workspaces the caller belongs to.
+
+	Returns each workspace with its slug and organization id, paginated via
+pagination.page_size/page_token. The CLI uses it to resolve which
+workspace an API token operates in.
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@return ApiWorkspaceServiceListWorkspacesRequest
@@ -59,7 +63,11 @@ func (r ApiWorkspaceServiceListWorkspacesRequest) Execute() (*ListWorkspacesResp
 }
 
 /*
-WorkspaceServiceListWorkspaces Method for WorkspaceServiceListWorkspaces
+WorkspaceServiceListWorkspaces Lists the workspaces the caller belongs to.
+
+Returns each workspace with its slug and organization id, paginated via
+pagination.page_size/page_token. The CLI uses it to resolve which
+workspace an API token operates in.
 
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @return ApiWorkspaceServiceListWorkspacesRequest

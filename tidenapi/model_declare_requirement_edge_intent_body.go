@@ -29,7 +29,7 @@ type DeclareRequirementEdgeIntentBody struct {
 	// confidence must be provided; explicit 0.0 is valid, omitted is not.
 	Confidence *float64 `json:"confidence,omitempty"`
 	Rationale *string `json:"rationale,omitempty"`
-	// dst_component_id sets a req→component endpoint (shift-left v3). Mutually exclusive with dst_requirement_id.
+	// dst_component_id sets a req→component endpoint. Mutually exclusive with dst_requirement_id.
 	DstComponentId *string `json:"dstComponentId,omitempty"`
 }
 

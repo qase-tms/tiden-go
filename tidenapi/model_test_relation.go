@@ -17,7 +17,7 @@ import (
 // checks if the TestRelation type satisfies the MappedNullable interface at compile time
 var _ MappedNullable = &TestRelation{}
 
-// TestRelation struct for TestRelation
+// TestRelation TestRelation is a typed, reporter-provided relation payload attached to a test; data's shape depends on type.
 type TestRelation struct {
 	Type *string `json:"type,omitempty"`
 	Data map[string]interface{} `json:"data,omitempty"`

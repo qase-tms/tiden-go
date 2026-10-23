@@ -17,7 +17,7 @@ import (
 // checks if the TestStep type satisfies the MappedNullable interface at compile time
 var _ MappedNullable = &TestStep{}
 
-// TestStep struct for TestStep
+// TestStep TestStep is one step of a test case's specification; children nest sub-steps.
 type TestStep struct {
 	Id *string `json:"id,omitempty"`
 	Action *string `json:"action,omitempty"`

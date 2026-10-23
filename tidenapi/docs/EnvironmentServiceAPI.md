@@ -4,16 +4,18 @@ All URIs are relative to *https://api.tiden.ai*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
-[**EnvironmentServiceCreateEnvironment**](EnvironmentServiceAPI.md#EnvironmentServiceCreateEnvironment) | **Post** /v1/products/{productId}/environments | 
-[**EnvironmentServiceDeleteEnvironment**](EnvironmentServiceAPI.md#EnvironmentServiceDeleteEnvironment) | **Delete** /v1/environments/{id} | 
-[**EnvironmentServiceGetEnvironment**](EnvironmentServiceAPI.md#EnvironmentServiceGetEnvironment) | **Get** /v1/environments/{id} | 
-[**EnvironmentServiceListEnvironments**](EnvironmentServiceAPI.md#EnvironmentServiceListEnvironments) | **Get** /v1/products/{productId}/environments | 
+[**EnvironmentServiceCreateEnvironment**](EnvironmentServiceAPI.md#EnvironmentServiceCreateEnvironment) | **Post** /v1/products/{productId}/environments | Creates an environment in a product.
+[**EnvironmentServiceDeleteEnvironment**](EnvironmentServiceAPI.md#EnvironmentServiceDeleteEnvironment) | **Delete** /v1/environments/{id} | Deletes an environment.
+[**EnvironmentServiceGetEnvironment**](EnvironmentServiceAPI.md#EnvironmentServiceGetEnvironment) | **Get** /v1/environments/{id} | Fetches one environment by id.
+[**EnvironmentServiceListEnvironments**](EnvironmentServiceAPI.md#EnvironmentServiceListEnvironments) | **Get** /v1/products/{productId}/environments | Lists a product&#39;s environments.
 
 
 
 ## EnvironmentServiceCreateEnvironment
 
 > CreateEnvironmentResponse EnvironmentServiceCreateEnvironment(ctx, productId).CreateEnvironmentBody(createEnvironmentBody).Execute()
+
+Creates an environment in a product.
 
 
 
@@ -85,6 +87,8 @@ Name | Type | Description  | Notes
 
 > map[string]interface{} EnvironmentServiceDeleteEnvironment(ctx, id).Execute()
 
+Deletes an environment.
+
 
 
 ### Example
@@ -153,6 +157,8 @@ Name | Type | Description  | Notes
 
 > GetEnvironmentResponse EnvironmentServiceGetEnvironment(ctx, id).Execute()
 
+Fetches one environment by id.
+
 
 
 ### Example
@@ -220,6 +226,8 @@ Name | Type | Description  | Notes
 ## EnvironmentServiceListEnvironments
 
 > ListEnvironmentsResponse EnvironmentServiceListEnvironments(ctx, productId).PaginationPageSize(paginationPageSize).PaginationPageToken(paginationPageToken).Execute()
+
+Lists a product's environments.
 
 
 

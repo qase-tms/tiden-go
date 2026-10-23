@@ -9,7 +9,8 @@ Name | Type | Description | Notes
 **Title** | Pointer to **string** |  | [optional] 
 **Description** | Pointer to **string** |  | [optional] 
 **Resources** | Pointer to **[]string** |  | [optional] 
-**Repository** | Pointer to **string** | repository is the canonical repo id of this node&#39;s component (shift-left v3), or \&quot;\&quot; when unscoped. Lets the CLI verdict compare changed files vs resources per-repo (avoids cross-repo path collisions). resources are repo-relative. | [optional] 
+**Repository** | Pointer to **string** | repository is the canonical repo id of this node&#39;s component, or \&quot;\&quot; when unscoped. Lets the CLI verdict compare changed files vs resources per-repo (avoids cross-repo path collisions). resources are repo-relative. | [optional] 
+**Tier** | Pointer to [**RequirementTier**](RequirementTier.md) |  | [optional] [default to REQUIREMENT_TIER_UNSPECIFIED]
 
 ## Methods
 
@@ -179,6 +180,31 @@ SetRepository sets Repository field to given value.
 `func (o *TouchedNode) HasRepository() bool`
 
 HasRepository returns a boolean if a field has been set.
+
+### GetTier
+
+`func (o *TouchedNode) GetTier() RequirementTier`
+
+GetTier returns the Tier field if non-nil, zero value otherwise.
+
+### GetTierOk
+
+`func (o *TouchedNode) GetTierOk() (*RequirementTier, bool)`
+
+GetTierOk returns a tuple with the Tier field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetTier
+
+`func (o *TouchedNode) SetTier(v RequirementTier)`
+
+SetTier sets Tier field to given value.
+
+### HasTier
+
+`func (o *TouchedNode) HasTier() bool`
+
+HasTier returns a boolean if a field has been set.
 
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)

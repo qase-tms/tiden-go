@@ -25,7 +25,7 @@ type GraphNode struct {
 	Status *string `json:"status,omitempty"`
 	CoverageStatus *string `json:"coverageStatus,omitempty"`
 	ParentId *string `json:"parentId,omitempty"`
-	// kind distinguishes node types in the graph (shift-left v3). \"requirement\" (default) or \"component\" — a component node reached via an impacts_component edge. Component nodes carry their name in `title`; seq_num/status/parent_id are empty.
+	// kind distinguishes node types in the graph. \"requirement\" (default) or \"component\" — a component node reached via an impacts_component edge. Component nodes carry their name in `title`; seq_num/status/parent_id are empty.
 	Kind *string `json:"kind,omitempty"`
 }
 

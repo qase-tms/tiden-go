@@ -22,6 +22,8 @@ type MatrixCell struct {
 	TestCase *string `json:"testCase,omitempty"`
 	Status *string `json:"status,omitempty"`
 	Display *string `json:"display,omitempty"`
+	// test reference; pinned by TIDEN-135 so the grid stays diffable across runs — do not repurpose it.  join key: lets a client attach gate-accurate status to
+	TestId *string `json:"testId,omitempty"`
 }
 
 // NewMatrixCell instantiates a new MatrixCell object
@@ -137,6 +139,38 @@ func (o *MatrixCell) SetDisplay(v string) {
 	o.Display = &v
 }
 
+// GetTestId returns the TestId field value if set, zero value otherwise.
+func (o *MatrixCell) GetTestId() string {
+	if o == nil || IsNil(o.TestId) {
+		var ret string
+		return ret
+	}
+	return *o.TestId
+}
+
+// GetTestIdOk returns a tuple with the TestId field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *MatrixCell) GetTestIdOk() (*string, bool) {
+	if o == nil || IsNil(o.TestId) {
+		return nil, false
+	}
+	return o.TestId, true
+}
+
+// HasTestId returns a boolean if a field has been set.
+func (o *MatrixCell) HasTestId() bool {
+	if o != nil && !IsNil(o.TestId) {
+		return true
+	}
+
+	return false
+}
+
+// SetTestId gets a reference to the given string and assigns it to the TestId field.
+func (o *MatrixCell) SetTestId(v string) {
+	o.TestId = &v
+}
+
 func (o MatrixCell) MarshalJSON() ([]byte, error) {
 	toSerialize,err := o.ToMap()
 	if err != nil {
@@ -155,6 +189,9 @@ func (o MatrixCell) ToMap() (map[string]interface{}, error) {
 	}
 	if !IsNil(o.Display) {
 		toSerialize["display"] = o.Display
+	}
+	if !IsNil(o.TestId) {
+		toSerialize["testId"] = o.TestId
 	}
 	return toSerialize, nil
 }

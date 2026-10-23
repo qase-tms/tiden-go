@@ -17,13 +17,31 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
+	"reflect"
 )
 
 
 type IssueServiceAPI interface {
 
 	/*
-	IssueServiceConfirmSourceMapUpload Phase 3: server validates the staged object + atomically promotes to live. Exempt: addressed by source-map id (the product-gated entry point is CreateSourceMapUpload); source maps are observability infra, not a billed cap.
+	IssueServiceBulkUpdateIssueStatus Sets the same status on many issues at once. Every id must belong to the given product.
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param productId
+	@return ApiIssueServiceBulkUpdateIssueStatusRequest
+	*/
+	IssueServiceBulkUpdateIssueStatus(ctx context.Context, productId string) ApiIssueServiceBulkUpdateIssueStatusRequest
+
+	// IssueServiceBulkUpdateIssueStatusExecute executes the request
+	//  @return BulkUpdateIssueStatusResponse
+	IssueServiceBulkUpdateIssueStatusExecute(r ApiIssueServiceBulkUpdateIssueStatusRequest) (*BulkUpdateIssueStatusResponse, *http.Response, error)
+
+	/*
+	IssueServiceConfirmSourceMapUpload Finalizes a source-map upload (phase 2 of 2).
+
+	Validates the staged object and atomically promotes it to live, so error
+events carrying the same debug_id resolve to original sources. Returns
+metadata only — never a download URL (source maps stay private).
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@param id
@@ -36,7 +54,11 @@ type IssueServiceAPI interface {
 	IssueServiceConfirmSourceMapUploadExecute(r ApiIssueServiceConfirmSourceMapUploadRequest) (*ConfirmSourceMapUploadResponse, *http.Response, error)
 
 	/*
-	IssueServiceCreateSourceMapUpload Phase 1: create a pending row, return a presigned PUT to a staging key.
+	IssueServiceCreateSourceMapUpload Starts a source-map upload (phase 1 of 2).
+
+	Creates a pending source-map row keyed by debug_id and returns a presigned
+PUT URL to a staging key. Upload the raw map bytes to upload_url, then
+call ConfirmSourceMapUpload with the returned id to promote it.
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@param productId
@@ -47,10 +69,257 @@ type IssueServiceAPI interface {
 	// IssueServiceCreateSourceMapUploadExecute executes the request
 	//  @return CreateSourceMapUploadResponse
 	IssueServiceCreateSourceMapUploadExecute(r ApiIssueServiceCreateSourceMapUploadRequest) (*CreateSourceMapUploadResponse, *http.Response, error)
+
+	/*
+	IssueServiceGetIssue Gets one issue together with its most recent occurrence.
+
+	The occurrence carries server-resolved (symbolicated) stack frames with the
+surrounding source lines, which is what identifies the code to fix.
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param id
+	@return ApiIssueServiceGetIssueRequest
+	*/
+	IssueServiceGetIssue(ctx context.Context, id string) ApiIssueServiceGetIssueRequest
+
+	// IssueServiceGetIssueExecute executes the request
+	//  @return GetIssueResponse
+	IssueServiceGetIssueExecute(r ApiIssueServiceGetIssueRequest) (*GetIssueResponse, *http.Response, error)
+
+	/*
+	IssueServiceGetIssueEvent Gets one occurrence of an issue with symbolicated stack frames.
+
+	Use this when the occurrence that matters is not the most recent one — for
+example the production occurrence of an issue whose latest event came from
+staging.
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param id issue id
+	@param eventId issue_events.id (row id, not the SDK event_id)
+	@return ApiIssueServiceGetIssueEventRequest
+	*/
+	IssueServiceGetIssueEvent(ctx context.Context, id string, eventId string) ApiIssueServiceGetIssueEventRequest
+
+	// IssueServiceGetIssueEventExecute executes the request
+	//  @return GetIssueEventResponse
+	IssueServiceGetIssueEventExecute(r ApiIssueServiceGetIssueEventRequest) (*GetIssueEventResponse, *http.Response, error)
+
+	/*
+	IssueServiceGetIssueEventStats Returns occurrence statistics for one issue: counts bucketed over time plus a per-environment split.
+
+	An issue carries no environment of its own — environment lives on each
+occurrence — so this is how you tell a production outage from dev noise.
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param id issue id
+	@return ApiIssueServiceGetIssueEventStatsRequest
+	*/
+	IssueServiceGetIssueEventStats(ctx context.Context, id string) ApiIssueServiceGetIssueEventStatsRequest
+
+	// IssueServiceGetIssueEventStatsExecute executes the request
+	//  @return GetIssueEventStatsResponse
+	IssueServiceGetIssueEventStatsExecute(r ApiIssueServiceGetIssueEventStatsRequest) (*GetIssueEventStatsResponse, *http.Response, error)
+
+	/*
+	IssueServiceListIssueEvents Lists an issue's individual occurrences, most recent first.
+
+	Stack frames are not resolved here — fetch a single occurrence for those.
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param id issue id
+	@return ApiIssueServiceListIssueEventsRequest
+	*/
+	IssueServiceListIssueEvents(ctx context.Context, id string) ApiIssueServiceListIssueEventsRequest
+
+	// IssueServiceListIssueEventsExecute executes the request
+	//  @return ListIssueEventsResponse
+	IssueServiceListIssueEventsExecute(r ApiIssueServiceListIssueEventsRequest) (*ListIssueEventsResponse, *http.Response, error)
+
+	/*
+	IssueServiceListIssues Lists a product's issues, most recently active first.
+
+	An issue is a group of error events sharing a fingerprint. Filter by
+status, environment, release, component, platform, level, and a trailing
+last-seen window; sort by last_seen (default), first_seen, or times_seen.
+Results are paginated with an opaque keyset cursor carried in
+pagination.page_token.
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param productId
+	@return ApiIssueServiceListIssuesRequest
+	*/
+	IssueServiceListIssues(ctx context.Context, productId string) ApiIssueServiceListIssuesRequest
+
+	// IssueServiceListIssuesExecute executes the request
+	//  @return ListIssuesResponse
+	IssueServiceListIssuesExecute(r ApiIssueServiceListIssuesRequest) (*ListIssuesResponse, *http.Response, error)
+
+	/*
+	IssueServiceListReleaseIssues Returns the issues attributable to a release: those first seen in it, plus a count of every issue seen during it. The post-deploy regression check.
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param releaseId
+	@return ApiIssueServiceListReleaseIssuesRequest
+	*/
+	IssueServiceListReleaseIssues(ctx context.Context, releaseId string) ApiIssueServiceListReleaseIssuesRequest
+
+	// IssueServiceListReleaseIssuesExecute executes the request
+	//  @return ListReleaseIssuesResponse
+	IssueServiceListReleaseIssuesExecute(r ApiIssueServiceListReleaseIssuesRequest) (*ListReleaseIssuesResponse, *http.Response, error)
+
+	/*
+	IssueServiceUpdateIssueStatus Sets one issue's status to unresolved, resolved, or ignored.
+
+	Every transition is recorded with its actor and is reversible. A resolved
+issue that recurs is reopened automatically and stamped as a regression.
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param id
+	@return ApiIssueServiceUpdateIssueStatusRequest
+	*/
+	IssueServiceUpdateIssueStatus(ctx context.Context, id string) ApiIssueServiceUpdateIssueStatusRequest
+
+	// IssueServiceUpdateIssueStatusExecute executes the request
+	//  @return UpdateIssueStatusResponse
+	IssueServiceUpdateIssueStatusExecute(r ApiIssueServiceUpdateIssueStatusRequest) (*UpdateIssueStatusResponse, *http.Response, error)
 }
 
 // IssueServiceAPIService IssueServiceAPI service
 type IssueServiceAPIService service
+
+type ApiIssueServiceBulkUpdateIssueStatusRequest struct {
+	ctx context.Context
+	ApiService IssueServiceAPI
+	productId string
+	bulkUpdateIssueStatusBody *BulkUpdateIssueStatusBody
+}
+
+func (r ApiIssueServiceBulkUpdateIssueStatusRequest) BulkUpdateIssueStatusBody(bulkUpdateIssueStatusBody BulkUpdateIssueStatusBody) ApiIssueServiceBulkUpdateIssueStatusRequest {
+	r.bulkUpdateIssueStatusBody = &bulkUpdateIssueStatusBody
+	return r
+}
+
+func (r ApiIssueServiceBulkUpdateIssueStatusRequest) Execute() (*BulkUpdateIssueStatusResponse, *http.Response, error) {
+	return r.ApiService.IssueServiceBulkUpdateIssueStatusExecute(r)
+}
+
+/*
+IssueServiceBulkUpdateIssueStatus Sets the same status on many issues at once. Every id must belong to the given product.
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param productId
+ @return ApiIssueServiceBulkUpdateIssueStatusRequest
+*/
+func (a *IssueServiceAPIService) IssueServiceBulkUpdateIssueStatus(ctx context.Context, productId string) ApiIssueServiceBulkUpdateIssueStatusRequest {
+	return ApiIssueServiceBulkUpdateIssueStatusRequest{
+		ApiService: a,
+		ctx: ctx,
+		productId: productId,
+	}
+}
+
+// Execute executes the request
+//  @return BulkUpdateIssueStatusResponse
+func (a *IssueServiceAPIService) IssueServiceBulkUpdateIssueStatusExecute(r ApiIssueServiceBulkUpdateIssueStatusRequest) (*BulkUpdateIssueStatusResponse, *http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodPost
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *BulkUpdateIssueStatusResponse
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "IssueServiceAPIService.IssueServiceBulkUpdateIssueStatus")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/v1/products/{productId}/issues:bulkSetStatus"
+	localVarPath = strings.Replace(localVarPath, "{"+"productId"+"}", url.PathEscape(parameterValueToString(r.productId, "productId")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+	if r.bulkUpdateIssueStatusBody == nil {
+		return localVarReturnValue, nil, reportError("bulkUpdateIssueStatusBody is required and must be specified")
+	}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{"application/json"}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	// body params
+	localVarPostBody = r.bulkUpdateIssueStatusBody
+	if r.ctx != nil {
+		// API Key Authentication
+		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
+			if apiKey, ok := auth["BearerAuth"]; ok {
+				var key string
+				if apiKey.Prefix != "" {
+					key = apiKey.Prefix + " " + apiKey.Key
+				} else {
+					key = apiKey.Key
+				}
+				localVarHeaderParams["Authorization"] = key
+			}
+		}
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+			var v Status
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
 
 type ApiIssueServiceConfirmSourceMapUploadRequest struct {
 	ctx context.Context
@@ -69,7 +338,11 @@ func (r ApiIssueServiceConfirmSourceMapUploadRequest) Execute() (*ConfirmSourceM
 }
 
 /*
-IssueServiceConfirmSourceMapUpload Phase 3: server validates the staged object + atomically promotes to live. Exempt: addressed by source-map id (the product-gated entry point is CreateSourceMapUpload); source maps are observability infra, not a billed cap.
+IssueServiceConfirmSourceMapUpload Finalizes a source-map upload (phase 2 of 2).
+
+Validates the staged object and atomically promotes it to live, so error
+events carrying the same debug_id resolve to original sources. Returns
+metadata only — never a download URL (source maps stay private).
 
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @param id
@@ -203,7 +476,11 @@ func (r ApiIssueServiceCreateSourceMapUploadRequest) Execute() (*CreateSourceMap
 }
 
 /*
-IssueServiceCreateSourceMapUpload Phase 1: create a pending row, return a presigned PUT to a staging key.
+IssueServiceCreateSourceMapUpload Starts a source-map upload (phase 1 of 2).
+
+Creates a pending source-map row keyed by debug_id and returns a presigned
+PUT URL to a staging key. Upload the raw map bytes to upload_url, then
+call ConfirmSourceMapUpload with the returned id to promote it.
 
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @param productId
@@ -261,6 +538,1055 @@ func (a *IssueServiceAPIService) IssueServiceCreateSourceMapUploadExecute(r ApiI
 	}
 	// body params
 	localVarPostBody = r.createSourceMapUploadBody
+	if r.ctx != nil {
+		// API Key Authentication
+		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
+			if apiKey, ok := auth["BearerAuth"]; ok {
+				var key string
+				if apiKey.Prefix != "" {
+					key = apiKey.Prefix + " " + apiKey.Key
+				} else {
+					key = apiKey.Key
+				}
+				localVarHeaderParams["Authorization"] = key
+			}
+		}
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+			var v Status
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type ApiIssueServiceGetIssueRequest struct {
+	ctx context.Context
+	ApiService IssueServiceAPI
+	id string
+}
+
+func (r ApiIssueServiceGetIssueRequest) Execute() (*GetIssueResponse, *http.Response, error) {
+	return r.ApiService.IssueServiceGetIssueExecute(r)
+}
+
+/*
+IssueServiceGetIssue Gets one issue together with its most recent occurrence.
+
+The occurrence carries server-resolved (symbolicated) stack frames with the
+surrounding source lines, which is what identifies the code to fix.
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param id
+ @return ApiIssueServiceGetIssueRequest
+*/
+func (a *IssueServiceAPIService) IssueServiceGetIssue(ctx context.Context, id string) ApiIssueServiceGetIssueRequest {
+	return ApiIssueServiceGetIssueRequest{
+		ApiService: a,
+		ctx: ctx,
+		id: id,
+	}
+}
+
+// Execute executes the request
+//  @return GetIssueResponse
+func (a *IssueServiceAPIService) IssueServiceGetIssueExecute(r ApiIssueServiceGetIssueRequest) (*GetIssueResponse, *http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *GetIssueResponse
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "IssueServiceAPIService.IssueServiceGetIssue")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/v1/issues/{id}"
+	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", url.PathEscape(parameterValueToString(r.id, "id")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	if r.ctx != nil {
+		// API Key Authentication
+		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
+			if apiKey, ok := auth["BearerAuth"]; ok {
+				var key string
+				if apiKey.Prefix != "" {
+					key = apiKey.Prefix + " " + apiKey.Key
+				} else {
+					key = apiKey.Key
+				}
+				localVarHeaderParams["Authorization"] = key
+			}
+		}
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+			var v Status
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type ApiIssueServiceGetIssueEventRequest struct {
+	ctx context.Context
+	ApiService IssueServiceAPI
+	id string
+	eventId string
+}
+
+func (r ApiIssueServiceGetIssueEventRequest) Execute() (*GetIssueEventResponse, *http.Response, error) {
+	return r.ApiService.IssueServiceGetIssueEventExecute(r)
+}
+
+/*
+IssueServiceGetIssueEvent Gets one occurrence of an issue with symbolicated stack frames.
+
+Use this when the occurrence that matters is not the most recent one — for
+example the production occurrence of an issue whose latest event came from
+staging.
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param id issue id
+ @param eventId issue_events.id (row id, not the SDK event_id)
+ @return ApiIssueServiceGetIssueEventRequest
+*/
+func (a *IssueServiceAPIService) IssueServiceGetIssueEvent(ctx context.Context, id string, eventId string) ApiIssueServiceGetIssueEventRequest {
+	return ApiIssueServiceGetIssueEventRequest{
+		ApiService: a,
+		ctx: ctx,
+		id: id,
+		eventId: eventId,
+	}
+}
+
+// Execute executes the request
+//  @return GetIssueEventResponse
+func (a *IssueServiceAPIService) IssueServiceGetIssueEventExecute(r ApiIssueServiceGetIssueEventRequest) (*GetIssueEventResponse, *http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *GetIssueEventResponse
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "IssueServiceAPIService.IssueServiceGetIssueEvent")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/v1/issues/{id}/events/{eventId}"
+	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", url.PathEscape(parameterValueToString(r.id, "id")), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"eventId"+"}", url.PathEscape(parameterValueToString(r.eventId, "eventId")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	if r.ctx != nil {
+		// API Key Authentication
+		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
+			if apiKey, ok := auth["BearerAuth"]; ok {
+				var key string
+				if apiKey.Prefix != "" {
+					key = apiKey.Prefix + " " + apiKey.Key
+				} else {
+					key = apiKey.Key
+				}
+				localVarHeaderParams["Authorization"] = key
+			}
+		}
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+			var v Status
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type ApiIssueServiceGetIssueEventStatsRequest struct {
+	ctx context.Context
+	ApiService IssueServiceAPI
+	id string
+}
+
+func (r ApiIssueServiceGetIssueEventStatsRequest) Execute() (*GetIssueEventStatsResponse, *http.Response, error) {
+	return r.ApiService.IssueServiceGetIssueEventStatsExecute(r)
+}
+
+/*
+IssueServiceGetIssueEventStats Returns occurrence statistics for one issue: counts bucketed over time plus a per-environment split.
+
+An issue carries no environment of its own — environment lives on each
+occurrence — so this is how you tell a production outage from dev noise.
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param id issue id
+ @return ApiIssueServiceGetIssueEventStatsRequest
+*/
+func (a *IssueServiceAPIService) IssueServiceGetIssueEventStats(ctx context.Context, id string) ApiIssueServiceGetIssueEventStatsRequest {
+	return ApiIssueServiceGetIssueEventStatsRequest{
+		ApiService: a,
+		ctx: ctx,
+		id: id,
+	}
+}
+
+// Execute executes the request
+//  @return GetIssueEventStatsResponse
+func (a *IssueServiceAPIService) IssueServiceGetIssueEventStatsExecute(r ApiIssueServiceGetIssueEventStatsRequest) (*GetIssueEventStatsResponse, *http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *GetIssueEventStatsResponse
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "IssueServiceAPIService.IssueServiceGetIssueEventStats")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/v1/issues/{id}/stats"
+	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", url.PathEscape(parameterValueToString(r.id, "id")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	if r.ctx != nil {
+		// API Key Authentication
+		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
+			if apiKey, ok := auth["BearerAuth"]; ok {
+				var key string
+				if apiKey.Prefix != "" {
+					key = apiKey.Prefix + " " + apiKey.Key
+				} else {
+					key = apiKey.Key
+				}
+				localVarHeaderParams["Authorization"] = key
+			}
+		}
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+			var v Status
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type ApiIssueServiceListIssueEventsRequest struct {
+	ctx context.Context
+	ApiService IssueServiceAPI
+	id string
+	paginationPageSize *int32
+	paginationPageToken *string
+}
+
+func (r ApiIssueServiceListIssueEventsRequest) PaginationPageSize(paginationPageSize int32) ApiIssueServiceListIssueEventsRequest {
+	r.paginationPageSize = &paginationPageSize
+	return r
+}
+
+func (r ApiIssueServiceListIssueEventsRequest) PaginationPageToken(paginationPageToken string) ApiIssueServiceListIssueEventsRequest {
+	r.paginationPageToken = &paginationPageToken
+	return r
+}
+
+func (r ApiIssueServiceListIssueEventsRequest) Execute() (*ListIssueEventsResponse, *http.Response, error) {
+	return r.ApiService.IssueServiceListIssueEventsExecute(r)
+}
+
+/*
+IssueServiceListIssueEvents Lists an issue's individual occurrences, most recent first.
+
+Stack frames are not resolved here — fetch a single occurrence for those.
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param id issue id
+ @return ApiIssueServiceListIssueEventsRequest
+*/
+func (a *IssueServiceAPIService) IssueServiceListIssueEvents(ctx context.Context, id string) ApiIssueServiceListIssueEventsRequest {
+	return ApiIssueServiceListIssueEventsRequest{
+		ApiService: a,
+		ctx: ctx,
+		id: id,
+	}
+}
+
+// Execute executes the request
+//  @return ListIssueEventsResponse
+func (a *IssueServiceAPIService) IssueServiceListIssueEventsExecute(r ApiIssueServiceListIssueEventsRequest) (*ListIssueEventsResponse, *http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *ListIssueEventsResponse
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "IssueServiceAPIService.IssueServiceListIssueEvents")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/v1/issues/{id}/events"
+	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", url.PathEscape(parameterValueToString(r.id, "id")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+
+	if r.paginationPageSize != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "pagination.pageSize", r.paginationPageSize, "form", "")
+	}
+	if r.paginationPageToken != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "pagination.pageToken", r.paginationPageToken, "form", "")
+	}
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	if r.ctx != nil {
+		// API Key Authentication
+		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
+			if apiKey, ok := auth["BearerAuth"]; ok {
+				var key string
+				if apiKey.Prefix != "" {
+					key = apiKey.Prefix + " " + apiKey.Key
+				} else {
+					key = apiKey.Key
+				}
+				localVarHeaderParams["Authorization"] = key
+			}
+		}
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+			var v Status
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type ApiIssueServiceListIssuesRequest struct {
+	ctx context.Context
+	ApiService IssueServiceAPI
+	productId string
+	status *string
+	environmentId *string
+	releaseId *string
+	sort *string
+	paginationPageSize *int32
+	paginationPageToken *string
+	componentId *string
+	platforms *[]string
+	levels *[]string
+	period *string
+	search *string
+	signal *string
+}
+
+// unresolved|resolved|ignored, \&quot;\&quot; &#x3D; all
+func (r ApiIssueServiceListIssuesRequest) Status(status string) ApiIssueServiceListIssuesRequest {
+	r.status = &status
+	return r
+}
+
+// optional filter
+func (r ApiIssueServiceListIssuesRequest) EnvironmentId(environmentId string) ApiIssueServiceListIssuesRequest {
+	r.environmentId = &environmentId
+	return r
+}
+
+// optional filter
+func (r ApiIssueServiceListIssuesRequest) ReleaseId(releaseId string) ApiIssueServiceListIssuesRequest {
+	r.releaseId = &releaseId
+	return r
+}
+
+// last_seen|first_seen|times_seen
+func (r ApiIssueServiceListIssuesRequest) Sort(sort string) ApiIssueServiceListIssuesRequest {
+	r.sort = &sort
+	return r
+}
+
+func (r ApiIssueServiceListIssuesRequest) PaginationPageSize(paginationPageSize int32) ApiIssueServiceListIssuesRequest {
+	r.paginationPageSize = &paginationPageSize
+	return r
+}
+
+func (r ApiIssueServiceListIssuesRequest) PaginationPageToken(paginationPageToken string) ApiIssueServiceListIssuesRequest {
+	r.paginationPageToken = &paginationPageToken
+	return r
+}
+
+// optional: filter by attributed component
+func (r ApiIssueServiceListIssuesRequest) ComponentId(componentId string) ApiIssueServiceListIssuesRequest {
+	r.componentId = &componentId
+	return r
+}
+
+// optional: filter by platform (platform dropdown, OR within)
+func (r ApiIssueServiceListIssuesRequest) Platforms(platforms []string) ApiIssueServiceListIssuesRequest {
+	r.platforms = &platforms
+	return r
+}
+
+// optional: filter by level (token bar, OR within)
+func (r ApiIssueServiceListIssuesRequest) Levels(levels []string) ApiIssueServiceListIssuesRequest {
+	r.levels = &levels
+	return r
+}
+
+// optional last-seen window: 3m|1h|12h|1d|7d|30d (\&quot;\&quot; &#x3D; all time)
+func (r ApiIssueServiceListIssuesRequest) Period(period string) ApiIssueServiceListIssuesRequest {
+	r.period = &period
+	return r
+}
+
+// optional: case-insensitive match on title/culprit
+func (r ApiIssueServiceListIssuesRequest) Search(search string) ApiIssueServiceListIssuesRequest {
+	r.search = &search
+	return r
+}
+
+// optional saved-view predicate: blocking|spiking|new|regressed
+func (r ApiIssueServiceListIssuesRequest) Signal(signal string) ApiIssueServiceListIssuesRequest {
+	r.signal = &signal
+	return r
+}
+
+func (r ApiIssueServiceListIssuesRequest) Execute() (*ListIssuesResponse, *http.Response, error) {
+	return r.ApiService.IssueServiceListIssuesExecute(r)
+}
+
+/*
+IssueServiceListIssues Lists a product's issues, most recently active first.
+
+An issue is a group of error events sharing a fingerprint. Filter by
+status, environment, release, component, platform, level, and a trailing
+last-seen window; sort by last_seen (default), first_seen, or times_seen.
+Results are paginated with an opaque keyset cursor carried in
+pagination.page_token.
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param productId
+ @return ApiIssueServiceListIssuesRequest
+*/
+func (a *IssueServiceAPIService) IssueServiceListIssues(ctx context.Context, productId string) ApiIssueServiceListIssuesRequest {
+	return ApiIssueServiceListIssuesRequest{
+		ApiService: a,
+		ctx: ctx,
+		productId: productId,
+	}
+}
+
+// Execute executes the request
+//  @return ListIssuesResponse
+func (a *IssueServiceAPIService) IssueServiceListIssuesExecute(r ApiIssueServiceListIssuesRequest) (*ListIssuesResponse, *http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *ListIssuesResponse
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "IssueServiceAPIService.IssueServiceListIssues")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/v1/products/{productId}/issues"
+	localVarPath = strings.Replace(localVarPath, "{"+"productId"+"}", url.PathEscape(parameterValueToString(r.productId, "productId")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+
+	if r.status != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "status", r.status, "form", "")
+	}
+	if r.environmentId != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "environmentId", r.environmentId, "form", "")
+	}
+	if r.releaseId != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "releaseId", r.releaseId, "form", "")
+	}
+	if r.sort != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "sort", r.sort, "form", "")
+	}
+	if r.paginationPageSize != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "pagination.pageSize", r.paginationPageSize, "form", "")
+	}
+	if r.paginationPageToken != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "pagination.pageToken", r.paginationPageToken, "form", "")
+	}
+	if r.componentId != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "componentId", r.componentId, "form", "")
+	}
+	if r.platforms != nil {
+		t := *r.platforms
+		if reflect.TypeOf(t).Kind() == reflect.Slice {
+			s := reflect.ValueOf(t)
+			for i := 0; i < s.Len(); i++ {
+				parameterAddToHeaderOrQuery(localVarQueryParams, "platforms", s.Index(i).Interface(), "form", "multi")
+			}
+		} else {
+			parameterAddToHeaderOrQuery(localVarQueryParams, "platforms", t, "form", "multi")
+		}
+	}
+	if r.levels != nil {
+		t := *r.levels
+		if reflect.TypeOf(t).Kind() == reflect.Slice {
+			s := reflect.ValueOf(t)
+			for i := 0; i < s.Len(); i++ {
+				parameterAddToHeaderOrQuery(localVarQueryParams, "levels", s.Index(i).Interface(), "form", "multi")
+			}
+		} else {
+			parameterAddToHeaderOrQuery(localVarQueryParams, "levels", t, "form", "multi")
+		}
+	}
+	if r.period != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "period", r.period, "form", "")
+	}
+	if r.search != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "search", r.search, "form", "")
+	}
+	if r.signal != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "signal", r.signal, "form", "")
+	}
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	if r.ctx != nil {
+		// API Key Authentication
+		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
+			if apiKey, ok := auth["BearerAuth"]; ok {
+				var key string
+				if apiKey.Prefix != "" {
+					key = apiKey.Prefix + " " + apiKey.Key
+				} else {
+					key = apiKey.Key
+				}
+				localVarHeaderParams["Authorization"] = key
+			}
+		}
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+			var v Status
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type ApiIssueServiceListReleaseIssuesRequest struct {
+	ctx context.Context
+	ApiService IssueServiceAPI
+	releaseId string
+}
+
+func (r ApiIssueServiceListReleaseIssuesRequest) Execute() (*ListReleaseIssuesResponse, *http.Response, error) {
+	return r.ApiService.IssueServiceListReleaseIssuesExecute(r)
+}
+
+/*
+IssueServiceListReleaseIssues Returns the issues attributable to a release: those first seen in it, plus a count of every issue seen during it. The post-deploy regression check.
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param releaseId
+ @return ApiIssueServiceListReleaseIssuesRequest
+*/
+func (a *IssueServiceAPIService) IssueServiceListReleaseIssues(ctx context.Context, releaseId string) ApiIssueServiceListReleaseIssuesRequest {
+	return ApiIssueServiceListReleaseIssuesRequest{
+		ApiService: a,
+		ctx: ctx,
+		releaseId: releaseId,
+	}
+}
+
+// Execute executes the request
+//  @return ListReleaseIssuesResponse
+func (a *IssueServiceAPIService) IssueServiceListReleaseIssuesExecute(r ApiIssueServiceListReleaseIssuesRequest) (*ListReleaseIssuesResponse, *http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *ListReleaseIssuesResponse
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "IssueServiceAPIService.IssueServiceListReleaseIssues")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/v1/releases/{releaseId}/issues"
+	localVarPath = strings.Replace(localVarPath, "{"+"releaseId"+"}", url.PathEscape(parameterValueToString(r.releaseId, "releaseId")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	if r.ctx != nil {
+		// API Key Authentication
+		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
+			if apiKey, ok := auth["BearerAuth"]; ok {
+				var key string
+				if apiKey.Prefix != "" {
+					key = apiKey.Prefix + " " + apiKey.Key
+				} else {
+					key = apiKey.Key
+				}
+				localVarHeaderParams["Authorization"] = key
+			}
+		}
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+			var v Status
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type ApiIssueServiceUpdateIssueStatusRequest struct {
+	ctx context.Context
+	ApiService IssueServiceAPI
+	id string
+	updateIssueStatusBody *UpdateIssueStatusBody
+}
+
+func (r ApiIssueServiceUpdateIssueStatusRequest) UpdateIssueStatusBody(updateIssueStatusBody UpdateIssueStatusBody) ApiIssueServiceUpdateIssueStatusRequest {
+	r.updateIssueStatusBody = &updateIssueStatusBody
+	return r
+}
+
+func (r ApiIssueServiceUpdateIssueStatusRequest) Execute() (*UpdateIssueStatusResponse, *http.Response, error) {
+	return r.ApiService.IssueServiceUpdateIssueStatusExecute(r)
+}
+
+/*
+IssueServiceUpdateIssueStatus Sets one issue's status to unresolved, resolved, or ignored.
+
+Every transition is recorded with its actor and is reversible. A resolved
+issue that recurs is reopened automatically and stamped as a regression.
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param id
+ @return ApiIssueServiceUpdateIssueStatusRequest
+*/
+func (a *IssueServiceAPIService) IssueServiceUpdateIssueStatus(ctx context.Context, id string) ApiIssueServiceUpdateIssueStatusRequest {
+	return ApiIssueServiceUpdateIssueStatusRequest{
+		ApiService: a,
+		ctx: ctx,
+		id: id,
+	}
+}
+
+// Execute executes the request
+//  @return UpdateIssueStatusResponse
+func (a *IssueServiceAPIService) IssueServiceUpdateIssueStatusExecute(r ApiIssueServiceUpdateIssueStatusRequest) (*UpdateIssueStatusResponse, *http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodPost
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *UpdateIssueStatusResponse
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "IssueServiceAPIService.IssueServiceUpdateIssueStatus")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/v1/issues/{id}:setStatus"
+	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", url.PathEscape(parameterValueToString(r.id, "id")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+	if r.updateIssueStatusBody == nil {
+		return localVarReturnValue, nil, reportError("updateIssueStatusBody is required and must be specified")
+	}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{"application/json"}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	// body params
+	localVarPostBody = r.updateIssueStatusBody
 	if r.ctx != nil {
 		// API Key Authentication
 		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {

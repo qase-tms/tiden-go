@@ -23,7 +23,11 @@ import (
 type AgentRunServiceAPI interface {
 
 	/*
-	AgentRunServiceCancelAgentRun Method for AgentRunServiceCancelAgentRun
+	AgentRunServiceCancelAgentRun Cancels a pending or running agent run.
+
+	Transitions the run to "cancelled" and records the reason (default
+"cancelled by user"). Only pending/running runs transition; a run that
+already finished is returned unchanged, so the call is safe to retry.
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@param id
@@ -36,7 +40,11 @@ type AgentRunServiceAPI interface {
 	AgentRunServiceCancelAgentRunExecute(r ApiAgentRunServiceCancelAgentRunRequest) (*CancelAgentRunResponse, *http.Response, error)
 
 	/*
-	AgentRunServiceGetAgentRun Method for AgentRunServiceGetAgentRun
+	AgentRunServiceGetAgentRun Fetches one agent run by id.
+
+	Returns the run with its status, trigger, timing, LLM token/cost counters,
+error summary, the branch it produced (if any), and the structured result
+when the run reported one.
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@param id
@@ -49,7 +57,11 @@ type AgentRunServiceAPI interface {
 	AgentRunServiceGetAgentRunExecute(r ApiAgentRunServiceGetAgentRunRequest) (*GetAgentRunResponse, *http.Response, error)
 
 	/*
-	AgentRunServiceListAgentRunEvents Method for AgentRunServiceListAgentRunEvents
+	AgentRunServiceListAgentRunEvents Lists the event log of an agent run.
+
+	Returns the run's timestamped events (level, kind, message, structured
+data) with page_size/page_token pagination — the polling alternative to
+StreamAgentRun.
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@param runId
@@ -62,7 +74,10 @@ type AgentRunServiceAPI interface {
 	AgentRunServiceListAgentRunEventsExecute(r ApiAgentRunServiceListAgentRunEventsRequest) (*ListAgentRunEventsResponse, *http.Response, error)
 
 	/*
-	AgentRunServiceListAgentRuns Method for AgentRunServiceListAgentRuns
+	AgentRunServiceListAgentRuns Lists the runs of an agent configuration.
+
+	Returns the config's runs, newest first, with page_size/page_token
+pagination.
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@param agentConfigId
@@ -75,7 +90,13 @@ type AgentRunServiceAPI interface {
 	AgentRunServiceListAgentRunsExecute(r ApiAgentRunServiceListAgentRunsRequest) (*ListAgentRunsResponse, *http.Response, error)
 
 	/*
-	AgentRunServiceStartAgentRun Method for AgentRunServiceStartAgentRun
+	AgentRunServiceStartAgentRun Starts a run of an agent configuration.
+
+	Enqueues a new run (status "pending") for execution; the call returns
+without waiting for it to finish. Fails when the
+config is disabled. inputs_override_json overrides the config's
+inputs_json for this run only, without persisting it. Follow progress via
+GetAgentRun or ListAgentRunEvents.
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@param agentConfigId
@@ -88,7 +109,11 @@ type AgentRunServiceAPI interface {
 	AgentRunServiceStartAgentRunExecute(r ApiAgentRunServiceStartAgentRunRequest) (*StartAgentRunResponse, *http.Response, error)
 
 	/*
-	AgentRunServiceStreamAgentRun Method for AgentRunServiceStreamAgentRun
+	AgentRunServiceStreamAgentRun Streams an agent run's events as they happen.
+
+	Server-streams AgentRunEvent messages for the run, resuming after
+after_event_id when set (empty streams from the beginning). Over REST the
+gateway delivers the stream as chunked newline-delimited JSON.
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@param runId
@@ -121,7 +146,11 @@ func (r ApiAgentRunServiceCancelAgentRunRequest) Execute() (*CancelAgentRunRespo
 }
 
 /*
-AgentRunServiceCancelAgentRun Method for AgentRunServiceCancelAgentRun
+AgentRunServiceCancelAgentRun Cancels a pending or running agent run.
+
+Transitions the run to "cancelled" and records the reason (default
+"cancelled by user"). Only pending/running runs transition; a run that
+already finished is returned unchanged, so the call is safe to retry.
 
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @param id
@@ -249,7 +278,11 @@ func (r ApiAgentRunServiceGetAgentRunRequest) Execute() (*GetAgentRunResponse, *
 }
 
 /*
-AgentRunServiceGetAgentRun Method for AgentRunServiceGetAgentRun
+AgentRunServiceGetAgentRun Fetches one agent run by id.
+
+Returns the run with its status, trigger, timing, LLM token/cost counters,
+error summary, the branch it produced (if any), and the structured result
+when the run reported one.
 
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @param id
@@ -384,7 +417,11 @@ func (r ApiAgentRunServiceListAgentRunEventsRequest) Execute() (*ListAgentRunEve
 }
 
 /*
-AgentRunServiceListAgentRunEvents Method for AgentRunServiceListAgentRunEvents
+AgentRunServiceListAgentRunEvents Lists the event log of an agent run.
+
+Returns the run's timestamped events (level, kind, message, structured
+data) with page_size/page_token pagination — the polling alternative to
+StreamAgentRun.
 
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @param runId
@@ -525,7 +562,10 @@ func (r ApiAgentRunServiceListAgentRunsRequest) Execute() (*ListAgentRunsRespons
 }
 
 /*
-AgentRunServiceListAgentRuns Method for AgentRunServiceListAgentRuns
+AgentRunServiceListAgentRuns Lists the runs of an agent configuration.
+
+Returns the config's runs, newest first, with page_size/page_token
+pagination.
 
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @param agentConfigId
@@ -660,7 +700,13 @@ func (r ApiAgentRunServiceStartAgentRunRequest) Execute() (*StartAgentRunRespons
 }
 
 /*
-AgentRunServiceStartAgentRun Method for AgentRunServiceStartAgentRun
+AgentRunServiceStartAgentRun Starts a run of an agent configuration.
+
+Enqueues a new run (status "pending") for execution; the call returns
+without waiting for it to finish. Fails when the
+config is disabled. inputs_override_json overrides the config's
+inputs_json for this run only, without persisting it. Follow progress via
+GetAgentRun or ListAgentRunEvents.
 
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @param agentConfigId
@@ -795,7 +841,11 @@ func (r ApiAgentRunServiceStreamAgentRunRequest) Execute() (*StreamResultOfAgent
 }
 
 /*
-AgentRunServiceStreamAgentRun Method for AgentRunServiceStreamAgentRun
+AgentRunServiceStreamAgentRun Streams an agent run's events as they happen.
+
+Server-streams AgentRunEvent messages for the run, resuming after
+after_event_id when set (empty streams from the beginning). Over REST the
+gateway delivers the stream as chunked newline-delimited JSON.
 
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @param runId

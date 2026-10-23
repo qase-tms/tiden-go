@@ -13,6 +13,8 @@ Name | Type | Description | Notes
 **LastTestUpdatedAt** | Pointer to **time.Time** |  | [optional] 
 **CoverageStatusReason** | Pointer to **string** |  | [optional] 
 **RankingSignals** | Pointer to **[]string** |  | [optional] 
+**RiskAcceptedCount** | Pointer to **int32** | Prior intent sessions&#39; JUDGEMENTS on this requirement&#39;s missing verification: risk acceptances that priced it, and test deferrals that handed the missing test to a next session. Both are read from the close artifacts recorded on session drafts, matched by main twin. They are next- session input (\&quot;someone already looked at this\&quot;), not coverage — neither moves coverage_status.  Read them with these four properties in mind, because none of them are obvious from the names:   - They count ARTIFACT ROWS, not sessions. One session that accepts under     two criteria naming this requirement contributes 2, and two sessions     that each accept it once also contribute 2.   - Nothing marks a judgement resolved. A deferral of a requirement that     has since been covered still counts, and a risk acceptance survives the     condition it was signed against.   - A judgement from an intent branch that was ABANDONED and never merged     counts exactly like one that landed: the artifacts live on the session     draft, and an unmerged draft is still a requirement. \&quot;Someone already     priced this\&quot; can therefore refer to a decision that never shipped.   - 0 means nobody judged it — not that nobody could.  Deliberately NOT folded into proposed_test_count (field 4): that one is derived from branch test-link proposals and is not writable from a close. | [optional] 
+**DeferredTestCount** | Pointer to **int32** |  | [optional] 
 
 ## Methods
 
@@ -257,6 +259,56 @@ SetRankingSignals sets RankingSignals field to given value.
 `func (o *CoverageGap) HasRankingSignals() bool`
 
 HasRankingSignals returns a boolean if a field has been set.
+
+### GetRiskAcceptedCount
+
+`func (o *CoverageGap) GetRiskAcceptedCount() int32`
+
+GetRiskAcceptedCount returns the RiskAcceptedCount field if non-nil, zero value otherwise.
+
+### GetRiskAcceptedCountOk
+
+`func (o *CoverageGap) GetRiskAcceptedCountOk() (*int32, bool)`
+
+GetRiskAcceptedCountOk returns a tuple with the RiskAcceptedCount field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetRiskAcceptedCount
+
+`func (o *CoverageGap) SetRiskAcceptedCount(v int32)`
+
+SetRiskAcceptedCount sets RiskAcceptedCount field to given value.
+
+### HasRiskAcceptedCount
+
+`func (o *CoverageGap) HasRiskAcceptedCount() bool`
+
+HasRiskAcceptedCount returns a boolean if a field has been set.
+
+### GetDeferredTestCount
+
+`func (o *CoverageGap) GetDeferredTestCount() int32`
+
+GetDeferredTestCount returns the DeferredTestCount field if non-nil, zero value otherwise.
+
+### GetDeferredTestCountOk
+
+`func (o *CoverageGap) GetDeferredTestCountOk() (*int32, bool)`
+
+GetDeferredTestCountOk returns a tuple with the DeferredTestCount field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetDeferredTestCount
+
+`func (o *CoverageGap) SetDeferredTestCount(v int32)`
+
+SetDeferredTestCount sets DeferredTestCount field to given value.
+
+### HasDeferredTestCount
+
+`func (o *CoverageGap) HasDeferredTestCount() bool`
+
+HasDeferredTestCount returns a boolean if a field has been set.
 
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)

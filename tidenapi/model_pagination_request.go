@@ -17,7 +17,7 @@ import (
 // checks if the PaginationRequest type satisfies the MappedNullable interface at compile time
 var _ MappedNullable = &PaginationRequest{}
 
-// PaginationRequest struct for PaginationRequest
+// PaginationRequest PaginationRequest is the shared cursor-pagination input: page_size caps the page (server default and maximum apply when 0 or out of range) and page_token continues from a previous response's next_page_token.
 type PaginationRequest struct {
 	PageSize *int32 `json:"pageSize,omitempty"`
 	PageToken *string `json:"pageToken,omitempty"`

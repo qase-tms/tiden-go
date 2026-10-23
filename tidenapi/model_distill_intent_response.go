@@ -17,7 +17,7 @@ import (
 // checks if the DistillIntentResponse type satisfies the MappedNullable interface at compile time
 var _ MappedNullable = &DistillIntentResponse{}
 
-// DistillIntentResponse struct for DistillIntentResponse
+// DistillIntentResponse DistillIntentResponse reports where the distilled changes were written and the per-kind change counts, or why distillation was skipped.
 type DistillIntentResponse struct {
 	// Name of the intent branch the changes were written to (empty when skipped).
 	IntentBranch *string `json:"intentBranch,omitempty"`

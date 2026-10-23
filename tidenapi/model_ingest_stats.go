@@ -17,7 +17,7 @@ import (
 // checks if the IngestStats type satisfies the MappedNullable interface at compile time
 var _ MappedNullable = &IngestStats{}
 
-// IngestStats struct for IngestStats
+// IngestStats IngestStats is the per-batch outcome: creation/update counters and the operation_id grouping the batch's history rows.
 type IngestStats struct {
 	SuitesCreated *int32 `json:"suitesCreated,omitempty"`
 	TestsCreated *int32 `json:"testsCreated,omitempty"`

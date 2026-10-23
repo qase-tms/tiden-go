@@ -4,14 +4,16 @@ All URIs are relative to *https://api.tiden.ai*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
-[**AuthServiceGetCurrentUser**](AuthServiceAPI.md#AuthServiceGetCurrentUser) | **Get** /v1/auth/me | 
-[**AuthServiceUpdateUserOnboarding**](AuthServiceAPI.md#AuthServiceUpdateUserOnboarding) | **Put** /v1/auth/onboarding | 
+[**AuthServiceGetCurrentUser**](AuthServiceAPI.md#AuthServiceGetCurrentUser) | **Get** /v1/auth/me | Returns the authenticated user (whoami).
+[**AuthServiceUpdateUserOnboarding**](AuthServiceAPI.md#AuthServiceUpdateUserOnboarding) | **Put** /v1/auth/onboarding | Updates the caller&#39;s onboarding progress flags.
 
 
 
 ## AuthServiceGetCurrentUser
 
 > GetCurrentUserResponse AuthServiceGetCurrentUser(ctx).Execute()
+
+Returns the authenticated user (whoami).
 
 
 
@@ -72,6 +74,8 @@ Other parameters are passed through a pointer to a apiAuthServiceGetCurrentUserR
 
 > UpdateUserOnboardingResponse AuthServiceUpdateUserOnboarding(ctx).UpdateUserOnboardingRequest(updateUserOnboardingRequest).Execute()
 
+Updates the caller's onboarding progress flags.
+
 
 
 ### Example
@@ -87,7 +91,7 @@ import (
 )
 
 func main() {
-	updateUserOnboardingRequest := *openapiclient.NewUpdateUserOnboardingRequest() // UpdateUserOnboardingRequest | 
+	updateUserOnboardingRequest := *openapiclient.NewUpdateUserOnboardingRequest() // UpdateUserOnboardingRequest | UpdateUserOnboardingRequest latches onboarding flags: each true field stamps its timestamp; false leaves the flag unchanged. wizard_step and answers are ordinary mutable state: an unset field is left untouched, a set one replaces the stored value.
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
@@ -112,7 +116,7 @@ Other parameters are passed through a pointer to a apiAuthServiceUpdateUserOnboa
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **updateUserOnboardingRequest** | [**UpdateUserOnboardingRequest**](UpdateUserOnboardingRequest.md) |  | 
+ **updateUserOnboardingRequest** | [**UpdateUserOnboardingRequest**](UpdateUserOnboardingRequest.md) | UpdateUserOnboardingRequest latches onboarding flags: each true field stamps its timestamp; false leaves the flag unchanged. wizard_step and answers are ordinary mutable state: an unset field is left untouched, a set one replaces the stored value. | 
 
 ### Return type
 
